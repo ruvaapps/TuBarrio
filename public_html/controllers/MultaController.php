@@ -1,0 +1,280 @@
+<?php
+
+// Asegurate de requerir el autoloader de Composer al inicio o en tu index principal
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use Minishlink\WebPush\WebPush;
+use Minishlink\WebPush\Subscription;
+
+class MultaController {
+    
+    // 1. Listar multas del barrio cruzando con lotes y usuarios (vecino sancionado)
+    public function index($user) {
+        header('Content-Type: application/json');
+
+        try {
+            $barrio_id = $user['barrio_id'] ?? null;
+            if (!$barrio_id) {
+                http_response_code(400);
+                echo json_encode(['error' => 'No se pudo identificar el barrio del usuario.']);
+                return;
+            }
+
+            $db = Database::getConnection();
+
+            $stmt = $db->prepare("
+                SELECT m.*, 
+                       l.identificador AS lote_identificador,
+                       u.nombre AS vecino_nombre, 
+                       u.apellido AS vecino_apellido, 
+                       u.email AS vecino_email
+                FROM multas m
+                JOIN lotes l ON m.lote_id = l.id
+                LEFT JOIN usuarios u ON m.usuario_id = u.id
+                WHERE m.barrio_id = :barrio_id
+                ORDER BY m.created_at DESC
+            ");
+            
+            $stmt->execute([':barrio_id' => $barrio_id]);
+            $multas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            echo json_encode([
+                'success' => true,
+                'data' => $multas
+            ]);
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error al obtener las multas: ' . $e->getMessage()]);
+        }
+    }
+
+    // 2. Registrar una nueva multa asociando el lote y el usuario_id del vecino
+    public function store($user) {
+        header('Content-Type: application/json');
+
+        try {
+            $input = json_decode(file_get_contents('php://input'), true);
+
+            $lote_id = $input['lote_id'] ?? null;
+            $usuario_id = $input['usuario_id'] ?? null;
+            $tipo = $input['tipo'] ?? null;
+            $monto = $input['monto'] ?? null;
+            $observaciones = $input['observaciones'] ?? null;
+            
+            $barrio_id = $user['barrio_id'] ?? null;
+            $intendente_id = $user['user_id'] ?? null;
+
+            if (!$lote_id || !$usuario_id || !$tipo || !$monto || !$barrio_id || !$intendente_id) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Faltan datos obligatorios para registrar la multa (incluyendo el vecino).']);
+                return;
+            }
+
+            $db = Database::getConnection();
+
+            $stmt = $db->prepare("
+                INSERT INTO multas (barrio_id, lote_id, usuario_id, usuario_intendente_id, tipo, monto, observaciones, estado)
+                VALUES (:barrio_id, :lote_id, :usuario_id, :intendente_id, :tipo, :monto, :observaciones, 'pendiente')
+            ");
+
+            $stmt->execute([
+                ':barrio_id' => $barrio_id,
+                ':lote_id' => $lote_id,
+                ':usuario_id' => $usuario_id,
+                ':intendente_id' => $intendente_id,
+                ':tipo' => $tipo,
+                ':monto' => $monto,
+                ':observaciones' => $observaciones
+            ]);
+
+            $multaId = $db->lastInsertId();
+
+            // Enviar Push automática al registrar la multa
+            $this->enviarPushVecino($db, $usuario_id, "Nueva Multa Registrada", "Se te ha emitido una multa por {$tipo} (\$ " . number_format($monto, 2) . ").");
+
+            http_response_code(200);
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Multa registrada con éxito',
+                'multa_id' => $multaId
+            ]);
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error al registrar multa: ' . $e->getMessage()]);
+        }
+    }
+
+    // 3. Obtener los vecinos vinculados a un lote para el select dinámico
+    public function obtenerVecinosPorLote($user, $loteId) {
+        header('Content-Type: application/json');
+
+        try {
+            $db = Database::getConnection();
+
+            $stmt = $db->prepare("
+                SELECT u.id, u.nombre, u.apellido, u.email, ul.tipo_relacion
+                FROM usuario_lote ul
+                JOIN usuarios u ON ul.usuario_id = u.id
+                WHERE ul.lote_id = :lote_id AND u.barrio_id = :barrio_id
+            ");
+            $stmt->execute([
+                ':lote_id' => $loteId,
+                ':barrio_id' => $user['barrio_id']
+            ]);
+            $vecinos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            echo json_encode(['success' => true, 'data' => $vecinos]);
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error al buscar vecinos del lote: ' . $e->getMessage()]);
+        }
+    }
+
+    // 4. Enviar aviso de multa por correo electrónico y Notificación Push al vecino sancionado
+    public function enviarAviso($user, $multaId) {
+        header('Content-Type: application/json');
+
+        try {
+            $db = Database::getConnection();
+
+            $stmt = $db->prepare("
+                SELECT m.*, l.identificador AS lote_identificador, u.id AS vecino_id, u.email, u.nombre, u.apellido
+                FROM multas m
+                JOIN lotes l ON m.lote_id = l.id
+                LEFT JOIN usuarios u ON m.usuario_id = u.id
+                WHERE m.id = :multa_id AND m.barrio_id = :barrio_id
+            ");
+            $stmt->execute([
+                ':multa_id' => $multaId,
+                ':barrio_id' => $user['barrio_id']
+            ]);
+            $multa = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$multa) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Multa no encontrada.']);
+                return;
+            }
+
+            if (empty($multa['email'])) {
+                http_response_code(400);
+                echo json_encode(['error' => 'El vecino seleccionado no tiene correo electrónico registrado.']);
+                return;
+            }
+
+            // 1. Envío de Correo Electrónico Real (Descomentado)
+            $destinatario = $multa['email'];
+            $asunto = "Notificación de Infracción / Multa - Lote " . $multa['lote_identificador'];
+            $mensaje = "Hola {$multa['nombre']} {$multa['apellido']},\n\n"
+                     . "Se le ha registrado una multa en el barrio.\n"
+                     . "Motivo: {$multa['tipo']}\n"
+                     . "Monto: \${$multa['monto']}\n"
+                     . "Observaciones: {$multa['observaciones']}\n\n"
+                     . "Por favor, comuníquese con la intendencia para regularizar su situación.\n\n"
+                     . "Atentamente,\nAdministración del Barrio.";
+            
+            $headers = "From: no-reply@tubarrio.lovar.com.ar\r\n" .
+                       "X-Mailer: PHP/" . phpversion();
+
+            @mail($destinatario, $asunto, $mensaje, $headers);
+
+            // 2. Envío de Notificación Push Real usando minishlink/web-push
+            if (!empty($multa['vecino_id'])) {
+                $this->enviarPushVecino(
+                    $db, 
+                    $multa['vecino_id'], 
+                    "⚠️ Aviso de Multa - Lote {$multa['lote_identificador']}", 
+                    "Motivo: {$multa['tipo']} | Monto: \${$multa['monto']}"
+                );
+            }
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Aviso enviado por correo y notificación push con éxito a ' . $destinatario
+            ]);
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error al enviar el aviso: ' . $e->getMessage()]);
+        }
+    }
+
+    // Método privado para disparar las notificaciones Push reales con la librería
+// Método privado para disparar las notificaciones Push reales con la librería
+    private function enviarPushVecino($db, $usuarioId, $titulo, $cuerpo) {
+        try {
+            $stmtPush = $db->prepare("SELECT * FROM push_subscriptions WHERE usuario_id = :usuario_id");
+            $stmtPush->execute([':usuario_id' => $usuarioId]);
+            $suscripciones = $stmtPush->fetchAll(PDO::FETCH_ASSOC);
+
+            if (empty($suscripciones)) {
+                return;
+            }
+
+            // Validamos que la clase exista para evitar errores fatales si la ruta del vendor falla
+            if (!class_exists('Minishlink\WebPush\WebPush')) {
+                return;
+            }
+
+            $auth = [
+                'VAPID' => [
+                    'subject' => 'mailto:admin@tubarrio.lovar.com.ar',
+                    'publicKey' => 'BI_JeTpLT-ltMz2pqM1jZZD8lS-ZZwJEVhUACXl-iQmYqpREU2oFWwkdI7JYMra8l40n0c1MqBuzYttooULkoK0',
+                    'privateKey' => 'bK4JJ-dz2mm4SF8539oxwa6zqJq9MI9QMP1YKXCpmt0', // Si usas claves de prueba, podés comentar temporalmente este bloque VAPID si te da problemas
+                ],
+            ];
+
+            // Envolvemos el cliente web-push en su propio try/catch para que no tire abajo el proceso principal
+            try {
+                $webPush = new WebPush($auth);
+
+                $payload = json_encode([
+                    'title' => $titulo,
+                    'body' => $cuerpo,
+                    'url' => 'vecino.html'
+                ]);
+
+                foreach ($suscripciones as $sub) {
+                    // Verificamos si las llaves están separadas o vienen en un JSON de keys
+                    $p256dh = $sub['keys_p256dh'] ?? '';
+                    $auth_key = $sub['keys_auth'] ?? '';
+
+                    if (empty($p256dh) && isset($sub['keys'])) {
+                        $decodedKeys = json_decode($sub['keys'], true);
+                        $p256dh = $decodedKeys['p256dh'] ?? '';
+                        $auth_key = $decodedKeys['auth'] ?? '';
+                    }
+
+                    $subscription = Subscription::create([
+                        'endpoint' => $sub['endpoint'],
+                        'keys' => [
+                            'p256dh' => $p256dh,
+                            'auth' => $auth_key
+                        ]
+                    ]);
+
+                    $webPush->queueNotification($subscription, $payload);
+                }
+
+                foreach ($webPush->flush() as $report) {
+                    $endpoint = $report->getRequest()->getUri()->__toString();
+                    if (!$report->isSuccess() && $report->isSubscriptionExpired()) {
+                        $stmtDel = $db->prepare("DELETE FROM push_subscriptions WHERE endpoint = :endpoint");
+                        $stmtDel->execute([':endpoint' => $endpoint]);
+                    }
+                }
+            } catch (\Throwable $pushEx) {
+                // TEMPORAL: Esto nos dirá exactamente por qué falla el push en pantalla
+                http_response_code(500);
+                echo json_encode(['error' => 'Error de WebPush: ' . $pushEx->getMessage()]);
+                exit;
+            }
+
+        } catch (Exception $ex) {
+            error_log("Error general en enviarPushVecino: " . $ex->getMessage());
+        }
+    }
+}

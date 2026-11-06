@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Intendencia - Gestión de Barrio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Barra Superior -->
+    <header class="bg-slate-800 text-white shadow-md p-4 flex justify-between items-center z-30">
+        <div>
+            <h1 class="font-bold text-lg" id="barrio-nombre">Panel de Intendencia</h1>
+            <p class="text-xs text-slate-300" id="usuario-info">Cargando...</p>
+        </div>
+        <div class="flex items-center space-x-2">
+            <!-- Botón de Notificaciones Push (Campanita) -->
+            <button onclick="toggleNotificacionesPush()" id="btn-push-toggle" class="bg-slate-700 hover:bg-slate-600 p-2 rounded-lg transition text-sm flex items-center justify-center shadow" title="Activar/Desactivar Notificaciones">
+                🔕
+            </button>
+            <button onclick="probarPushManual(this)" id="btn-push-test" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg transition shadow" title="Enviar una notificacion de prueba">
+                Probar Push
+            </button>
+            <button onclick="cerrarSesion()" class="text-sm bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg transition shadow">Salir</button>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal con Menú Lateral y Secciones -->
+    <div class="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6 grid md:grid-cols-4 gap-6">
+
+        <!-- Menú Lateral -->
+        <aside class="md:col-span-1 space-y-2">
+            <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-200 space-y-1">
+                <button onclick="cambiarSeccion('reclamos')" id="nav-reclamos" class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3">
+                    <span>📢</span>
+                    <span>Gestión de Reclamos</span>
+                </button>
+                <button onclick="cambiarSeccion('vecinos')" id="nav-vecinos" class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3">
+                    <span>👤</span>
+                    <span>Alta de Vecinos</span>
+                </button>
+                <button onclick="cambiarSeccion('multas')" id="nav-multas" class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3">
+                    <span>⚠️</span>
+                    <span>Gestión de Multas</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Contenido Dinámico -->
+        <main class="md:col-span-3 space-y-6">
+
+            <!-- SECCIÓN 1: RECLAMOS -->
+            <section id="seccion-reclamos" class="space-y-4">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="font-bold text-gray-800 text-lg">Reclamos del Barrio</h2>
+                            <p class="text-xs text-gray-500">Hacé <b>doble clic</b> en cualquier fila para ver el detalle y gestionar el reclamo.</p>
+                        </div>
+                        <button onclick="cargarReclamos()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">Actualizar lista</button>
+                    </div>
+
+                    <!-- Tabla de Reclamos -->
+                    <div class="overflow-x-auto border border-gray-100 rounded-xl">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 uppercase border-b border-gray-100 text-[11px]">
+                                    <th class="p-3">ID</th>
+                                    <th class="p-3">Quién lo cargó</th>
+                                    <th class="p-3">Título / Categoría</th>
+                                    <th class="p-3">Estado</th>
+                                    <th class="p-3 text-right">Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-reclamos-body" class="divide-y divide-gray-100">
+                                <tr>
+                                    <td colspan="5" class="p-6 text-center text-gray-400">Cargando reclamos...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN 2: ALTA DE VECINO -->
+            <section id="seccion-vecinos" class="space-y-4 hidden">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 space-y-4">
+                    <h2 class="font-bold text-gray-800 text-lg">Dar de Alta a un Nuevo Vecino</h2>
+                    <p class="text-xs text-gray-500">Completa los datos del residente y asígnale su lote correspondiente.</p>
+
+                    <form id="form-alta-vecino" onsubmit="registrarVecino(event)" class="space-y-3">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Nombre</label>
+                                <input type="text" id="nombre" placeholder="Ej: Juan" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Apellido</label>
+                                <input type="text" id="apellido" placeholder="Ej: Pérez" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Correo electrónico</label>
+                            <input type="email" id="email" placeholder="vecino@email.com" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Teléfono / WhatsApp</label>
+                                <input type="text" id="telefono" placeholder="351XXXXXXX" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Contraseña temporal</label>
+                                <input type="password" id="password" placeholder="••••••••" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Manzana</label>
+                                <input type="text" id="manzana" placeholder="Ej: Mza. B" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Número de Lote</label>
+                                <input type="text" id="lote_identificador" placeholder="Ej: 12" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Tipo de Relación</label>
+                            <select id="tipo_relacion" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500 bg-white">
+                                <option value="propietario">Propietario</option>
+                                <option value="inquilino">Inquilino</option>
+                                <option value="familiar">Familiar</option>
+                            </select>
+                        </div>
+
+                        <div id="mensaje-feedback" class="text-xs font-medium text-center hidden"></div>
+
+                        <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-3 rounded-xl transition shadow">
+                            Registrar y Vincular Vecino
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- SECCIÓN 3: GESTIÓN DE MULTAS (Con Sub-pestañas: Ver / Registrar) -->
+            <section id="seccion-multas" class="space-y-4 hidden">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 space-y-4">
+                    
+                    <!-- Cabecera de Multas y Sub-pestañas -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-4">
+                        <div>
+                            <h2 class="font-bold text-gray-800 text-lg">Módulo de Multas e Infracciones</h2>
+                            <p class="text-xs text-gray-500">Administrá las multas emitidas y notificá a los residentes.</p>
+                        </div>
+                        <div class="flex bg-gray-100 p-1 rounded-xl text-xs font-semibold">
+                            <button onclick="cambiarSubSeccionMultas('ver')" id="subnav-ver" class="px-4 py-2 rounded-lg transition bg-white text-slate-800 shadow-sm">Ver Multas</button>
+                            <button onclick="cambiarSubSeccionMultas('registrar')" id="subnav-registrar" class="px-4 py-2 rounded-lg transition text-gray-600 hover:text-slate-900">Registrar Multa</button>
+                        </div>
+                    </div>
+
+                    <!-- SUB-SECCIÓN A: VER MULTAS (TABLA) -->
+                    <div id="subseccion-ver-multas" class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-500 font-medium">Listado histórico de infracciones registradas</span>
+                            <button onclick="cargarMultas()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">Actualizar lista</button>
+                        </div>
+
+                        <div class="overflow-x-auto border border-gray-100 rounded-xl">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-gray-50 text-gray-500 uppercase border-b border-gray-100 text-[11px]">
+                                        <th class="p-3">ID</th>
+                                        <th class="p-3">Lote / Vecino Sancionado</th>
+                                        <th class="p-3">Motivo / Monto</th>
+                                        <th class="p-3">Estado</th>
+                                        <th class="p-3 text-right">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-multas-body" class="divide-y divide-gray-100">
+                                    <tr>
+                                        <td colspan="5" class="p-6 text-center text-gray-400">Cargando multas...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- SUB-SECCIÓN B: REGISTRAR NUEVA MULTA -->
+                    <div id="subseccion-registrar-multa" class="space-y-4 hidden">
+                        <form id="form-multa" onsubmit="registrarMulta(event)" class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Seleccionar Vecino (Mza / Lote / Nombre)</label>
+                                <select id="multa-select-vecino" onchange="seleccionarVecino()" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500 bg-white" required>
+                                    <option value="">Cargando lista de vecinos...</option>
+                                </select>
+                            </div>
+
+                            <input type="hidden" id="multa-lote-id">
+
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Tipo de Infracción</label>
+                                <select id="multa-tipo" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500 bg-white">
+                                    <option value="velocidad">Exceso de velocidad</option>
+                                    <option value="mal_estacionamiento">Mal estacionamiento</option>
+                                    <option value="ruidos_molestos">Ruidos molestos</option>
+                                    <option value="mascotas">Mascotas sueltas / Sin correa</option>
+                                    <option value="obras">Incumplimiento reglamento de obra</option>
+                                    <option value="otro">Otro motivo</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Monto de la Multa ($)</label>
+                                <input type="number" step="0.01" id="multa-monto" placeholder="Ej: 15000.00" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Observaciones / Motivo detallado</label>
+                                <textarea id="multa-observaciones" rows="3" placeholder="Describa el hecho, fecha y hora de la infracción..." class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required></textarea>
+                            </div>
+
+                            <div id="multa-feedback" class="text-xs font-medium text-center hidden"></div>
+
+                            <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-3 rounded-xl transition shadow">
+                                Emitir y Registrar Multa
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL DE DETALLE DE RECLAMO (Doble Clic) con Comentarios de Gestión -->
+    <div id="modal-detalle-reclamo" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <div>
+                    <span id="modal-id-badge" class="text-xs font-bold px-2 py-0.5 rounded uppercase"></span>
+                    <h3 class="font-bold text-gray-800 text-base mt-1" id="modal-titulo">Detalle del Reclamo</h3>
+                </div>
+                <button onclick="cerrarModalDetalle()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div class="bg-gray-50 p-3 rounded-xl space-y-1 text-gray-600">
+                    <p><b>Vecino:</b> <span id="modal-vecino"></span></p>
+                    <p><b>Lote:</b> <span id="modal-lote"></span></p>
+                    <p><b>Categoría:</b> <span id="modal-categoria"></span></p>
+                    <p><b>Fecha de creación:</b> <span id="modal-fecha"></span></p>
+                </div>
+
+                <div>
+                    <p class="font-semibold text-gray-700 mb-1">Descripción detallada:</p>
+                    <p id="modal-descripcion" class="text-gray-600 bg-slate-50 p-3 rounded-xl border border-gray-100 leading-relaxed"></p>
+                </div>
+
+                <div id="modal-contenedor-imagen" class="hidden">
+                    <p class="font-semibold text-gray-700 mb-1">Evidencia Fotográfica:</p>
+                    <a id="modal-imagen-link" href="#" target="_blank" class="inline-block">
+                        <img id="modal-imagen-src" src="" alt="Foto adjunta" class="w-full max-h-56 object-cover rounded-xl border shadow-sm">
+                    </a>
+                </div>
+
+                <!-- Historial de Comentarios de Gestión -->
+                <div>
+                    <p class="font-semibold text-gray-700 mb-1">Historial de Gestión / Comentarios:</p>
+                    <div id="modal-historial-comentarios" class="bg-slate-50 p-3 rounded-xl border border-gray-100 max-h-36 overflow-y-auto space-y-2 text-[11px]">
+                        <span class="text-gray-400 italic">Cargando comentarios...</span>
+                    </div>
+                </div>
+
+                <!-- Agregar nuevo comentario -->
+                <div class="space-y-1">
+                    <label class="block font-semibold text-gray-700">Agregar Nota / Comentario de Gestión:</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="modal-nuevo-comentario" placeholder="Escribí una nota interna o para el vecino..." class="flex-1 border rounded-xl p-2 text-xs outline-none focus:ring-2 focus:ring-slate-500">
+                        <button type="button" onclick="agregarComentarioReclamo()" class="bg-slate-700 hover:bg-slate-800 text-white font-semibold px-3 py-2 rounded-xl transition text-[11px]">
+                            Comentar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Modificar Estado del Reclamo -->
+                <div class="pt-2 border-t space-y-2">
+                    <label class="block font-semibold text-gray-700">Modificar Estado del Reclamo:</label>
+                    <div class="flex space-x-2">
+                        <select id="modal-select-estado" class="flex-1 border rounded-xl p-2 text-xs outline-none bg-white font-medium">
+                            <option value="pendiente">Pendiente</option>
+                            <option value="en_proceso">En Proceso</option>
+                            <option value="resuelto">Resuelto</option>
+                            <option value="rechazado">Rechazado</option>
+                        </select>
+                        <button type="button" onclick="actualizarEstadoDesdeModal()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2 rounded-xl transition">
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de lógica y Notificaciones Push -->
+    <script>
+        const API_URL = 'index.php?route='; 
+        if (typeof token === 'undefined') {
+            var token = localStorage.getItem('token');
+        }
+
+        const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+        let listaReclamosGlobal = [];
+        let listaMultasGlobal = [];
+        let vecinosGlobal = [];
+        let reclamoSeleccionadoId = null;
+
+        // Clave VAPID Pública de prueba
+        const VAPID_PUBLIC_KEY = 'BI_JeTpLT-ltMz2pqM1jZZD8lS-ZZwJEVhUACXl-iQmYqpREU2oFWwkdI7JYMra8l40n0c1MqBuzYttooULkoK0';
+
+        // --- FUNCIONES DE NOTIFICACIONES PUSH Y CAMPANA ---
+        async function chequearEstadoPush() {
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+            
+            try {
+                const registro = await navigator.serviceWorker.register('sw.js');
+                const suscripcion = await registro.pushManager.getSubscription();
+                const btn = document.getElementById('btn-push-toggle');
+                
+                if (suscripcion && Notification.permission === 'granted') {
+                    btn.innerHTML = '🔔';
+                    btn.title = 'Notificaciones activas (Clic para desactivar)';
+                    btn.classList.add('ring-2', 'ring-white');
+                } else {
+                    btn.innerHTML = '🔕';
+                    btn.title = 'Notificaciones desactivadas (Clic para activar)';
+                    btn.classList.remove('ring-2', 'ring-white');
+                }
+            } catch (err) {
+                console.error('Error al chequear estado push:', err);
+            }
+        }
+
+        async function toggleNotificacionesPush() {
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+                alert('Tu navegador no soporta notificaciones push.');
+                return;
+            }
+
+            try {
+                const registro = await navigator.serviceWorker.ready;
+                let suscripcion = await registro.pushManager.getSubscription();
+
+                if (suscripcion) {
+                    const endpointActual = suscripcion.endpoint;
+                    await suscripcion.unsubscribe();
+                    await eliminarSuscripcionEnServidor(endpointActual);
+                    alert('Notificaciones desactivadas correctamente.');
+                    chequearEstadoPush();
+                } else {
+                    const permiso = await Notification.requestPermission();
+                    if (permiso !== 'granted') {
+                        alert('No se concedieron los permisos para las notificaciones.');
+                        chequearEstadoPush();
+                        return;
+                    }
+
+                    const claveConvertida = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+                    suscripcion = await registro.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: claveConvertida
+                    });
+
+                    const guardado = await guardarSuscripcionEnServidor(suscripcion);
+                    await enviarPushDePrueba();
+                    alert(`Notificaciones activadas para usuario ID ${guardado.usuario_id} y validadas con una prueba.`);
+                    chequearEstadoPush();
+                }
+            } catch (error) {
+                console.error('Error al alternar notificaciones:', error);
+                alert('No se pudo activar push. Revisá sesion/token y permisos del navegador.');
+            }
+        }
+
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+
+        async function guardarSuscripcionEnServidor(suscripcion) {
+            if (!token) {
+                throw new Error('No hay token de sesion.');
+            }
+
+            const subJson = suscripcion.toJSON();
+            const payload = {
+                endpoint: subJson.endpoint,
+                keys: {
+                    p256dh: subJson.keys.p256dh,
+                    auth: subJson.keys.auth
+                }
+            };
+
+            try {
+                const response = await fetch('index.php?route=/push/suscripcion', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                let result = {};
+                try {
+                    result = await response.json();
+                } catch (parseError) {
+                    result = {};
+                }
+
+                if (!response.ok || !result.success) {
+                    const msg = result.error || `Error ${response.status} al guardar suscripcion push.`;
+                    throw new Error(msg);
+                }
+
+                console.log('Suscripción Push registrada en el servidor.', result);
+                return result;
+            } catch (error) {
+                console.error('Error enviando suscripción al servidor:', error);
+                throw error;
+            }
+        }
+
+        async function eliminarSuscripcionEnServidor(endpoint) {
+            if (!token) {
+                throw new Error('No hay token de sesion.');
+            }
+
+            const response = await fetch('index.php?route=/push/desuscripcion', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ endpoint: endpoint })
+            });
+
+            let result = {};
+            try {
+                result = await response.json();
+            } catch (parseError) {
+                result = {};
+            }
+
+            if (!response.ok || !result.success) {
+                const msg = result.error || `Error ${response.status} al eliminar suscripcion push.`;
+                throw new Error(msg);
+            }
+
+            console.log('Suscripción Push eliminada en el servidor.', result);
+            return result;
+        }
+
+        async function enviarPushDePrueba() {
+            const response = await fetch('index.php?route=/push/prueba', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            let result = {};
+            try {
+                result = await response.json();
+            } catch (parseError) {
+                result = {};
+            }
+
+            if (!response.ok || !result.success) {
+                const msg = result.error || `Error ${response.status} al enviar push de prueba.`;
+                throw new Error(msg);
+            }
+        }
+
+        async function probarPushManual(btn) {
+            if (!token) {
+                alert('No hay sesion activa. Volve a iniciar sesion.');
+                return;
+            }
+
+            const boton = btn || document.getElementById('btn-push-test');
+            const textoOriginal = boton ? boton.innerText : '';
+
+            try {
+                if (boton) {
+                    boton.disabled = true;
+                    boton.innerText = 'Enviando...';
+                }
+
+                await enviarPushDePrueba();
+                alert('Push de prueba enviado correctamente.');
+            } catch (error) {
+                console.error('Error al enviar push de prueba:', error);
+                alert(error.message || 'No se pudo enviar el push de prueba.');
+            } finally {
+                if (boton) {
+                    boton.disabled = false;
+                    boton.innerText = textoOriginal || 'Probar Push';
+                }
+            }
+        }
+        // --------------------------------------------------
+
+        // Control de inicio de sesión y carga
+        if (!token || (usuario.rol !== 'intendente' && usuario.rol !== 'admin_general')) {
+            alert('Acceso no autorizado. Inicia sesión como intendente.');
+            window.location.href = 'login.html';
+        }
+
+        document.getElementById('barrio-nombre').innerText = `Intendencia - ${usuario.barrio_nombre || 'Barrio'}`;
+        document.getElementById('usuario-info').innerText = `${usuario.nombre} (${usuario.rol})`;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarReclamos();
+            cargarMultas();
+            cargarTodosLosVecinos();
+
+            // Verificar estado y activar notificaciones push de forma automática e inteligente
+            chequearEstadoPush();
+        });
+
+        function cambiarSeccion(seccion) {
+            const secReclamos = document.getElementById('seccion-reclamos');
+            const secVecinos = document.getElementById('seccion-vecinos');
+            const secMultas = document.getElementById('seccion-multas');
+
+            const navReclamos = document.getElementById('nav-reclamos');
+            const navVecinos = document.getElementById('nav-vecinos');
+            const navMultas = document.getElementById('nav-multas');
+
+            secReclamos.classList.add('hidden');
+            secVecinos.classList.add('hidden');
+            secMultas.classList.add('hidden');
+
+            navReclamos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
+            navVecinos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
+            navMultas.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
+
+            if (seccion === 'reclamos') {
+                secReclamos.classList.remove('hidden');
+                navReclamos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
+            } else if (seccion === 'vecinos') {
+                secVecinos.classList.remove('hidden');
+                navVecinos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
+            } else if (seccion === 'multas') {
+                secMultas.classList.remove('hidden');
+                navMultas.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
+            }
+        }
+
+        function cambiarSubSeccionMultas(sub) {
+            const subVer = document.getElementById('subseccion-ver-multas');
+            const subReg = document.getElementById('subseccion-registrar-multa');
+            const btnVer = document.getElementById('subnav-ver');
+            const btnReg = document.getElementById('subnav-registrar');
+
+            if (sub === 'ver') {
+                subVer.classList.remove('hidden');
+                subReg.classList.add('hidden');
+                btnVer.className = "px-4 py-2 rounded-lg transition bg-white text-slate-800 shadow-sm";
+                btnReg.className = "px-4 py-2 rounded-lg transition text-gray-600 hover:text-slate-900";
+                cargarMultas();
+            } else {
+                subReg.classList.remove('hidden');
+                subVer.classList.add('hidden');
+                btnReg.className = "px-4 py-2 rounded-lg transition bg-white text-slate-800 shadow-sm";
+                btnVer.className = "px-4 py-2 rounded-lg transition text-gray-600 hover:text-slate-900";
+            }
+        }
+
+        async function cargarTodosLosVecinos() {
+            try {
+                const response = await fetch('index.php?route=/vecinos/listar', {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                vecinosGlobal = result.data || [];
+
+                const select = document.getElementById('multa-select-vecino');
+                select.innerHTML = '<option value="">-- Seleccionar Vecino (Mza / Lote / Nombre) --</option>';
+
+                vecinosGlobal.forEach(v => {
+                    const mzaTexto = v.manzana ? `Mza: ${v.manzana} - ` : '';
+                    const loteTexto = v.lote_identificador ? `Lote: ${v.lote_identificador}` : 'Sin lote';
+                    select.innerHTML += `<option value="${v.usuario_id}" data-lote="${v.lote_id}">${mzaTexto}${loteTexto} - ${v.nombre} ${v.apellido} (${v.tipo_relacion || 'Residente'})</option>`;
+                });
+            } catch (error) {
+                console.error('Error al cargar vecinos:', error);
+            }
+        }
+
+        function seleccionarVecino() {
+            const select = document.getElementById('multa-select-vecino');
+            const selectedOption = select.options[select.selectedIndex];
+            const loteId = selectedOption.getAttribute('data-lote');
+            
+            document.getElementById('multa-lote-id').value = loteId || '';
+        }
+
+        async function registrarVecino(e) {
+            e.preventDefault();
+            const feedback = document.getElementById('mensaje-feedback');
+            feedback.classList.add('hidden');
+
+            const data = {
+                nombre: document.getElementById('nombre').value,
+                apellido: document.getElementById('apellido').value,
+                email: document.getElementById('email').value,
+                telefono: document.getElementById('telefono').value,
+                password: document.getElementById('password').value,
+                manzana: document.getElementById('manzana').value,
+                lote_identificador: document.getElementById('lote_identificador').value,
+                tipo_relacion: document.getElementById('tipo_relacion').value
+            };
+
+            try {
+                const response = await fetch('index.php?route=/vecinos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                feedback.classList.remove('hidden');
+                if (response.ok) {
+                    feedback.className = "text-xs font-medium text-center text-emerald-600";
+                    feedback.innerText = "¡Vecino registrado y vinculado al lote con éxito!";
+                    document.getElementById('form-alta-vecino').reset();
+                    cargarTodosLosVecinos(); 
+                } else {
+                    feedback.className = "text-xs font-medium text-center text-red-600";
+                    feedback.innerText = result.error || 'Ocurrió un error al registrar el vecino.';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                feedback.classList.add('hidden');
+            }
+        }
+
+        async function registrarMulta(e) {
+            e.preventDefault();
+            const feedback = document.getElementById('multa-feedback');
+            feedback.classList.add('hidden');
+
+            const data = {
+                lote_id: document.getElementById('multa-lote-id').value,
+                usuario_id: document.getElementById('multa-select-vecino').value,
+                tipo: document.getElementById('multa-tipo').value,
+                monto: document.getElementById('multa-monto').value,
+                observaciones: document.getElementById('multa-observaciones').value,
+                barrio_id: usuario.barrio_id
+            };
+
+            try {
+                const response = await fetch('index.php?route=/multas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                feedback.classList.remove('hidden');
+                if (response.ok) {
+                    feedback.className = "text-xs font-medium text-center text-emerald-600";
+                    feedback.innerText = "¡Multa registrada con éxito!";
+                    document.getElementById('form-multa').reset();
+                    setTimeout(() => cambiarSubSeccionMultas('ver'), 1200);
+                } else {
+                    feedback.className = "text-xs font-medium text-center text-red-600";
+                    feedback.innerText = result.error || 'Ocurrió un error al registrar la multa.';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                feedback.classList.add('hidden');
+                feedback.className = "text-xs font-medium text-center text-red-600";
+                feedback.innerText = 'Error de conexión con el servidor.';
+            }
+        }
+
+        async function cargarMultas() {
+            try {
+                const response = await fetch('index.php?route=/multas', {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const result = await response.json();
+                listaMultasGlobal = result.data || [];
+                
+                const tbody = document.getElementById('tabla-multas-body');
+                tbody.innerHTML = '';
+
+                if (!Array.isArray(listaMultasGlobal) || listaMultasGlobal.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">No hay multas registradas.</td></tr>`;
+                    return;
+                }
+
+                listaMultasGlobal.forEach(m => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-gray-50/50 transition";
+
+                    const vecinoInfo = m.vecino_nombre ? `${m.vecino_nombre} ${m.vecino_apellido} (${m.vecino_email})` : 'Sin vecino vinculado';
+
+                    tr.innerHTML = `
+                        <td class="p-3 font-bold text-gray-800">#${m.id}</td>
+                        <td class="p-3 text-gray-700">
+                            <span class="font-semibold block text-gray-900">Lote: ${m.lote_identificador || m.lote_id}</span>
+                            <span class="text-[10px] text-gray-500">${vecinoInfo}</span>
+                        </td>
+                        <td class="p-3 text-gray-800">
+                            <span class="font-semibold text-blue-600 uppercase text-[10px] block">${m.tipo}</span>
+                            <span>$${parseFloat(m.monto).toLocaleString()}</span><br>
+                            <span class="text-[10px] text-gray-400 italic">${m.observaciones || ''}</span>
+                        </td>
+                        <td class="p-3">
+                            <span class="px-2.5 py-1 rounded-full font-semibold text-[10px] uppercase ${obtenerBadgeEstadoMulta(m.estado)}">${m.estado}</span>
+                        </td>
+                        <td class="p-3 text-right">
+                            <button onclick="enviarAvisoMulta(${m.id})" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded-lg text-[11px] transition shadow-sm">
+                                ✉️ Enviar Aviso
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+            } catch (error) {
+                console.error('Error al cargar multas:', error);
+                document.getElementById('tabla-multas-body').innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-400">Error al cargar las multas.</td></tr>`;
+            }
+        }
+
+        async function enviarAvisoMulta(multaId) {
+            if (!confirm(`¿Deseas enviar el aviso de la multa #${multaId} por correo electrónico y notificación push al vecino?`)) return;
+
+            try {
+                const response = await fetch(`index.php?route=/multas/${multaId}/enviar-aviso`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert('¡Aviso de multa enviado por correo y notificación push con éxito!');
+                } else {
+                    alert(result.error || 'No se pudo enviar el aviso.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error de conexión al intentar enviar el aviso.');
+            }
+        }
+
+        async function cargarReclamos() {
+            try {
+                const response = await fetch('index.php?route=/reclamos', {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const result = await response.json();
+                listaReclamosGlobal = result.data || [];
+                
+                const tbody = document.getElementById('tabla-reclamos-body');
+                tbody.innerHTML = '';
+
+                if (!Array.isArray(listaReclamosGlobal) || listaReclamosGlobal.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">No hay reclamos registrados en este barrio.</td></tr>`;
+                    return;
+                }
+
+                listaReclamosGlobal.forEach(r => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-blue-50/50 cursor-pointer transition select-none";
+                    tr.ondblclick = () => abrirDetalleReclamo(r.id);
+
+                    const fechaFormateada = r.created_at ? new Date(r.created_at).toLocaleDateString() : '';
+                    const nombreVecino = `${r.vecino_nombre || 'N/D'} ${r.vecino_apellido || ''}`;
+                    const loteInfo = `Lote: ${r.lote_identificador || r.lote_id || 'N/D'}`;
+
+                    tr.innerHTML = `
+                        <td class="p-3 font-bold text-gray-800">#${r.id}</td>
+                        <td class="p-3 text-gray-700 font-medium">${nombreVecino}<br><span class="text-[10px] text-gray-400">${loteInfo}</span></td>
+                        <td class="p-3 text-gray-800">
+                            <span class="font-semibold text-blue-600 uppercase text-[10px] block">${r.categoria_nombre || 'General'}</span>
+                            <span class="font-bold">${r.titulo || 'Sin título'}</span>
+                        </td>
+                        <td class="p-3">
+                            <span class="px-2.5 py-1 rounded-full font-semibold text-[10px] uppercase ${obtenerBadgeEstado(r.estado)}">${r.estado}</span>
+                        </td>
+                        <td class="p-3 text-right text-gray-400">${fechaFormateada}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+            } catch (error) {
+                console.error('Error al cargar reclamos:', error);
+            }
+        }
+
+        async function abrirDetalleReclamo(id) {
+            const r = listaReclamosGlobal.find(item => item.id == id);
+            if (!r) return;
+
+            reclamoSeleccionadoId = r.id;
+
+            document.getElementById('modal-id-badge').innerText = `Reclamo #${r.id}`;
+            document.getElementById('modal-id-badge').className = `text-xs font-bold px-2 py-0.5 rounded uppercase ${obtenerBadgeEstado(r.estado)}`;
+            document.getElementById('modal-titulo').innerText = r.titulo || 'Sin título';
+            document.getElementById('modal-vecino').innerText = `${r.vecino_nombre || 'N/D'} ${r.vecino_apellido || ''}`;
+            document.getElementById('modal-lote').innerText = r.lote_identificador || r.lote_id || 'N/D';
+            document.getElementById('modal-categoria').innerText = r.categoria_nombre || 'General';
+            document.getElementById('modal-fecha').innerText = r.created_at ? new Date(r.created_at).toLocaleString() : 'N/D';
+            document.getElementById('modal-descripcion').innerText = r.descripcion || 'Sin descripción';
+
+            const contenedorImg = document.getElementById('modal-contenedor-imagen');
+            if (r.imagen_url) {
+                document.getElementById('modal-imagen-src').src = r.imagen_url;
+                document.getElementById('modal-imagen-link').href = r.imagen_url;
+                contenedorImg.classList.remove('hidden');
+            } else {
+                contenedorImg.classList.add('hidden');
+            }
+
+            document.getElementById('modal-select-estado').value = r.estado;
+            document.getElementById('modal-detalle-reclamo').classList.remove('hidden');
+            
+            cargarHistorialComentarios(id);
+        }
+
+        function cerrarModalDetalle() {
+            document.getElementById('modal-detalle-reclamo').classList.add('hidden');
+            reclamoSeleccionadoId = null;
+        }
+
+        async function cargarHistorialComentarios(reclamoId) {
+            const contenedor = document.getElementById('modal-historial-comentarios');
+            contenedor.innerHTML = '<span class="text-gray-400 italic">Cargando comentarios...</span>';
+
+            try {
+                const response = await fetch(`index.php?route=/reclamos/${reclamoId}/historial`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                const historial = result.data || [];
+
+                if (historial.length === 0) {
+                    contenedor.innerHTML = '<span class="text-gray-400 italic">No hay comentarios registrados aún.</span>';
+                    return;
+                }
+
+                contenedor.innerHTML = '';
+                historial.forEach(h => {
+                    const div = document.createElement('div');
+                    div.className = "border-b pb-1 mb-1";
+                    const fecha = h.created_at ? new Date(h.created_at).toLocaleString() : '';
+                    div.innerHTML = `<b>${h.nombre || 'Sistema'} ${h.apellido || ''}</b> <span class="text-[10px] text-gray-400">(${fecha})</span>:<br>${h.comentario || ''}`;
+                    contenedor.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Error al cargar historial:', error);
+                contenedor.innerHTML = '<span class="text-red-400">Error al cargar comentarios.</span>';
+            }
+        }
+
+        async function agregarComentarioReclamo() {
+            if (!reclamoSeleccionadoId) return;
+            const inputComentario = document.getElementById('modal-nuevo-comentario');
+            const comentario = inputComentario.value.trim();
+
+            if (!comentario) {
+                alert('Escribí un comentario antes de enviar.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`index.php?route=/reclamos/${reclamoSeleccionadoId}/comentarios`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ comentario: comentario })
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    inputComentario.value = '';
+                    cargarHistorialComentarios(reclamoSeleccionadoId);
+                } else {
+                    alert(result.error || 'No se pudo guardar el comentario.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error de conexión al enviar el comentario.');
+            }
+        }
+
+        async function actualizarEstadoDesdeModal() {
+            if (!reclamoSeleccionadoId) return;
+            const nuevoEstado = document.getElementById('modal-select-estado').value;
+
+            try {
+                const response = await fetch(`index.php?route=/reclamos/${reclamoSeleccionadoId}/estado`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ estado: nuevoEstado })
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert('¡Estado actualizado con éxito!');
+                    cerrarModalDetalle();
+                    cargarReclamos();
+                } else {
+                    alert(result.error || 'No se pudo actualizar el estado');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error de conexión al actualizar el estado.');
+            }
+        }
+
+        function obtenerBadgeEstado(estado) {
+            switch(estado) {
+                case 'pendiente': return 'bg-yellow-100 text-yellow-800';
+                case 'en_proceso': return 'bg-blue-100 text-blue-800';
+                case 'resuelto': return 'bg-emerald-100 text-emerald-800';
+                case 'rechazado': return 'bg-red-100 text-red-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function obtenerBadgeEstadoMulta(estado) {
+            switch(estado) {
+                case 'pendiente': return 'bg-yellow-100 text-yellow-800';
+                case 'pagada': return 'bg-emerald-100 text-emerald-800';
+                case 'anulada': return 'bg-red-100 text-red-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function cerrarSesion() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

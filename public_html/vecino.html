@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Vecino - Gestión de Barrio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Header / Barra Superior -->
+    <header class="bg-blue-600 text-white shadow-md p-4 flex justify-between items-center">
+        <div>
+            <h1 class="font-bold text-lg" id="barrio-nombre">Mi Barrio</h1>
+            <p class="text-xs text-blue-200" id="usuario-info">Cargando perfil...</p>
+        </div>
+        <div class="flex items-center space-x-2">
+            <!-- Botón de Notificaciones Push (Campanita) -->
+            <button onclick="toggleNotificacionesPush()" id="btn-push-toggle" class="bg-blue-700 hover:bg-blue-800 p-2 rounded-lg transition text-sm flex items-center justify-center shadow" title="Activar/Desactivar Notificaciones">
+                🔕
+            </button>
+            <button onclick="probarPushManual(this)" id="btn-push-test" class="text-xs bg-blue-700 hover:bg-blue-800 px-3 py-1.5 rounded-lg transition shadow" title="Enviar una notificacion de prueba">
+                Probar Push
+            </button>
+            <button onclick="cerrarSesion()" class="text-sm bg-blue-700 hover:bg-blue-800 px-3 py-1.5 rounded-lg transition shadow">Salir</button>
+        </div>
+    </header>
+
+    <!-- Navegación por pestañas (Tabs) -->
+    <div class="bg-white border-b shadow-sm">
+        <div class="max-w-md mx-auto flex">
+            <button onclick="cambiarTab('reclamos')" id="tab-btn-reclamos" class="flex-1 py-3 text-sm font-semibold text-center border-b-2 border-blue-600 text-blue-600 transition">
+                📋 Mis Reclamos
+            </button>
+            <button onclick="cambiarTab('nuevo')" id="tab-btn-nuevo" class="flex-1 py-3 text-sm font-semibold text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition">
+                ➕ Nuevo Reclamo
+            </button>
+        </div>
+    </div>
+
+    <!-- Contenedor Principal -->
+    <main class="max-w-md w-full mx-auto p-4 flex-1 space-y-4">
+
+        <!-- TAB 1: LISTADO DE RECLAMOS EN FORMATO TABLA / LISTA -->
+        <div id="seccion-tab-reclamos" class="space-y-3">
+            <div class="flex justify-between items-center mb-2">
+                <div>
+                    <h2 class="text-gray-700 font-bold text-sm">Historial de Incidencias</h2>
+                    <p class="text-[11px] text-gray-400">Tocá cualquier fila para ver el detalle y seguimiento.</p>
+                </div>
+                <button onclick="cargarReclamos()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-2.5 py-1 rounded-lg transition">Actualizar</button>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-500 uppercase border-b border-gray-100 text-[10px]">
+                                <th class="p-2.5">ID</th>
+                                <th class="p-2.5">Título / Cat.</th>
+                                <th class="p-2.5">Estado</th>
+                                <th class="p-2.5 text-right">Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-reclamos-body" class="divide-y divide-gray-100">
+                            <tr>
+                                <td colspan="4" class="p-6 text-center text-gray-400">Cargando reclamos...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: FORMULARIO NUEVO RECLAMO -->
+        <div id="seccion-tab-nuevo" class="space-y-4 hidden">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 space-y-4">
+                <div>
+                    <h2 class="font-bold text-gray-800 text-base">Reportar Nueva Incidencia</h2>
+                    <p class="text-xs text-gray-500">Completá los datos del inconveniente en tu lote.</p>
+                </div>
+                
+                <form id="form-reclamo" onsubmit="enviarReclamo(event)" class="space-y-3">
+                    <input type="hidden" id="lote_id">
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Categoría</label>
+                        <select id="categoria_id" class="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white" required>
+                            <option value="">Seleccione una categoría...</option>
+                            <option value="1">Iluminación</option>
+                            <option value="2">Jardinería / Espacios Verdes</option>
+                            <option value="3">Calles / Bacheo</option>
+                            <option value="4">Seguridad / Portón</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Título del problema</label>
+                        <input type="text" id="titulo" placeholder="Ej: Luminaria apagada en esquina" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Descripción detallada</label>
+                        <textarea id="descripcion" rows="3" placeholder="Describí brevemente el inconveniente..." class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Evidencia Fotográfica (Opcional)</label>
+                        <input type="file" id="imagen" accept="image/*" capture="environment" class="w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                        <p class="text-[10px] text-gray-400 mt-1">Podés tomar una foto o elegirla de la galería.</p>
+                    </div>
+
+                    <button type="submit" id="btn-submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition shadow">
+                        Enviar Reclamo
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL DE DETALLE DE RECLAMO PARA EL VECINO -->
+    <div id="modal-detalle-reclamo" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <div>
+                    <span id="modal-id-badge" class="text-xs font-bold px-2 py-0.5 rounded uppercase"></span>
+                    <h3 class="font-bold text-gray-800 text-base mt-1" id="modal-titulo">Detalle del Reclamo</h3>
+                </div>
+                <button onclick="cerrarModalDetalle()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div class="bg-gray-50 p-3 rounded-xl space-y-1 text-gray-600">
+                    <p><b>Categoría:</b> <span id="modal-categoria"></span></p>
+                    <p><b>Fecha de creación:</b> <span id="modal-fecha"></span></p>
+                </div>
+
+                <div>
+                    <p class="font-semibold text-gray-700 mb-1">Descripción detallada:</p>
+                    <p id="modal-descripcion" class="text-gray-600 bg-slate-50 p-3 rounded-xl border border-gray-100 leading-relaxed"></p>
+                </div>
+
+                <div id="modal-contenedor-imagen" class="hidden">
+                    <p class="font-semibold text-gray-700 mb-1">Evidencia Fotográfica:</p>
+                    <a id="modal-imagen-link" href="#" target="_blank" class="inline-block">
+                        <img id="modal-imagen-src" src="" alt="Foto adjunta" class="w-full max-h-56 object-cover rounded-xl border shadow-sm">
+                    </a>
+                </div>
+
+                <!-- Historial de Comentarios / Seguimiento de Intendencia -->
+                <div>
+                    <p class="font-semibold text-gray-700 mb-1">Seguimiento / Comentarios de Intendencia:</p>
+                    <div id="modal-historial-comentarios" class="bg-slate-50 p-3 rounded-xl border border-gray-100 max-h-36 overflow-y-auto space-y-2 text-[11px]">
+                        <span class="text-gray-400 italic">Cargando comentarios...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de lógica Frontend y Notificaciones Push -->
+    <script>
+        const API_URL = 'index.php?route='; 
+        const token = localStorage.getItem('token');
+        let listaReclamosGlobal = [];
+        let reclamoSeleccionadoId = null;
+
+        // Clave VAPID Pública de prueba
+        const VAPID_PUBLIC_KEY = 'BI_JeTpLT-ltMz2pqM1jZZD8lS-ZZwJEVhUACXl-iQmYqpREU2oFWwkdI7JYMra8l40n0c1MqBuzYttooULkoK0';
+
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarDatosUsuario();
+            cargarReclamos();
+            
+            // Verificar estado y activar notificaciones push de forma automática e inteligente
+            chequearEstadoPush();
+        });
+
+        // --- FUNCIONES DE NOTIFICACIONES PUSH Y CAMPANA ---
+        async function chequearEstadoPush() {
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+            
+            try {
+                const registro = await navigator.serviceWorker.register('sw.js');
+                const suscripcion = await registro.pushManager.getSubscription();
+                const btn = document.getElementById('btn-push-toggle');
+                
+                if (suscripcion && Notification.permission === 'granted') {
+                    btn.innerHTML = '🔔';
+                    btn.title = 'Notificaciones activas (Clic para desactivar)';
+                    btn.classList.add('ring-2', 'ring-white');
+                } else {
+                    btn.innerHTML = '🔕';
+                    btn.title = 'Notificaciones desactivadas (Clic para activar)';
+                    btn.classList.remove('ring-2', 'ring-white');
+                }
+            } catch (err) {
+                console.error('Error al chequear estado push:', err);
+            }
+        }
+
+        async function toggleNotificacionesPush() {
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+                alert('Tu navegador no soporta notificaciones push.');
+                return;
+            }
+
+            try {
+                const registro = await navigator.serviceWorker.ready;
+                let suscripcion = await registro.pushManager.getSubscription();
+
+                if (suscripcion) {
+                    const endpointActual = suscripcion.endpoint;
+                    // Si ya está suscrito, se desuscribe
+                    await suscripcion.unsubscribe();
+                    await eliminarSuscripcionEnServidor(endpointActual);
+                    alert('Notificaciones desactivadas correctamente.');
+                    chequearEstadoPush();
+                } else {
+                    // Si no está suscrito, solicita permisos y suscribe
+                    const permiso = await Notification.requestPermission();
+                    if (permiso !== 'granted') {
+                        alert('No se concedieron los permisos para las notificaciones.');
+                        chequearEstadoPush();
+                        return;
+                    }
+
+                    const claveConvertida = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+                    suscripcion = await registro.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: claveConvertida
+                    });
+
+                    const guardado = await guardarSuscripcionEnServidor(suscripcion);
+                    await enviarPushDePrueba();
+                    alert(`Notificaciones activadas para usuario ID ${guardado.usuario_id} y validadas con una prueba.`);
+                    chequearEstadoPush();
+                }
+            } catch (error) {
+                console.error('Error al alternar notificaciones:', error);
+                alert('No se pudo activar push. Revisá sesion/token y permisos del navegador.');
+            }
+        }
+
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+
+        async function guardarSuscripcionEnServidor(suscripcion) {
+            if (!token) {
+                throw new Error('No hay token de sesion.');
+            }
+
+            const subJson = suscripcion.toJSON();
+            const payload = {
+                endpoint: subJson.endpoint,
+                keys: {
+                    p256dh: subJson.keys.p256dh,
+                    auth: subJson.keys.auth
+                }
+            };
+
+            try {
+                const response = await fetch('index.php?route=/push/suscripcion', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                let result = {};
+                try {
+                    result = await response.json();
+                } catch (parseError) {
+                    result = {};
+                }
+
+                if (!response.ok || !result.success) {
+                    const msg = result.error || `Error ${response.status} al guardar suscripcion push.`;
+                    throw new Error(msg);
+                }
+
+                console.log('Suscripción Push registrada en el servidor.', result);
+                return result;
+            } catch (error) {
+                console.error('Error enviando suscripción al servidor:', error);
+                throw error;
+            }
+        }
+
+        async function eliminarSuscripcionEnServidor(endpoint) {
+            if (!token) {
+                throw new Error('No hay token de sesion.');
+            }
+
+            const response = await fetch('index.php?route=/push/desuscripcion', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ endpoint: endpoint })
+            });
+
+            let result = {};
+            try {
+                result = await response.json();
+            } catch (parseError) {
+                result = {};
+            }
+
+            if (!response.ok || !result.success) {
+                const msg = result.error || `Error ${response.status} al eliminar suscripcion push.`;
+                throw new Error(msg);
+            }
+
+            console.log('Suscripción Push eliminada en el servidor.', result);
+            return result;
+        }
+
+        async function enviarPushDePrueba() {
+            const response = await fetch('index.php?route=/push/prueba', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            let result = {};
+            try {
+                result = await response.json();
+            } catch (parseError) {
+                result = {};
+            }
+
+            if (!response.ok || !result.success) {
+                const msg = result.error || `Error ${response.status} al enviar push de prueba.`;
+                throw new Error(msg);
+            }
+        }
+
+        async function probarPushManual(btn) {
+            if (!token) {
+                alert('No hay sesion activa. Volve a iniciar sesion.');
+                return;
+            }
+
+            const boton = btn || document.getElementById('btn-push-test');
+            const textoOriginal = boton ? boton.innerText : '';
+
+            try {
+                if (boton) {
+                    boton.disabled = true;
+                    boton.innerText = 'Enviando...';
+                }
+
+                await enviarPushDePrueba();
+                alert('Push de prueba enviado correctamente.');
+            } catch (error) {
+                console.error('Error al enviar push de prueba:', error);
+                alert(error.message || 'No se pudo enviar el push de prueba.');
+            } finally {
+                if (boton) {
+                    boton.disabled = false;
+                    boton.innerText = textoOriginal || 'Probar Push';
+                }
+            }
+        }
+        // --------------------------------------------------
+
+        function cargarDatosUsuario() {
+            const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+            document.getElementById('barrio-nombre').innerText = usuario.barrio_nombre || 'Barrio Cerrado';
+            document.getElementById('usuario-info').innerText = `${usuario.nombre} ${usuario.apellido} (${usuario.rol})`;
+            
+            if (usuario.lote_id) {
+                document.getElementById('lote_id').value = usuario.lote_id;
+            }
+        }
+
+        function cambiarTab(tab) {
+            const tabReclamos = document.getElementById('seccion-tab-reclamos');
+            const tabNuevo = document.getElementById('seccion-tab-nuevo');
+            const btnReclamos = document.getElementById('tab-btn-reclamos');
+            const btnNuevo = document.getElementById('tab-btn-nuevo');
+
+            if (tab === 'reclamos') {
+                tabReclamos.classList.remove('hidden');
+                tabNuevo.classList.add('hidden');
+                btnReclamos.className = "flex-1 py-3 text-sm font-semibold text-center border-b-2 border-blue-600 text-blue-600 transition";
+                btnNuevo.className = "flex-1 py-3 text-sm font-semibold text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition";
+            } else {
+                tabNuevo.classList.remove('hidden');
+                tabReclamos.classList.add('hidden');
+                btnNuevo.className = "flex-1 py-3 text-sm font-semibold text-center border-b-2 border-blue-600 text-blue-600 transition";
+                btnReclamos.className = "flex-1 py-3 text-sm font-semibold text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition";
+            }
+        }
+
+        async function cargarReclamos() {
+            try {
+                const response = await fetch(`${API_URL}/reclamos`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const responseText = await response.text();
+                if (!responseText.trim()) {
+                    throw new Error("El servidor devolvió una respuesta vacía.");
+                }
+
+                const result = JSON.parse(responseText);
+                const tbody = document.getElementById('tabla-reclamos-body');
+                listaReclamosGlobal = result.data || result;
+
+                if (!result.success || !Array.isArray(listaReclamosGlobal) || listaReclamosGlobal.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-400">No hay reclamos registrados.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                listaReclamosGlobal.forEach(r => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-blue-50/50 cursor-pointer transition select-none";
+                    tr.onclick = () => abrirDetalleReclamo(r.id);
+
+                    const fechaFormateada = r.created_at ? new Date(r.created_at).toLocaleDateString() : '';
+
+                    tr.innerHTML = `
+                        <td class="p-3 font-bold text-gray-800">#${r.id}</td>
+                        <td class="p-3 text-gray-800">
+                            <span class="font-semibold text-blue-600 uppercase text-[9px] block">${r.categoria_nombre || 'General'}</span>
+                            <span class="font-medium">${r.titulo || 'Sin título'}</span>
+                        </td>
+                        <td class="p-3">
+                            <span class="px-2 py-0.5 rounded-full font-semibold text-[9px] uppercase ${obtenerBadgeEstado(r.estado)}">${r.estado}</span>
+                        </td>
+                        <td class="p-3 text-right text-gray-400">${fechaFormateada}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+            } catch (error) {
+                console.error('Error al cargar reclamos:', error);
+                document.getElementById('tabla-reclamos-body').innerHTML = `<tr><td colspan="4" class="p-6 text-center text-red-400">Error al cargar los reclamos.</td></tr>`;
+            }
+        }
+
+        function abrirDetalleReclamo(id) {
+            const r = listaReclamosGlobal.find(item => item.id == id);
+            if (!r) return;
+
+            reclamoSeleccionadoId = r.id;
+
+            document.getElementById('modal-id-badge').innerText = `Reclamo #${r.id}`;
+            document.getElementById('modal-id-badge').className = `text-xs font-bold px-2 py-0.5 rounded uppercase ${obtenerBadgeEstado(r.estado)}`;
+            document.getElementById('modal-titulo').innerText = r.titulo || 'Sin título';
+            document.getElementById('modal-categoria').innerText = r.categoria_nombre || 'General';
+            document.getElementById('modal-fecha').innerText = r.created_at ? new Date(r.created_at).toLocaleString() : 'N/D';
+            document.getElementById('modal-descripcion').innerText = r.descripcion || 'Sin descripción';
+
+            const contenedorImg = document.getElementById('modal-contenedor-imagen');
+            if (r.imagen_url) {
+                document.getElementById('modal-imagen-src').src = r.imagen_url;
+                document.getElementById('modal-imagen-link').href = r.imagen_url;
+                contenedorImg.classList.remove('hidden');
+            } else {
+                contenedorImg.classList.add('hidden');
+            }
+
+            document.getElementById('modal-detalle-reclamo').classList.remove('hidden');
+            cargarHistorialComentarios(id);
+        }
+
+        function cerrarModalDetalle() {
+            document.getElementById('modal-detalle-reclamo').classList.add('hidden');
+            reclamoSeleccionadoId = null;
+        }
+
+        async function cargarHistorialComentarios(reclamoId) {
+            const contenedor = document.getElementById('modal-historial-comentarios');
+            contenedor.innerHTML = '<span class="text-gray-400 italic">Cargando seguimiento...</span>';
+
+            try {
+                const response = await fetch(`${API_URL}/reclamos/${reclamoId}/historial`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                const historial = result.data || [];
+
+                if (historial.length === 0) {
+                    contenedor.innerHTML = '<span class="text-gray-400 italic">No hay comentarios ni actualizaciones aún.</span>';
+                    return;
+                }
+
+                contenedor.innerHTML = '';
+                historial.forEach(h => {
+                    const div = document.createElement('div');
+                    div.className = "border-b pb-1 mb-1";
+                    const fecha = h.created_at ? new Date(h.created_at).toLocaleString() : '';
+                    div.innerHTML = `<b>${h.nombre || 'Sistema'} ${h.apellido || ''}</b> <span class="text-[10px] text-gray-400">(${fecha})</span>:<br>${h.comentario || ''}`;
+                    contenedor.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Error al cargar historial:', error);
+                contenedor.innerHTML = '<span class="text-red-400">Error al cargar seguimiento.</span>';
+            }
+        }
+
+        function obtenerBadgeEstado(estado) {
+            switch(estado) {
+                case 'pendiente': return 'bg-yellow-100 text-yellow-800';
+                case 'en_proceso': return 'bg-blue-100 text-blue-800';
+                case 'resuelto': return 'bg-emerald-100 text-emerald-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        async function enviarReclamo(e) {
+            e.preventDefault();
+            
+            const btnSubmit = document.getElementById('btn-submit');
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = 'Procesando imagen...';
+
+            const formData = new FormData();
+            formData.append('categoria_id', document.getElementById('categoria_id').value);
+            formData.append('lote_id', document.getElementById('lote_id').value);
+            formData.append('titulo', document.getElementById('titulo').value);
+            formData.append('descripcion', document.getElementById('descripcion').value);
+
+            const fileInput = document.getElementById('imagen');
+            
+            if (fileInput.files && fileInput.files[0]) {
+                const archivoOriginal = fileInput.files[0];
+
+                if (!archivoOriginal.type.startsWith('image/')) {
+                    alert('Por favor, seleccioná un archivo de imagen válido.');
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerText = 'Enviar Reclamo';
+                    return;
+                }
+
+                btnSubmit.innerText = 'Comprimiendo...';
+
+                try {
+                    const archivoComprimido = await comprimirImagen(archivoOriginal, 1200, 0.7);
+                    formData.append('imagen', archivoComprimido);
+                } catch (err) {
+                    console.error('Error al comprimir:', err);
+                    formData.append('imagen', archivoOriginal);
+                }
+            }
+
+            btnSubmit.innerText = 'Enviando reclamo...';
+
+            try {
+                const response = await fetch(`${API_URL}/reclamos`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    document.getElementById('form-reclamo').reset();
+                    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+                    if (usuario.lote_id) document.getElementById('lote_id').value = usuario.lote_id;
+
+                    cargarReclamos();
+                    cambiarTab('reclamos');
+                } else {
+                    alert(result.error || 'Error al enviar el reclamo');
+                }
+            } catch (error) {
+                console.error('Error de red:', error);
+                alert('No se pudo conectar con el servidor.');
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = 'Enviar Reclamo';
+            }
+        }
+
+        function comprimirImagen(file, maxWidth = 1200, quality = 0.7) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        canvas.toBlob((blob) => {
+                            if (!blob) {
+                                reject(new Error('Falló la compresión'));
+                                return;
+                            }
+                            const archivoComprimido = new File([blob], file.name, {
+                                type: 'image/jpeg',
+                                lastModified: Date.now()
+                            });
+                            resolve(archivoComprimido);
+                        }, 'image/jpeg', quality);
+                    };
+                    img.onerror = (error) => reject(error);
+                };
+                reader.onerror = (error) => reject(error);
+            });
+        }
+
+        function cerrarSesion() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
