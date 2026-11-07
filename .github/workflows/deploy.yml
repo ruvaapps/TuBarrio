@@ -20,7 +20,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USER_DEV }}
           password: ${{ secrets.FTP_PASSWORD_DEV }}
-          local-dir: ./public_html/         # Toma los archivos de la carpeta del repo
+          local-dir: ./public_html/         # Toma los  archivos de la carpeta del repo
           remote-dir: ./               # Si la cuenta FTP apunta a /Desarrollo, se vuelcan directo ahí
 
   deploy-produccion:
