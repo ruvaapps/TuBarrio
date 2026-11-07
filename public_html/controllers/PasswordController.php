@@ -1,10 +1,29 @@
 <?php
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../helpers/rate_limiter.php';
 
 class PasswordController
 {
     private const CODE_EXP_MINUTES = 10;
     private const MAX_ATTEMPTS = 5;
+
+    private function getClientIp(): string
+    {
+        return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    }
+
+    private function enforceRateLimit(string $bucket, int $maxAttempts, int $windowSeconds, string $errorMessage): bool
+    {
+        $result = RateLimiter::consume($bucket, $maxAttempts, $windowSeconds);
+        if (!$result['allowed']) {
+            header('Retry-After: ' . (string) $result['retry_after']);
+            http_response_code(429);
+            echo json_encode(['error' => $errorMessage]);
+            return false;
+        }
+
+        return true;
+    }
 
     public function requestCode()
     {
@@ -12,6 +31,15 @@ class PasswordController
         $input = $this->readJson();
 
         $email = trim($input['email'] ?? '');
+
+        $emailHash = hash('sha256', strtolower($email));
+        if (!$this->enforceRateLimit('pwd_request:ip:' . $this->getClientIp(), 8, 300, 'Demasiadas solicitudes. Intentalo más tarde.')) {
+            return;
+        }
+        if (!$this->enforceRateLimit('pwd_request:email:' . $emailHash, 5, 300, 'Demasiadas solicitudes para este email. Intentalo más tarde.')) {
+            return;
+        }
+
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             http_response_code(400);
             echo json_encode(['error' => 'Email inválido.']);
@@ -94,6 +122,14 @@ class PasswordController
         $email = trim($input['email'] ?? '');
         $code = trim($input['codigo'] ?? '');
 
+        $emailHash = hash('sha256', strtolower($email));
+        if (!$this->enforceRateLimit('pwd_verify:ip:' . $this->getClientIp(), 20, 300, 'Demasiados intentos. Esperá unos minutos.')) {
+            return;
+        }
+        if (!$this->enforceRateLimit('pwd_verify:email:' . $emailHash, 10, 300, 'Demasiados intentos para este email. Esperá unos minutos.')) {
+            return;
+        }
+
         if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/^\d{6}$/', $code)) {
             http_response_code(400);
             echo json_encode(['error' => 'Datos inválidos.']);
@@ -149,6 +185,14 @@ class PasswordController
         $code = trim($input['codigo'] ?? '');
         $newPassword = trim($input['new_password'] ?? '');
         $confirmPassword = trim($input['confirm_password'] ?? '');
+
+        $emailHash = hash('sha256', strtolower($email));
+        if (!$this->enforceRateLimit('pwd_reset:ip:' . $this->getClientIp(), 10, 300, 'Demasiados intentos. Esperá unos minutos.')) {
+            return;
+        }
+        if (!$this->enforceRateLimit('pwd_reset:email:' . $emailHash, 5, 300, 'Demasiados intentos para este email. Esperá unos minutos.')) {
+            return;
+        }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/^\d{6}$/', $code)) {
             http_response_code(400);

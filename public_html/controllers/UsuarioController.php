@@ -85,15 +85,22 @@ public function storeVecino($user) {
 
         } catch (Exception $e) {
             $db->rollBack();
+            error_log('UsuarioController::storeVecino error: ' . $e->getMessage());
             http_response_code(500);
-            echo json_encode(["error" => "Error al registrar el vecino: " . $e->getMessage()]);
+            echo json_encode(["error" => "Error interno del servidor"]);
         }
     }
 
     // Listar vecinos incluyendo la manzana del lote
     public function listarVecinos($user) {
         header('Content-Type: application/json');
-        
+
+        if (!in_array($user['rol'] ?? '', ['intendente', 'admin_general'], true)) {
+            http_response_code(403);
+            echo json_encode(['error' => 'No tenes permisos para listar vecinos']);
+            return;
+        }
+
         try {
             $db = Database::getConnection();
             $stmt = $db->prepare("
@@ -113,10 +120,11 @@ public function storeVecino($user) {
                 'data' => $vecinos
             ]);
         } catch (Exception $e) {
+            error_log('UsuarioController::listarVecinos error: ' . $e->getMessage());
             http_response_code(500);
             echo json_encode([
                 'success' => false, 
-                'error' => 'Error al listar vecinos: ' . $e->getMessage()
+                'error' => 'Error interno del servidor'
             ]);
         }
     }

@@ -159,22 +159,47 @@
         </div>
     </div>
 
+    <script src="session-guard.js"></script>
     <!-- Script de lógica Frontend y Notificaciones Push -->
     <script>
         const API_URL = 'index.php?route='; 
-        const token = localStorage.getItem('token');
+        let usuarioSesion = null;
         let listaReclamosGlobal = [];
         let reclamoSeleccionadoId = null;
 
         // Clave VAPID Pública de prueba
         const VAPID_PUBLIC_KEY = 'BI_JeTpLT-ltMz2pqM1jZZD8lS-ZZwJEVhUACXl-iQmYqpREU2oFWwkdI7JYMra8l40n0c1MqBuzYttooULkoK0';
 
-        if (!token) {
-            window.location.href = 'login.html';
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            cargarDatosUsuario();
+        function apiFetch(url, options = {}) {
+            return SessionGuard.apiFetch(url, options);
+        }
+
+        async function validarSesion() {
+            const usuario = await SessionGuard.requireSession({
+                apiBase: API_URL,
+                allowedRoles: ['vecino'],
+                redirectTo: 'login.html'
+            });
+
+            usuarioSesion = usuario;
+            return usuario;
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const usuario = await validarSesion();
+            if (!usuario) return;
+
+
+            cargarDatosUsuario(usuario);
             cargarReclamos();
             
             // Verificar estado y activar notificaciones push de forma automática e inteligente
@@ -260,10 +285,6 @@
         }
 
         async function guardarSuscripcionEnServidor(suscripcion) {
-            if (!token) {
-                throw new Error('No hay token de sesion.');
-            }
-
             const subJson = suscripcion.toJSON();
             const payload = {
                 endpoint: subJson.endpoint,
@@ -274,11 +295,10 @@
             };
 
             try {
-                const response = await fetch('index.php?route=/push/suscripcion', {
+                const response = await apiFetch('index.php?route=/push/suscripcion', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(payload)
                 });
@@ -304,15 +324,10 @@
         }
 
         async function eliminarSuscripcionEnServidor(endpoint) {
-            if (!token) {
-                throw new Error('No hay token de sesion.');
-            }
-
-            const response = await fetch('index.php?route=/push/desuscripcion', {
+            const response = await apiFetch('index.php?route=/push/desuscripcion', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ endpoint: endpoint })
             });
@@ -334,12 +349,7 @@
         }
 
         async function enviarPushDePrueba() {
-            const response = await fetch('index.php?route=/push/prueba', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+            const response = await apiFetch('index.php?route=/push/prueba', { method: 'POST' });
 
             let result = {};
             try {
@@ -355,11 +365,6 @@
         }
 
         async function probarPushManual(btn) {
-            if (!token) {
-                alert('No hay sesion activa. Volve a iniciar sesion.');
-                return;
-            }
-
             const boton = btn || document.getElementById('btn-push-test');
             const textoOriginal = boton ? boton.innerText : '';
 
@@ -383,8 +388,7 @@
         }
         // --------------------------------------------------
 
-        function cargarDatosUsuario() {
-            const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+        function cargarDatosUsuario(usuario) {
             document.getElementById('barrio-nombre').innerText = usuario.barrio_nombre || 'Barrio Cerrado';
             document.getElementById('usuario-info').innerText = `${usuario.nombre} ${usuario.apellido} (${usuario.rol})`;
             
@@ -414,10 +418,8 @@
 
         async function cargarReclamos() {
             try {
-                const response = await fetch(`${API_URL}/reclamos`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                
+                const response = await apiFetch(`${API_URL}/reclamos`);
+
                 const responseText = await response.text();
                 if (!responseText.trim()) {
                     throw new Error("El servidor devolvió una respuesta vacía.");
@@ -443,11 +445,11 @@
                     tr.innerHTML = `
                         <td class="p-3 font-bold text-gray-800">#${r.id}</td>
                         <td class="p-3 text-gray-800">
-                            <span class="font-semibold text-blue-600 uppercase text-[9px] block">${r.categoria_nombre || 'General'}</span>
-                            <span class="font-medium">${r.titulo || 'Sin título'}</span>
+                            <span class="font-semibold text-blue-600 uppercase text-[9px] block">${escapeHtml(r.categoria_nombre || 'General')}</span>
+                            <span class="font-medium">${escapeHtml(r.titulo || 'Sin título')}</span>
                         </td>
                         <td class="p-3">
-                            <span class="px-2 py-0.5 rounded-full font-semibold text-[9px] uppercase ${obtenerBadgeEstado(r.estado)}">${r.estado}</span>
+                            <span class="px-2 py-0.5 rounded-full font-semibold text-[9px] uppercase ${obtenerBadgeEstado(r.estado)}">${escapeHtml(r.estado)}</span>
                         </td>
                         <td class="p-3 text-right text-gray-400">${fechaFormateada}</td>
                     `;
@@ -496,9 +498,7 @@
             contenedor.innerHTML = '<span class="text-gray-400 italic">Cargando seguimiento...</span>';
 
             try {
-                const response = await fetch(`${API_URL}/reclamos/${reclamoId}/historial`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const response = await apiFetch(`${API_URL}/reclamos/${reclamoId}/historial`);
                 const result = await response.json();
                 const historial = result.data || [];
 
@@ -512,7 +512,21 @@
                     const div = document.createElement('div');
                     div.className = "border-b pb-1 mb-1";
                     const fecha = h.created_at ? new Date(h.created_at).toLocaleString() : '';
-                    div.innerHTML = `<b>${h.nombre || 'Sistema'} ${h.apellido || ''}</b> <span class="text-[10px] text-gray-400">(${fecha})</span>:<br>${h.comentario || ''}`;
+
+                    const strong = document.createElement('b');
+                    strong.textContent = `${h.nombre || 'Sistema'} ${h.apellido || ''}`.trim();
+
+                    const fechaSpan = document.createElement('span');
+                    fechaSpan.className = 'text-[10px] text-gray-400';
+                    fechaSpan.textContent = ` (${fecha}):`;
+
+                    const br = document.createElement('br');
+                    const textoComentario = document.createTextNode(h.comentario || '');
+
+                    div.appendChild(strong);
+                    div.appendChild(fechaSpan);
+                    div.appendChild(br);
+                    div.appendChild(textoComentario);
                     contenedor.appendChild(div);
                 });
             } catch (error) {
@@ -569,9 +583,8 @@
             btnSubmit.innerText = 'Enviando reclamo...';
 
             try {
-                const response = await fetch(`${API_URL}/reclamos`, {
+                const response = await apiFetch(`${API_URL}/reclamos`, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` },
                     body: formData
                 });
 
@@ -579,7 +592,7 @@
 
                 if (response.ok && result.success) {
                     document.getElementById('form-reclamo').reset();
-                    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+                    const usuario = usuarioSesion || JSON.parse(localStorage.getItem('usuario') || '{}');
                     if (usuario.lote_id) document.getElementById('lote_id').value = usuario.lote_id;
 
                     cargarReclamos();
@@ -637,9 +650,18 @@
             });
         }
 
-        function cerrarSesion() {
-            localStorage.clear();
-            window.location.href = 'login.html';
+        async function cerrarSesion() {
+            try {
+                await fetch('index.php?route=/auth/logout', {
+                    method: 'POST',
+                    credentials: 'same-origin'
+                });
+            } catch (error) {
+                console.error('No se pudo limpiar cookie de sesion en servidor:', error);
+            } finally {
+                localStorage.clear();
+                window.location.href = 'login.html';
+            }
         }
     </script>
 </body>

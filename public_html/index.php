@@ -2,6 +2,7 @@
 // index.php - Router principal de la API
 
 require_once __DIR__ . '/config/cors.php';
+require_once __DIR__ . '/config/security_headers.php';
 require_once __DIR__ . '/config/database.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -29,6 +30,21 @@ switch (true) {
         (new AuthController())->login();
         break;
 
+    case ($route === '/auth/logout' && $method === 'POST'):
+        require_once __DIR__ . '/controllers/AuthController.php';
+        (new AuthController())->logout();
+        break;
+
+    case ($route === '/auth/me' && $method === 'GET'):
+        require_once __DIR__ . '/controllers/AuthController.php';
+        (new AuthController())->me();
+        break;
+
+    case ($route === '/auth/refresh' && $method === 'POST'):
+        require_once __DIR__ . '/controllers/AuthController.php';
+        (new AuthController())->refresh();
+        break;
+
     // 2. RECLAMOS: Listar (GET) y Crear (POST)
     case ($route === '/reclamos'):
         require_once __DIR__ . '/middlewares/AuthMiddleware.php';
@@ -41,6 +57,10 @@ switch (true) {
             $controller->index($user);
         } elseif ($method === 'POST') {
             $controller->store($user);
+        } else {
+            http_response_code(405);
+            header('Allow: GET, POST');
+            echo json_encode(['error' => 'Metodo HTTP no permitido']);
         }
         break;
 
@@ -66,6 +86,10 @@ switch (true) {
             $controller->index($user);
         } elseif ($method === 'POST') {
             $controller->store($user);
+        } else {
+            http_response_code(405);
+            header('Allow: GET, POST');
+            echo json_encode(['error' => 'Metodo HTTP no permitido']);
         }
         break;
 
@@ -89,6 +113,10 @@ switch (true) {
             $controller->index($user);
         } elseif ($method === 'POST') {
             $controller->store($user);
+        } else {
+            http_response_code(405);
+            header('Allow: GET, POST');
+            echo json_encode(['error' => 'Metodo HTTP no permitido']);
         }
         break;
 
@@ -172,8 +200,7 @@ switch (true) {
     default:
         http_response_code(404);
         echo json_encode([
-            "error" => "Ruta no encontrada o método HTTP no permitido",
-            "debug_route" => $route
+            "error" => "Ruta no encontrada o método HTTP no permitido"
         ]);
         break;
 }

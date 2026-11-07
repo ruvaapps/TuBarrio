@@ -49,10 +49,11 @@ class ReclamoController {
             ]);
 
         } catch (Exception $e) {
+            error_log('ReclamoController::index error: ' . $e->getMessage());
             http_response_code(500);
             echo json_encode([
                 "success" => false,
-                "error" => "Error en base de datos o servidor: " . $e->getMessage()
+                "error" => "Error interno del servidor"
             ]);
         }
     }
@@ -100,31 +101,64 @@ class ReclamoController {
 
             // 2. Procesar imágenes/archivos adjuntos y guardarlos en `reclamo_adjuntos`
             if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
-                $uploadDir = __DIR__ . '/../uploads/reclamos/';
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
+                $maxSizeBytes = (int) (getenv('MAX_UPLOAD_IMAGE_BYTES') ?: 5242880); // 5 MB por defecto
+                $tmpPath = $_FILES['imagen']['tmp_name'] ?? '';
+                $fileSize = (int) ($_FILES['imagen']['size'] ?? 0);
+
+                if (!is_uploaded_file($tmpPath)) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Archivo subido no valido']);
+                    return;
                 }
 
-                $ext = strtolower(pathinfo($_FILES['imagen']['name'], PATHINFO_EXTENSION));
-                $extensionesPermitidas = ['jpg', 'jpeg', 'png', 'webp', 'heic'];
+                if ($fileSize <= 0 || $fileSize > $maxSizeBytes) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'La imagen supera el tamano permitido']);
+                    return;
+                }
 
-                if (in_array($ext, $extensionesPermitidas)) {
-                    $nombreArchivo = 'reclamo_' . $reclamo_id . '_' . time() . '.' . $ext;
-                    $rutaDestino = $uploadDir . $nombreArchivo;
+                $finfo = new finfo(FILEINFO_MIME_TYPE);
+                $realMime = $finfo->file($tmpPath) ?: '';
+                $mimeToExt = [
+                    'image/jpeg' => 'jpg',
+                    'image/png' => 'png',
+                    'image/webp' => 'webp',
+                    'image/heic' => 'heic',
+                    'image/heif' => 'heic'
+                ];
 
-                    if (move_uploaded_file($_FILES['imagen']['tmp_name'], $rutaDestino)) {
-                        $url_archivo = 'uploads/reclamos/' . $nombreArchivo;
+                if (!isset($mimeToExt[$realMime])) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Formato de imagen no permitido']);
+                    return;
+                }
 
-                        $stmtAdj = $db->prepare("
-                            INSERT INTO reclamo_adjuntos (reclamo_id, usuario_id, url_archivo, tipo)
-                            VALUES (:reclamo_id, :usuario_id, :url_archivo, 'foto_inicial')
-                        ");
-                        $stmtAdj->execute([
-                            ':reclamo_id' => $reclamo_id,
-                            ':usuario_id' => $user_id,
-                            ':url_archivo' => $url_archivo
-                        ]);
-                    }
+                $uploadDir = __DIR__ . '/../uploads/reclamos/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+
+                $ext = $mimeToExt[$realMime];
+
+                $nombreArchivo = 'reclamo_' . $reclamo_id . '_' . time() . '.' . $ext;
+                $rutaDestino = $uploadDir . $nombreArchivo;
+
+                if (move_uploaded_file($tmpPath, $rutaDestino)) {
+                    $url_archivo = 'uploads/reclamos/' . $nombreArchivo;
+
+                    $stmtAdj = $db->prepare("
+                        INSERT INTO reclamo_adjuntos (reclamo_id, usuario_id, url_archivo, tipo)
+                        VALUES (:reclamo_id, :usuario_id, :url_archivo, 'foto_inicial')
+                    ");
+                    $stmtAdj->execute([
+                        ':reclamo_id' => $reclamo_id,
+                        ':usuario_id' => $user_id,
+                        ':url_archivo' => $url_archivo
+                    ]);
+                } else {
+                    http_response_code(500);
+                    echo json_encode(['error' => 'No se pudo guardar la imagen']);
+                    return;
                 }
             }
 
@@ -149,8 +183,9 @@ class ReclamoController {
 
         } catch (Exception $e) {
             $db->rollBack();
+            error_log('ReclamoController::store error: ' . $e->getMessage());
             http_response_code(500);
-            echo json_encode(["error" => "Error al guardar el reclamo: " . $e->getMessage()]);
+            echo json_encode(["error" => "Error interno del servidor"]);
         }
     }
 
@@ -253,8 +288,9 @@ class ReclamoController {
 
             echo json_encode(['success' => true, 'data' => $historial]);
         } catch (Exception $e) {
+            error_log('ReclamoController::obtenerHistorial error: ' . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['error' => 'Error al obtener historial: ' . $e->getMessage()]);
+            echo json_encode(['error' => 'Error interno del servidor']);
         }
     }
 
@@ -286,8 +322,9 @@ class ReclamoController {
 
             echo json_encode(['success' => true, 'message' => 'Comentario registrado exitosamente.']);
         } catch (Exception $e) {
+            error_log('ReclamoController::agregarComentario error: ' . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['error' => 'Error al guardar comentario: ' . $e->getMessage()]);
+            echo json_encode(['error' => 'Error interno del servidor']);
         }
     }
 }

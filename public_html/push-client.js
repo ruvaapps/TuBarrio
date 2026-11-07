@@ -57,9 +57,6 @@ function urlBase64ToUint8Array(base64String) {
 
 // Enviar la suscripción vía API a PHP
 async function guardarSuscripcionEnServidor(suscripcion) {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
     const subJson = suscripcion.toJSON();
     const payload = {
         endpoint: subJson.endpoint,
@@ -72,9 +69,9 @@ async function guardarSuscripcionEnServidor(suscripcion) {
     try {
         await fetch('index.php?route=/push/suscripcion', {
             method: 'POST',
+            credentials: 'same-origin',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(payload)
         });

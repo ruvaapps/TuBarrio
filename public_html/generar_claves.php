@@ -2,6 +2,12 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
+if (PHP_SAPI !== 'cli') {
+    http_response_code(403);
+    echo 'Forbidden';
+    exit;
+}
+
 require_once __DIR__ . '/vendor/autoload.php';
 
 try {

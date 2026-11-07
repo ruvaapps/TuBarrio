@@ -97,13 +97,13 @@
                 const response = await fetch(buildApiUrl('/auth/login'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
                     body: JSON.stringify({ email, password })
                 });
 
                 const result = await response.json();
 
                 if (response.ok) {
-                    localStorage.setItem('token', result.token);
                     localStorage.setItem('usuario', JSON.stringify(result.usuario));
 
                     const rol = result.usuario.rol;
@@ -178,6 +178,7 @@
                 const response = await fetch(buildApiUrl('/auth/password/request-code'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
                     body: JSON.stringify({ email: email })
                 });
 
@@ -209,6 +210,7 @@
                 const response = await fetch(buildApiUrl('/auth/password/verify-code'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
                     body: JSON.stringify({ email: email, codigo: codigo })
                 });
 
@@ -247,6 +249,7 @@
                 const response = await fetch(buildApiUrl('/auth/password/reset'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
                     body: JSON.stringify({
                         email: email,
                         codigo: codigo,

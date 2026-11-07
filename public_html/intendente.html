@@ -306,18 +306,39 @@
         </div>
     </div>
 
+    <script src="session-guard.js"></script>
     <!-- Script de lógica y Notificaciones Push -->
     <script>
         const API_URL = 'index.php?route='; 
-        if (typeof token === 'undefined') {
-            var token = localStorage.getItem('token');
-        }
-
-        const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+        let usuario = null;
         let listaReclamosGlobal = [];
         let listaMultasGlobal = [];
         let vecinosGlobal = [];
         let reclamoSeleccionadoId = null;
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function apiFetch(url, options = {}) {
+            return SessionGuard.apiFetch(url, options);
+        }
+
+        async function validarSesion() {
+            const sesion = await SessionGuard.requireSession({
+                apiBase: API_URL,
+                allowedRoles: ['intendente', 'admin_general'],
+                redirectTo: 'login.html'
+            });
+
+            usuario = sesion;
+            return sesion;
+        }
 
         // Clave VAPID Pública de prueba
         const VAPID_PUBLIC_KEY = 'BI_JeTpLT-ltMz2pqM1jZZD8lS-ZZwJEVhUACXl-iQmYqpREU2oFWwkdI7JYMra8l40n0c1MqBuzYttooULkoK0';
@@ -399,10 +420,6 @@
         }
 
         async function guardarSuscripcionEnServidor(suscripcion) {
-            if (!token) {
-                throw new Error('No hay token de sesion.');
-            }
-
             const subJson = suscripcion.toJSON();
             const payload = {
                 endpoint: subJson.endpoint,
@@ -413,11 +430,10 @@
             };
 
             try {
-                const response = await fetch('index.php?route=/push/suscripcion', {
+                const response = await apiFetch('index.php?route=/push/suscripcion', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(payload)
                 });
@@ -443,15 +459,10 @@
         }
 
         async function eliminarSuscripcionEnServidor(endpoint) {
-            if (!token) {
-                throw new Error('No hay token de sesion.');
-            }
-
-            const response = await fetch('index.php?route=/push/desuscripcion', {
+            const response = await apiFetch('index.php?route=/push/desuscripcion', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ endpoint: endpoint })
             });
@@ -473,12 +484,7 @@
         }
 
         async function enviarPushDePrueba() {
-            const response = await fetch('index.php?route=/push/prueba', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+            const response = await apiFetch('index.php?route=/push/prueba', { method: 'POST' });
 
             let result = {};
             try {
@@ -494,11 +500,6 @@
         }
 
         async function probarPushManual(btn) {
-            if (!token) {
-                alert('No hay sesion activa. Volve a iniciar sesion.');
-                return;
-            }
-
             const boton = btn || document.getElementById('btn-push-test');
             const textoOriginal = boton ? boton.innerText : '';
 
@@ -522,16 +523,14 @@
         }
         // --------------------------------------------------
 
-        // Control de inicio de sesión y carga
-        if (!token || (usuario.rol !== 'intendente' && usuario.rol !== 'admin_general')) {
-            alert('Acceso no autorizado. Inicia sesión como intendente.');
-            window.location.href = 'login.html';
-        }
+        document.addEventListener('DOMContentLoaded', async () => {
+            const sesion = await validarSesion();
+            if (!sesion) return;
 
-        document.getElementById('barrio-nombre').innerText = `Intendencia - ${usuario.barrio_nombre || 'Barrio'}`;
-        document.getElementById('usuario-info').innerText = `${usuario.nombre} (${usuario.rol})`;
 
-        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('barrio-nombre').innerText = `Intendencia - ${sesion.barrio_nombre || 'Barrio'}`;
+            document.getElementById('usuario-info').innerText = `${sesion.nombre} (${sesion.rol})`;
+
             cargarReclamos();
             cargarMultas();
             cargarTodosLosVecinos();
@@ -591,10 +590,7 @@
 
         async function cargarTodosLosVecinos() {
             try {
-                const response = await fetch('index.php?route=/vecinos/listar', {
-                    method: 'GET',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const response = await apiFetch('index.php?route=/vecinos/listar', { method: 'GET' });
                 const result = await response.json();
                 vecinosGlobal = result.data || [];
 
@@ -604,7 +600,11 @@
                 vecinosGlobal.forEach(v => {
                     const mzaTexto = v.manzana ? `Mza: ${v.manzana} - ` : '';
                     const loteTexto = v.lote_identificador ? `Lote: ${v.lote_identificador}` : 'Sin lote';
-                    select.innerHTML += `<option value="${v.usuario_id}" data-lote="${v.lote_id}">${mzaTexto}${loteTexto} - ${v.nombre} ${v.apellido} (${v.tipo_relacion || 'Residente'})</option>`;
+                    const option = document.createElement('option');
+                    option.value = v.usuario_id;
+                    option.dataset.lote = v.lote_id || '';
+                    option.textContent = `${mzaTexto}${loteTexto} - ${v.nombre || ''} ${v.apellido || ''} (${v.tipo_relacion || 'Residente'})`;
+                    select.appendChild(option);
                 });
             } catch (error) {
                 console.error('Error al cargar vecinos:', error);
@@ -636,11 +636,10 @@
             };
 
             try {
-                const response = await fetch('index.php?route=/vecinos', {
+                const response = await apiFetch('index.php?route=/vecinos', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(data)
                 });
@@ -678,11 +677,10 @@
             };
 
             try {
-                const response = await fetch('index.php?route=/multas', {
+                const response = await apiFetch('index.php?route=/multas', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(data)
                 });
@@ -709,10 +707,7 @@
 
         async function cargarMultas() {
             try {
-                const response = await fetch('index.php?route=/multas', {
-                    method: 'GET',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const response = await apiFetch('index.php?route=/multas', { method: 'GET' });
 
                 const result = await response.json();
                 listaMultasGlobal = result.data || [];
@@ -730,23 +725,24 @@
                     tr.className = "hover:bg-gray-50/50 transition";
 
                     const vecinoInfo = m.vecino_nombre ? `${m.vecino_nombre} ${m.vecino_apellido} (${m.vecino_email})` : 'Sin vecino vinculado';
+                    const multaId = Number(m.id) || 0;
 
                     tr.innerHTML = `
-                        <td class="p-3 font-bold text-gray-800">#${m.id}</td>
+                        <td class="p-3 font-bold text-gray-800">#${multaId}</td>
                         <td class="p-3 text-gray-700">
-                            <span class="font-semibold block text-gray-900">Lote: ${m.lote_identificador || m.lote_id}</span>
-                            <span class="text-[10px] text-gray-500">${vecinoInfo}</span>
+                            <span class="font-semibold block text-gray-900">Lote: ${escapeHtml(m.lote_identificador || m.lote_id)}</span>
+                            <span class="text-[10px] text-gray-500">${escapeHtml(vecinoInfo)}</span>
                         </td>
                         <td class="p-3 text-gray-800">
-                            <span class="font-semibold text-blue-600 uppercase text-[10px] block">${m.tipo}</span>
+                            <span class="font-semibold text-blue-600 uppercase text-[10px] block">${escapeHtml(m.tipo)}</span>
                             <span>$${parseFloat(m.monto).toLocaleString()}</span><br>
-                            <span class="text-[10px] text-gray-400 italic">${m.observaciones || ''}</span>
+                            <span class="text-[10px] text-gray-400 italic">${escapeHtml(m.observaciones || '')}</span>
                         </td>
                         <td class="p-3">
-                            <span class="px-2.5 py-1 rounded-full font-semibold text-[10px] uppercase ${obtenerBadgeEstadoMulta(m.estado)}">${m.estado}</span>
+                            <span class="px-2.5 py-1 rounded-full font-semibold text-[10px] uppercase ${obtenerBadgeEstadoMulta(m.estado)}">${escapeHtml(m.estado)}</span>
                         </td>
                         <td class="p-3 text-right">
-                            <button onclick="enviarAvisoMulta(${m.id})" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded-lg text-[11px] transition shadow-sm">
+                            <button onclick="enviarAvisoMulta(${multaId})" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded-lg text-[11px] transition shadow-sm">
                                 ✉️ Enviar Aviso
                             </button>
                         </td>
@@ -764,10 +760,7 @@
             if (!confirm(`¿Deseas enviar el aviso de la multa #${multaId} por correo electrónico y notificación push al vecino?`)) return;
 
             try {
-                const response = await fetch(`index.php?route=/multas/${multaId}/enviar-aviso`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const response = await apiFetch(`index.php?route=/multas/${multaId}/enviar-aviso`, { method: 'POST' });
 
                 const result = await response.json();
                 if (response.ok) {
@@ -783,10 +776,7 @@
 
         async function cargarReclamos() {
             try {
-                const response = await fetch('index.php?route=/reclamos', {
-                    method: 'GET',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const response = await apiFetch('index.php?route=/reclamos', { method: 'GET' });
 
                 const result = await response.json();
                 listaReclamosGlobal = result.data || [];
@@ -810,13 +800,13 @@
 
                     tr.innerHTML = `
                         <td class="p-3 font-bold text-gray-800">#${r.id}</td>
-                        <td class="p-3 text-gray-700 font-medium">${nombreVecino}<br><span class="text-[10px] text-gray-400">${loteInfo}</span></td>
+                        <td class="p-3 text-gray-700 font-medium">${escapeHtml(nombreVecino)}<br><span class="text-[10px] text-gray-400">${escapeHtml(loteInfo)}</span></td>
                         <td class="p-3 text-gray-800">
-                            <span class="font-semibold text-blue-600 uppercase text-[10px] block">${r.categoria_nombre || 'General'}</span>
-                            <span class="font-bold">${r.titulo || 'Sin título'}</span>
+                            <span class="font-semibold text-blue-600 uppercase text-[10px] block">${escapeHtml(r.categoria_nombre || 'General')}</span>
+                            <span class="font-bold">${escapeHtml(r.titulo || 'Sin título')}</span>
                         </td>
                         <td class="p-3">
-                            <span class="px-2.5 py-1 rounded-full font-semibold text-[10px] uppercase ${obtenerBadgeEstado(r.estado)}">${r.estado}</span>
+                            <span class="px-2.5 py-1 rounded-full font-semibold text-[10px] uppercase ${obtenerBadgeEstado(r.estado)}">${escapeHtml(r.estado)}</span>
                         </td>
                         <td class="p-3 text-right text-gray-400">${fechaFormateada}</td>
                     `;
@@ -868,10 +858,7 @@
             contenedor.innerHTML = '<span class="text-gray-400 italic">Cargando comentarios...</span>';
 
             try {
-                const response = await fetch(`index.php?route=/reclamos/${reclamoId}/historial`, {
-                    method: 'GET',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const response = await apiFetch(`index.php?route=/reclamos/${reclamoId}/historial`, { method: 'GET' });
                 const result = await response.json();
                 const historial = result.data || [];
 
@@ -885,7 +872,21 @@
                     const div = document.createElement('div');
                     div.className = "border-b pb-1 mb-1";
                     const fecha = h.created_at ? new Date(h.created_at).toLocaleString() : '';
-                    div.innerHTML = `<b>${h.nombre || 'Sistema'} ${h.apellido || ''}</b> <span class="text-[10px] text-gray-400">(${fecha})</span>:<br>${h.comentario || ''}`;
+
+                    const strong = document.createElement('b');
+                    strong.textContent = `${h.nombre || 'Sistema'} ${h.apellido || ''}`.trim();
+
+                    const fechaSpan = document.createElement('span');
+                    fechaSpan.className = 'text-[10px] text-gray-400';
+                    fechaSpan.textContent = ` (${fecha}):`;
+
+                    const br = document.createElement('br');
+                    const textoComentario = document.createTextNode(h.comentario || '');
+
+                    div.appendChild(strong);
+                    div.appendChild(fechaSpan);
+                    div.appendChild(br);
+                    div.appendChild(textoComentario);
                     contenedor.appendChild(div);
                 });
             } catch (error) {
@@ -905,11 +906,10 @@
             }
 
             try {
-                const response = await fetch(`index.php?route=/reclamos/${reclamoSeleccionadoId}/comentarios`, {
+                const response = await apiFetch(`index.php?route=/reclamos/${reclamoSeleccionadoId}/comentarios`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ comentario: comentario })
                 });
@@ -932,11 +932,10 @@
             const nuevoEstado = document.getElementById('modal-select-estado').value;
 
             try {
-                const response = await fetch(`index.php?route=/reclamos/${reclamoSeleccionadoId}/estado`, {
+                const response = await apiFetch(`index.php?route=/reclamos/${reclamoSeleccionadoId}/estado`, {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ estado: nuevoEstado })
                 });
@@ -974,9 +973,18 @@
             }
         }
 
-        function cerrarSesion() {
-            localStorage.clear();
-            window.location.href = 'login.html';
+        async function cerrarSesion() {
+            try {
+                await fetch('index.php?route=/auth/logout', {
+                    method: 'POST',
+                    credentials: 'same-origin'
+                });
+            } catch (error) {
+                console.error('No se pudo limpiar cookie de sesion en servidor:', error);
+            } finally {
+                localStorage.clear();
+                window.location.href = 'login.html';
+            }
         }
     </script>
 </body>

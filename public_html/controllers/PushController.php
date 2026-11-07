@@ -6,6 +6,24 @@ use Minishlink\WebPush\WebPush;
 use Minishlink\WebPush\Subscription;
 
 class PushController {
+    private function getVapidAuth() {
+        $subject = getenv('VAPID_SUBJECT') ?: '';
+        $publicKey = getenv('VAPID_PUBLIC_KEY') ?: '';
+        $privateKey = getenv('VAPID_PRIVATE_KEY') ?: '';
+
+        if ($subject === '' || $publicKey === '' || $privateKey === '') {
+            throw new RuntimeException('VAPID environment variables are not configured.');
+        }
+
+        return [
+            'VAPID' => [
+                'subject' => $subject,
+                'publicKey' => $publicKey,
+                'privateKey' => $privateKey,
+            ],
+        ];
+    }
+
     public function guardarSuscripcion($user) {
         header('Content-Type: application/json');
 
@@ -54,8 +72,9 @@ class PushController {
             ]);
 
         } catch (Exception $e) {
+            error_log('PushController::guardarSuscripcion error: ' . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['error' => 'Error al guardar suscripción: ' . $e->getMessage()]);
+            echo json_encode(['error' => 'Error interno del servidor']);
         }
     }
 
@@ -87,8 +106,9 @@ class PushController {
                 'eliminadas' => $stmtDel->rowCount()
             ]);
         } catch (Exception $e) {
+            error_log('PushController::eliminarSuscripcion error: ' . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['error' => 'Error al eliminar suscripción: ' . $e->getMessage()]);
+            echo json_encode(['error' => 'Error interno del servidor']);
         }
     }
 
@@ -124,8 +144,9 @@ class PushController {
                 'fallidas' => $resultado['fail']
             ]);
         } catch (Exception $e) {
+            error_log('PushController::enviarPrueba error: ' . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['error' => 'Error al enviar push de prueba: ' . $e->getMessage()]);
+            echo json_encode(['error' => 'Error interno del servidor']);
         }
     }
 
@@ -138,13 +159,7 @@ class PushController {
             return ['sin_suscripciones' => true, 'ok' => 0, 'fail' => 0];
         }
 
-        $auth = [
-            'VAPID' => [
-                'subject' => 'mailto:admin@tubarrio.lovar.com.ar',
-                'publicKey' => 'BI_JeTpLT-ltMz2pqM1jZZD8lS-ZZwJEVhUACXl-iQmYqpREU2oFWwkdI7JYMra8l40n0c1MqBuzYttooULkoK0',
-                'privateKey' => 'bK4JJ-dz2mm4SF8539oxwa6zqJq9MI9QMP1YKXCpmt0',
-            ],
-        ];
+        $auth = $this->getVapidAuth();
 
         $webPush = new WebPush($auth);
 

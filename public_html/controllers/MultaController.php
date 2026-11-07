@@ -7,10 +7,41 @@ use Minishlink\WebPush\WebPush;
 use Minishlink\WebPush\Subscription;
 
 class MultaController {
-    
+
+    private function getVapidAuth() {
+        $subject = getenv('VAPID_SUBJECT') ?: '';
+        $publicKey = getenv('VAPID_PUBLIC_KEY') ?: '';
+        $privateKey = getenv('VAPID_PRIVATE_KEY') ?: '';
+
+        if ($subject === '' || $publicKey === '' || $privateKey === '') {
+            throw new RuntimeException('VAPID environment variables are not configured.');
+        }
+
+        return [
+            'VAPID' => [
+                'subject' => $subject,
+                'publicKey' => $publicKey,
+                'privateKey' => $privateKey,
+            ],
+        ];
+    }
+
+    private function requireMultaManagerRole($user): bool {
+        if (!in_array($user['rol'] ?? '', ['intendente', 'admin_general'], true)) {
+            http_response_code(403);
+            echo json_encode(['error' => 'No tenes permisos para gestionar multas.']);
+            return false;
+        }
+        return true;
+    }
+
     // 1. Listar multas del barrio cruzando con lotes y usuarios (vecino sancionado)
     public function index($user) {
         header('Content-Type: application/json');
+
+        if (!$this->requireMultaManagerRole($user)) {
+            return;
+        }
 
         try {
             $barrio_id = $user['barrio_id'] ?? null;
@@ -44,14 +75,19 @@ class MultaController {
             ]);
 
         } catch (Exception $e) {
+            error_log('MultaController::index error: ' . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['error' => 'Error al obtener las multas: ' . $e->getMessage()]);
+            echo json_encode(['error' => 'Error interno del servidor']);
         }
     }
 
     // 2. Registrar una nueva multa asociando el lote y el usuario_id del vecino
     public function store($user) {
         header('Content-Type: application/json');
+
+        if (!$this->requireMultaManagerRole($user)) {
+            return;
+        }
 
         try {
             $input = json_decode(file_get_contents('php://input'), true);
@@ -101,14 +137,19 @@ class MultaController {
             ]);
 
         } catch (Exception $e) {
+            error_log('MultaController::store error: ' . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['error' => 'Error al registrar multa: ' . $e->getMessage()]);
+            echo json_encode(['error' => 'Error interno del servidor']);
         }
     }
 
     // 3. Obtener los vecinos vinculados a un lote para el select dinámico
     public function obtenerVecinosPorLote($user, $loteId) {
         header('Content-Type: application/json');
+
+        if (!$this->requireMultaManagerRole($user)) {
+            return;
+        }
 
         try {
             $db = Database::getConnection();
@@ -128,14 +169,19 @@ class MultaController {
             echo json_encode(['success' => true, 'data' => $vecinos]);
 
         } catch (Exception $e) {
+            error_log('MultaController::obtenerVecinosPorLote error: ' . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['error' => 'Error al buscar vecinos del lote: ' . $e->getMessage()]);
+            echo json_encode(['error' => 'Error interno del servidor']);
         }
     }
 
     // 4. Enviar aviso de multa por correo electrónico y Notificación Push al vecino sancionado
     public function enviarAviso($user, $multaId) {
         header('Content-Type: application/json');
+
+        if (!$this->requireMultaManagerRole($user)) {
+            return;
+        }
 
         try {
             $db = Database::getConnection();
@@ -197,8 +243,9 @@ class MultaController {
             ]);
 
         } catch (Exception $e) {
+            error_log('MultaController::enviarAviso error: ' . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['error' => 'Error al enviar el aviso: ' . $e->getMessage()]);
+            echo json_encode(['error' => 'Error interno del servidor']);
         }
     }
 
@@ -219,13 +266,7 @@ class MultaController {
                 return;
             }
 
-            $auth = [
-                'VAPID' => [
-                    'subject' => 'mailto:admin@tubarrio.lovar.com.ar',
-                    'publicKey' => 'BI_JeTpLT-ltMz2pqM1jZZD8lS-ZZwJEVhUACXl-iQmYqpREU2oFWwkdI7JYMra8l40n0c1MqBuzYttooULkoK0',
-                    'privateKey' => 'bK4JJ-dz2mm4SF8539oxwa6zqJq9MI9QMP1YKXCpmt0', // Si usas claves de prueba, podés comentar temporalmente este bloque VAPID si te da problemas
-                ],
-            ];
+            $auth = $this->getVapidAuth();
 
             // Envolvemos el cliente web-push en su propio try/catch para que no tire abajo el proceso principal
             try {
@@ -267,10 +308,7 @@ class MultaController {
                     }
                 }
             } catch (\Throwable $pushEx) {
-                // TEMPORAL: Esto nos dirá exactamente por qué falla el push en pantalla
-                http_response_code(500);
-                echo json_encode(['error' => 'Error de WebPush: ' . $pushEx->getMessage()]);
-                exit;
+                error_log('MultaController::enviarPushVecino webpush error: ' . $pushEx->getMessage());
             }
 
         } catch (Exception $ex) {

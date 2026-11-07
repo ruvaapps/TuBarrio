@@ -135,18 +135,23 @@
         </div>
     </div>
 
+    <script src="session-guard.js"></script>
     <!-- Script de redirección dinámica y PWA -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            evaluarSesion();
+        document.addEventListener('DOMContentLoaded', async () => {
+            await evaluarSesion();
         });
 
-        function evaluarSesion() {
-            const token = localStorage.getItem('token');
-            const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
-            const barrios = JSON.parse(localStorage.getItem('barrios') || '[]');
+        async function evaluarSesion() {
+            const session = await SessionGuard.getCurrentSession('index.php?route=');
+            if (!session.ok) {
+                return;
+            }
 
-            if (!token) return; // Si no hay token, se muestra el landing normalmente
+            const usuario = session.usuario;
+            localStorage.setItem('usuario', JSON.stringify(usuario));
+
+            if (!usuario || !usuario.rol) return;
 
             // Si el usuario ya está logueado, ajustamos el botón superior
             const navActions = document.getElementById('nav-actions');
@@ -157,12 +162,18 @@
             `;
         }
 
-        function verificarYSeguir() {
-            const token = localStorage.getItem('token');
+        async function verificarYSeguir() {
+            const session = await SessionGuard.getCurrentSession('index.php?route=');
+            if (!session.ok) {
+                cerrarSesionLocal();
+                return;
+            }
+
+            localStorage.setItem('usuario', JSON.stringify(session.usuario));
             const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
             const barrios = JSON.parse(localStorage.getItem('barrios') || '[]');
 
-            if (!token) {
+            if (!usuario || !usuario.rol) {
                 window.location.href = 'login.html';
                 return;
             }
