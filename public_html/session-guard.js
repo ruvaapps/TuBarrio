@@ -58,7 +58,7 @@
     async function requireSession(config) {
         const cfg = config || {};
         const apiBase = cfg.apiBase || 'index.php?route=';
-        const redirectTo = cfg.redirectTo || 'login.html';
+        const redirectTo = cfg.redirectTo || 'login';
         const allowedRoles = Array.isArray(cfg.allowedRoles) ? cfg.allowedRoles : [];
 
         const session = await getCurrentSession(apiBase);

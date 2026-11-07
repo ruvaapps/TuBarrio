@@ -20,7 +20,7 @@ try {
 
     if ($stmt->rowCount() > 0) {
         echo "<h2 style='color: green;'>¡Rol actualizado exitosamente a 'intendente'!</h2>";
-        echo "<p>Ya podés cerrar sesión y volver a ingresar en <a href='login.html'>login.html</a>.</p>";
+        echo "<p>Ya podés cerrar sesión y volver a ingresar en <a href='login'>login</a>.</p>";
     } else {
         echo "<h2 style='color: orange;'>No se encontró ningún usuario con ese email.</h2>";
     }

@@ -108,9 +108,9 @@
 
                     const rol = result.usuario.rol;
                     if (rol === 'intendente' || rol === 'admin_general') {
-                        window.location.href = 'intendente.html';
+                        window.location.href = 'intendente';
                     } else {
-                        window.location.href = 'vecino.html';
+                        window.location.href = 'vecino';
                     }
                 } else {
                     errorDiv.innerText = result.error || 'Credenciales invalidas';

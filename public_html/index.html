@@ -28,7 +28,7 @@
                 <a href="#beneficios" class="hover:text-blue-600 transition">Beneficios</a>
             </nav>
             <div id="nav-actions">
-                <a href="login.html" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2.5 rounded-xl text-sm transition shadow-sm">
+                <a href="login" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2.5 rounded-xl text-sm transition shadow-sm">
                     Ingresar a mi Barrio
                 </a>
             </div>
@@ -174,7 +174,7 @@
             const barrios = JSON.parse(localStorage.getItem('barrios') || '[]');
 
             if (!usuario || !usuario.rol) {
-                window.location.href = 'login.html';
+                window.location.href = 'login';
                 return;
             }
 
@@ -185,9 +185,9 @@
                 // Si tiene 1 solo barrio (o el barrio activo en usuario)
                 const rol = usuario.rol;
                 if (rol === 'intendente' || rol === 'admin_general') {
-                    window.location.href = 'intendente.html';
+                    window.location.href = 'intendente';
                 } else {
-                    window.location.href = 'vecino.html';
+                    window.location.href = 'vecino';
                 }
             }
         }
@@ -225,15 +225,15 @@
 
             // Redirigimos según el rol en ese barrio
             if (barrioSeleccionado.rol === 'intendente' || barrioSeleccionado.rol === 'admin_general') {
-                window.location.href = 'intendente.html';
+                window.location.href = 'intendente';
             } else {
-                window.location.href = 'vecino.html';
+                window.location.href = 'vecino';
             }
         }
 
         function cerrarSesionLocal() {
             localStorage.clear();
-            window.location.href = 'login.html';
+            window.location.href = 'login';
         }
 
         // Lógica PWA: Registro de Service Worker e Instalación

@@ -275,7 +275,7 @@ class MultaController {
                 $payload = json_encode([
                     'title' => $titulo,
                     'body' => $cuerpo,
-                    'url' => 'vecino.html'
+                    'url' => 'vecino'
                 ]);
 
                 foreach ($suscripciones as $sub) {

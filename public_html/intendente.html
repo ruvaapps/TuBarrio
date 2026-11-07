@@ -333,7 +333,7 @@
             const sesion = await SessionGuard.requireSession({
                 apiBase: API_URL,
                 allowedRoles: ['intendente', 'admin_general'],
-                redirectTo: 'login.html'
+                redirectTo: 'login'
             });
 
             usuario = sesion;
@@ -983,7 +983,7 @@
                 console.error('No se pudo limpiar cookie de sesion en servidor:', error);
             } finally {
                 localStorage.clear();
-                window.location.href = 'login.html';
+                window.location.href = 'login';
             }
         }
     </script>

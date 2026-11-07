@@ -52,7 +52,7 @@ try {
     echo "<h2 style='color: green;'>¡Intendente y Barrio creados con éxito!</h2>";
     echo "<p><b>Email:</b> {$email}</p>";
     echo "<p><b>Contraseña temporal:</b> {$password_plana}</p>";
-    echo "<p>Ya podés ir al <a href='login.html'>login.html</a> para iniciar sesión.</p>";
+    echo "<p>Ya podés ir al <a href='login'>login</a> para iniciar sesión.</p>";
 
 } catch (Exception $e) {
     $db->rollBack();

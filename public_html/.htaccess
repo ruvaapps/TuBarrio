@@ -1,5 +1,16 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # 1. Redirigir URLs con .html a la version sin extension (301 externo)
+    RewriteCond %{THE_REQUEST} \s/([^\s]+)\.html[\s?] [NC]
+    RewriteRule ^ /%1 [R=301,L]
+
+    # 2. Servir los .html internamente sin mostrar la extension
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME}.html -f
+    RewriteRule ^(.*?)$ $1.html [L]
+
+    # 3. El resto va al router de la API
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ index.php?route=/$1 [QSA,L]

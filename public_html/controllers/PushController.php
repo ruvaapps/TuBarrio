@@ -127,7 +127,7 @@ class PushController {
 
             $titulo = 'Notificacion de prueba';
             $cuerpo = 'Push activo correctamente en TuBarrio.';
-            $url = ($user['rol'] ?? '') === 'vecino' ? 'vecino.html' : 'intendente.html';
+            $url = ($user['rol'] ?? '') === 'vecino' ? 'vecino' : 'intendente';
 
             $resultado = $this->enviarPushAUsuario($db, $usuarioId, $titulo, $cuerpo, $url);
 
