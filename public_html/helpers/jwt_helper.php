@@ -39,12 +39,19 @@ class JWTHelper {
             return false;
         }
 
+        if (!is_string($jwt) || $jwt === '') return false;
         $tokenParts = explode('.', $jwt);
         if (count($tokenParts) !== 3) return false;
 
         $header = self::base64UrlDecode($tokenParts[0]);
         $payload = self::base64UrlDecode($tokenParts[1]);
         $signatureProvided = $tokenParts[2];
+
+        if ($header === false || $payload === false) return false;
+
+        $headerData = json_decode($header, true);
+        if (!is_array($headerData)) return false;
+        if (($headerData['alg'] ?? '') !== 'HS256') return false;
 
         $base64UrlHeader = self::base64UrlEncode($header);
         $base64UrlPayload = self::base64UrlEncode($payload);
@@ -63,8 +70,8 @@ class JWTHelper {
         $payloadData = json_decode($payload, true);
         if (!is_array($payloadData)) return false;
 
-        if (isset($payloadData['nbf']) && $payloadData['nbf'] > time()) return false;
-        if (isset($payloadData['exp']) && $payloadData['exp'] < time()) return false;
+        if (isset($payloadData['nbf']) && (!is_int($payloadData['nbf']) || $payloadData['nbf'] > time())) return false;
+        if (!isset($payloadData['exp']) || !is_int($payloadData['exp']) || $payloadData['exp'] <= time()) return false;
 
         return $payloadData;
     }
@@ -74,6 +81,16 @@ class JWTHelper {
     }
 
     private static function base64UrlDecode($text) {
-        return base64_decode(str_replace(['-', '_'], ['+', '/'], $text));
+        if (!is_string($text) || $text === '' || preg_match('/[^A-Za-z0-9\-_]/', $text)) {
+            return false;
+        }
+
+        $base64 = str_replace(['-', '_'], ['+', '/'], $text);
+        $padding = strlen($base64) % 4;
+        if ($padding > 0) {
+            $base64 .= str_repeat('=', 4 - $padding);
+        }
+
+        return base64_decode($base64, true);
     }
 }
