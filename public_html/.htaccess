@@ -1,3 +1,26 @@
+# ============================================
+# VARIABLES DE ENTORNO (SetEnv)
+# ============================================
+SetEnv DB_HOST localhost
+SetEnv DB_PORT 3306
+SetEnv DB_NAME TU_DB
+SetEnv DB_USER TU_USE
+SetEnv DB_PASS TU_PASS
+
+SetEnv JWT_SECRET_KEY kEY_LARGA
+SetEnv JWT_PREVIOUS_SECRET_KEY ""
+SetEnv REFRESH_TOKEN_DAYS 14
+SetEnv MAX_UPLOAD_IMAGE_BYTES 5242880
+
+SetEnv VAPID_SUBJECT mailto:admintubarrio@lovar.com.ar
+SetEnv VAPID_PUBLIC_KEY CLAVE_LARGA
+SetEnv VAPID_PRIVATE_KEY CLAVE_CORTA
+
+SetEnv CORS_ALLOWED_ORIGINS https://tubarrio.lovar.com.ar
+
+# ============================================
+# REESCRITURA (URLs sin extension + router API)
+# ============================================
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
