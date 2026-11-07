@@ -1,0 +1,40 @@
+name: Deploy Automático a DirectAdmin
+
+on:
+  push:
+    branches:
+      - main
+      - dev-*
+
+jobs:
+  deploy-desarrollo:
+    if: startsWith(github.ref, 'refs/heads/dev-')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Subir a carpeta Desarrollo
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USER_DEV }}
+          password: ${{ secrets.FTP_PASSWORD_DEV }}
+          local-dir: ./Public/         # Toma los archivos de la carpeta del repo
+          remote-dir: ./               # Si la cuenta FTP apunta a /Desarrollo, se vuelcan directo ahí
+
+  deploy-produccion:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Subir a carpeta Public (Producción)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USER_PROD }}
+          password: ${{ secrets.FTP_PASSWORD_PROD }}
+          local-dir: ./Public/         # Toma los mismos archivos de la carpeta del repo
+          remote-dir: ./               # Si la cuenta FTP apunta a /public_html, se vuelcan directo ahí
