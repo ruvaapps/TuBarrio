@@ -52,20 +52,35 @@ class MultaController {
 
             $db = Database::getConnection();
 
+            // Solo multas (tipo_multa = 'multa')
             $stmt = $db->prepare("
                 SELECT m.id, m.tipo, m.tipo_multa, m.monto, m.estado, m.observaciones, m.created_at,
                        l.identificador AS lote_identificador
                 FROM multas m
                 LEFT JOIN lotes l ON m.lote_id = l.id
-                WHERE m.barrio_id = :barrio_id AND m.usuario_id = :user_id
+                WHERE m.barrio_id = :barrio_id AND m.usuario_id = :user_id AND m.tipo_multa = 'multa'
                 ORDER BY m.created_at DESC
             ");
             $stmt->execute([':barrio_id' => $barrio_id, ':user_id' => $user_id]);
             $multas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+            // Avisos (tipo_multa = 'aviso')
+            $stmtAvisos = $db->prepare("
+                SELECT m.id, m.tipo, m.tipo_multa, m.estado, m.observaciones, m.created_at,
+                       l.identificador AS lote_identificador,
+                       (SELECT COUNT(*) FROM multas mm WHERE mm.id_aviso_relacionado = m.id AND mm.tipo_multa = 'multa') AS multa_generada
+                FROM multas m
+                LEFT JOIN lotes l ON m.lote_id = l.id
+                WHERE m.barrio_id = :barrio_id AND m.usuario_id = :user_id AND m.tipo_multa = 'aviso'
+                ORDER BY m.created_at DESC
+            ");
+            $stmtAvisos->execute([':barrio_id' => $barrio_id, ':user_id' => $user_id]);
+            $avisos = $stmtAvisos->fetchAll(PDO::FETCH_ASSOC);
+
             echo json_encode([
                 'success' => true,
-                'data' => $multas
+                'data' => $multas,
+                'avisos' => $avisos
             ]);
 
         } catch (Exception $e) {
