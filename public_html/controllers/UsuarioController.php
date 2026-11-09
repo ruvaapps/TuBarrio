@@ -104,7 +104,7 @@ public function storeVecino($user) {
         try {
             $db = Database::getConnection();
             $stmt = $db->prepare("
-                SELECT u.id AS usuario_id, u.nombre, u.apellido, u.email, 
+                SELECT u.id AS usuario_id, u.nombre, u.apellido, u.email, u.telefono, u.estado,
                        l.id AS lote_id, l.manzana, l.identificador AS lote_identificador, 
                        ul.tipo_relacion
                 FROM usuarios u

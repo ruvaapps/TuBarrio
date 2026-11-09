@@ -94,39 +94,50 @@
         <!-- SECCIÓN 2: GESTIÓN DE VECINOS -->
         <section id="seccion-vecinos" class="space-y-4 hidden">
             <div class="bg-white rounded-2xl p-6 shadow-sm border-gray-200 space-y-4">
-                <div class="flex justify-between items-center">
-                    <h2 class="font-bold text-gray-800 text-lg">Gestión de Vecinos</h2>
-                    <button onclick="cargarVecinos()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">Actualizar lista</button>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-4">
+                    <div>
+                        <h2 class="font-bold text-gray-800 text-lg">Gestión de Vecinos</h2>
+                        <p class="text-xs text-gray-500">Administrá los vecinos registrados y dá de alta nuevos residentes.</p>
+                    </div>
+                    <div class="flex bg-gray-100 p-1 rounded-xl text-xs font-semibold">
+                        <button onclick="cambiarSubSeccionVecinos('ver')" id="subnav-vecinos-ver" class="px-4 py-2 rounded-lg transition bg-white text-slate-800 shadow-sm">Ver Vecinos</button>
+                        <button onclick="cambiarSubSeccionVecinos('registrar')" id="subnav-vecinos-registrar" class="px-4 py-2 rounded-lg transition text-gray-600 hover:text-slate-900">Registrar Vecino</button>
+                    </div>
                 </div>
 
-                <div class="overflow-x-auto border-gray-100 rounded-xl">
-                    <table class="w-full text-left border-collapse text-xs">
-                        <thead>
-                        <tr class="bg-gray-50 text-gray-500 uppercase border-b border-gray-100 text-[11px]">
-                            <th class="p-3">Nombre</th>
-                            <th class="p-3">Apellido</th>
-                            <th class="p-3">Email</th>
-                            <th class="p-3">Teléfono</th>
-                            <th class="p-3">Manzana</th>
-                            <th class="p-3">Lote</th>
-                            <th class="p-3">Tipo de Relación</th>
-                            <th class="p-3">Estado</th>
-                            <th class="p-3 text-center">Acciones</th>
-                        </tr>
-                        </thead>
-                        <tbody id="tabla-vecinos-body" class="divide-y divide-gray-100">
-                        <tr>
-                            <td colspan="9" class="p-6 text-center text-gray-400">Cargando vecinos...</td>
-                        </tr>
-                        </tbody>
-                    </table>
+                <!-- SUB-SECCIÓN A: LISTA DE VECINOS -->
+                <div id="subseccion-ver-vecinos" class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500 font-medium">Listado de vecinos registrados en el barrio</span>
+                        <button onclick="cargarVecinos()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">Actualizar lista</button>
+                    </div>
+
+                    <div class="overflow-x-auto border-gray-100 rounded-xl">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                            <tr class="bg-gray-50 text-gray-500 uppercase border-b border-gray-100 text-[11px]">
+                                <th class="p-3">Nombre</th>
+                                <th class="p-3">Apellido</th>
+                                <th class="p-3">Email</th>
+                                <th class="p-3">Teléfono</th>
+                                <th class="p-3">Manzana</th>
+                                <th class="p-3">Lote</th>
+                                <th class="p-3">Tipo de Relación</th>
+                                <th class="p-3">Estado</th>
+                                <th class="p-3 text-center">Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody id="tabla-vecinos-body" class="divide-y divide-gray-100">
+                            <tr>
+                                <td colspan="9" class="p-6 text-center text-gray-400">Cargando vecinos...</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
 
-            <div class="bg-white rounded-2xl p-6 shadow-sm border-gray-200 space-y-4">
-                <h2 class="font-bold text-gray-800 text-lg">Dar de Alta a un Nuevo Vecino</h2>
-                <p class="text-xs text-gray-500">Completa los datos del residente y asígnale su lote correspondiente.</p>
-
+                <!-- SUB-SECCIÓN B: DAR DE ALTA VECINO -->
+                <div id="subseccion-registrar-vecino" class="space-y-4 hidden">
                 <form id="form-alta-vecino" onsubmit="registrarVecino(event)" class="space-y-3">
                     <div class="grid grid-cols-2 gap-3">
                         <div>
@@ -794,6 +805,7 @@
         } else if (seccion === 'vecinos') {
             secVecinos.classList.remove('hidden');
             navVecinos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
+            cargarVecinos();
         } else if (seccion === 'multas') {
             secMultas.classList.remove('hidden');
             navMultas.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
@@ -826,6 +838,8 @@
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50/50 transition';
 
+                const estaActivo = (v.estado || 'activo') === 'activo';
+
                 tr.innerHTML = `
                     <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.nombre)}</td>
                     <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.apellido)}</td>
@@ -834,10 +848,12 @@
                     <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.manzana || '')}</td>
                     <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.lote_identificador || '')}</td>
                     <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.tipo_relacion || '')}</td>
-                    <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.estado || 'activo')}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${estaActivo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${estaActivo ? 'Activo' : 'Bloqueado'}</span>
+                    </td>
                     <td class="p-3 text-center">
-                        <button onclick="cambiarEstadoVecino(${v.usuario_id}, '${v.estado === 'activo' ? 'bloqueado' : 'activo'}')" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-1 rounded-lg transition shadow-sm">
-                            ${v.estado === 'activo' ? 'Bloquear' : 'Activar'}
+                        <button onclick="cambiarEstadoVecino(${v.usuario_id}, '${estaActivo ? 'bloqueado' : 'activo'}')" class="${estaActivo ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white'} font-semibold px-3 py-1 rounded-lg transition shadow-sm">
+                            ${estaActivo ? 'Bloquear' : 'Activar'}
                         </button>
                     </td>
                 `;
@@ -881,35 +897,63 @@
 
             poblarSelectVecinos('multa-select-vecino');
             poblarSelectVecinos('aviso-select-vecino');
-
-            // Además, llenar la tabla de vecinos con estos datos
-            const tbody = document.getElementById('tabla-vecinos-body');
-            tbody.innerHTML = '';
-
-            if (vecinosGlobal.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" class="p-6 text-center text-gray-400">No hay vecinos registrados.</td></tr>';
-                return;
-            }
-
-            vecinosGlobal.forEach(v => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-50/50 transition';
-                tr.innerHTML = `
-                    <td class="p-3 text-gray-800">${escapeHtml(v.nombre)}</td>
-                    <td class="p-3 text-gray-800">${escapeHtml(v.apellido)}</td>
-                    <td class="p-3 text-gray-800">${escapeHtml(v.email)}</td>
-                    <td class="p-3 text-gray-800"></td>
-                    <td class="p-3 text-gray-800">${escapeHtml(v.manzana || '')}</td>
-                    <td class="p-3 text-gray-800">${escapeHtml(v.lote_identificador || '')}</td>
-                    <td class="p-3 text-gray-800">${escapeHtml(v.tipo_relacion || '')}</td>
-                    <td class="p-3 text-gray-800">activo</td>
-                    <td class="p-3 text-center text-gray-400 text-[10px]">—</td>
-                `;
-                tbody.appendChild(tr);
-            });
         } catch (error) {
             console.error('Error al cargar vecinos:', error);
-            document.getElementById('tabla-vecinos-body').innerHTML = '<tr><td colspan="9" class="p-6 text-center text-red-400">Error al cargar los vecinos.</td></tr>';
+        }
+    }
+
+    // ===================== GESTIÓN DE VECINOS =====================
+    function cambiarSubSeccionVecinos(sub) {
+        const ver = document.getElementById('subseccion-ver-vecinos');
+        const registrar = document.getElementById('subseccion-registrar-vecino');
+        const navVer = document.getElementById('subnav-vecinos-ver');
+        const navRegistrar = document.getElementById('subnav-vecinos-registrar');
+
+        ver.classList.toggle('hidden', sub !== 'ver');
+        registrar.classList.toggle('hidden', sub !== 'registrar');
+        navVer.className = sub === 'ver' ? 'px-4 py-2 rounded-lg transition bg-white text-slate-800 shadow-sm' : 'px-4 py-2 rounded-lg transition text-gray-600 hover:text-slate-900';
+        navRegistrar.className = sub === 'registrar' ? 'px-4 py-2 rounded-lg transition bg-white text-slate-800 shadow-sm' : 'px-4 py-2 rounded-lg transition text-gray-600 hover:text-slate-900';
+    }
+
+    async function registrarVecino(event) {
+        event.preventDefault();
+        const feedback = document.getElementById('mensaje-feedback');
+
+        const payload = {
+            nombre: document.getElementById('nombre').value.trim(),
+            apellido: document.getElementById('apellido').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            telefono: document.getElementById('telefono').value.trim(),
+            password: document.getElementById('password').value,
+            manzana: document.getElementById('manzana').value.trim(),
+            lote_identificador: document.getElementById('lote_identificador').value.trim(),
+            tipo_relacion: document.getElementById('tipo_relacion').value
+        };
+
+        try {
+            const response = await apiFetch('index.php?route=/vecinos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            feedback.classList.remove('hidden');
+            if (response.ok && result.success) {
+                feedback.textContent = result.message || 'Vecino dado de alta correctamente.';
+                feedback.className = 'text-xs font-medium text-center text-green-600';
+                document.getElementById('form-alta-vecino').reset();
+                cargarTodosLosVecinos();
+                cargarVecinos();
+            } else {
+                feedback.textContent = result.error || 'No se pudo dar de alta al vecino.';
+                feedback.className = 'text-xs font-medium text-center text-red-600';
+            }
+        } catch (error) {
+            console.error('Error al registrar vecino:', error);
+            feedback.classList.remove('hidden');
+            feedback.textContent = 'Error de conexión al registrar el vecino.';
+            feedback.className = 'text-xs font-medium text-center text-red-600';
         }
     }
 
