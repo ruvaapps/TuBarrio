@@ -122,6 +122,69 @@ class AvisoController {
         }
     }
 
+    // Generar una multa a partir de un aviso existente
+    public function generarMultaDesdeAviso($user, $avisoId) {
+        header('Content-Type: application/json');
+
+        if (!in_array($user['rol'] ?? '', ['intendente', 'admin_general'], true)) {
+            http_response_code(403);
+            echo json_encode(['error' => 'No tenés permisos para generar multas']);
+            return;
+        }
+
+        try {
+            $db = Database::getConnection();
+
+            // Buscar el aviso (verificando que pertenezca al barrio del intendente)
+            $stmt = $db->prepare("SELECT * FROM multas WHERE id = :id AND barrio_id = :barrio_id AND tipo_multa = 'aviso' LIMIT 1");
+            $stmt->execute([':id' => $avisoId, ':barrio_id' => $user['barrio_id'] ?? null]);
+            $aviso = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$aviso) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Aviso no encontrado']);
+                return;
+            }
+
+            // Si ya tiene una multa generada, no duplicar
+            $stmtExiste = $db->prepare("SELECT COUNT(*) FROM multas WHERE id_aviso_relacionado = :id AND tipo_multa = 'multa'");
+            $stmtExiste->execute([':id' => $avisoId]);
+            if ($stmtExiste->fetchColumn() > 0) {
+                http_response_code(409);
+                echo json_encode(['error' => 'Ya existe una multa generada a partir de este aviso']);
+                return;
+            }
+
+            // Pedir monto (y observaciones actualizadas opcionales) por body
+            $input = json_decode(file_get_contents('php://input'), true);
+            $monto = isset($input['monto']) && is_numeric($input['monto']) && $input['monto'] >= 0 ? (float)$input['monto'] : null;
+
+            if ($monto === null) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Indicá el monto de la multa a generar']);
+                return;
+            }
+
+            $stmtInsert = $db->prepare("INSERT INTO multas (barrio_id, lote_id, usuario_id, usuario_intendente_id, tipo_multa, tipo, monto, observaciones, estado, id_aviso_relacionado) VALUES (:barrio_id, :lote_id, :usuario_id, :intendente_id, 'multa', :tipo, :monto, :observaciones, 'pendiente', :id_aviso_relacionado)");
+            $stmtInsert->execute([
+                ':barrio_id' => $aviso['barrio_id'],
+                ':lote_id' => $aviso['lote_id'],
+                ':usuario_id' => $aviso['usuario_id'],
+                ':intendente_id' => $user['user_id'],
+                ':tipo' => $aviso['tipo'],
+                ':monto' => $monto,
+                ':observaciones' => $aviso['observaciones'],
+                ':id_aviso_relacionado' => $aviso['id']
+            ]);
+
+            echo json_encode(['success' => true, 'message' => 'Multa generada correctamente a partir del aviso']);
+        } catch (Exception $e) {
+            error_log('AvisoController::generarMultaDesdeAviso error: ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['error' => 'Error interno del servidor']);
+        }
+    }
+
     private function generarMultaRelacionada($user, $aviso) {
         $db = Database::getConnection();
 

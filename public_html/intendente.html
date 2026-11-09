@@ -407,6 +407,54 @@
     </div>
 </div>
 
+<!-- MODAL DE DETALLE DE AVISO + GENERAR MULTA -->
+<div id="modal-detalle-aviso" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center border-b pb-3">
+            <div>
+                <span id="modal-aviso-id-badge" class="text-xs font-bold px-2 py-0.5 rounded uppercase bg-blue-100 text-blue-800">AVISO</span>
+                <h3 class="font-bold text-gray-800 text-base mt-1" id="modal-aviso-titulo">Detalle del Aviso</h3>
+            </div>
+            <button onclick="cerrarModalDetalleAviso()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+        </div>
+
+        <div class="space-y-3 text-xs">
+            <div class="bg-gray-50 p-3 rounded-xl space-y-1 text-gray-600">
+                <p><b>Vecino:</b> <span id="modal-aviso-vecino"></span></p>
+                <p><b>Correo:</b> <span id="modal-aviso-email"></span></p>
+                <p><b>Lote:</b> <span id="modal-aviso-lote"></span></p>
+                <p><b>Tipo de infracción:</b> <span id="modal-aviso-tipo"></span></p>
+                <p><b>Fecha de registro:</b> <span id="modal-aviso-fecha"></span></p>
+                <p><b>Estado:</b> <span id="modal-aviso-estado"></span></p>
+            </div>
+
+            <div>
+                <p class="font-semibold text-gray-700 mb-1">Observaciones / Motivo:</p>
+                <p id="modal-aviso-observaciones" class="text-gray-600 bg-slate-50 p-3 rounded-xl border-gray-100 leading-relaxed"></p>
+            </div>
+
+            <!-- Bloque para generar multa -->
+            <div id="aviso-bloque-generar-multa" class="bg-yellow-50 border border-yellow-100 p-4 rounded-xl space-y-2">
+                <p class="font-semibold text-yellow-800">⚡ Generar multa a partir de este aviso</p>
+                <div>
+                    <label for="aviso-multa-monto" class="block text-[10px] font-semibold text-yellow-700 mb-1">Monto de la multa</label>
+                    <input type="number" id="aviso-multa-monto" min="0" step="0.01" placeholder="Ej: 5000.00" class="w-full border rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-yellow-400 bg-white">
+                </div>
+                <div id="aviso-multa-feedback" class="text-[11px] font-medium text-center hidden"></div>
+                <button onclick="generarMultaDesdeAviso()" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2.5 rounded-xl transition text-xs">
+                    Generar Multa
+                </button>
+            </div>
+
+            <div class="pt-2 border-t flex justify-end gap-2">
+                <button onclick="cerrarModalDetalleAviso()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-xl transition text-xs">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- MODAL DE DETALLE DE RECLAMO (Doble Clic) con Comentarios de Gestión -->
 <div id="modal-detalle-reclamo" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
     <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
@@ -486,6 +534,8 @@
     let vecinosGlobal = [];
     let reclamoSeleccionadoId = null;
     let multaAbiertaId = null;
+    let listaAvisosGlobal = [];
+    let avisoAbiertoId = null;
 
     function escapeHtml(value) {
         return String(value ?? '')
@@ -1210,13 +1260,15 @@
                 return;
             }
 
+            listaAvisosGlobal = avisos;
             cont.innerHTML = avisos.map(a => `
-                <div class="border border-gray-100 rounded-xl p-3 flex justify-between items-start bg-gray-50/50">
+                <div onclick="abrirModalDetalleAviso(${a.id})" class="border border-gray-100 rounded-xl p-3 flex justify-between items-start bg-gray-50/50 cursor-pointer hover:bg-gray-100 hover:border-gray-300 transition">
                     <div>
                         <p class="text-xs font-bold text-gray-800">${escapeHtml(a.tipo || '')} — ${escapeHtml(`${a.vecino_nombre || ''} ${a.vecino_apellido || ''}`.trim())}</p>
                         <p class="text-[11px] text-gray-600 mt-1">${escapeHtml(a.observaciones || a.detalle || '')}</p>
                         <p class="text-[10px] text-gray-400 mt-1">${escapeHtml((a.created_at || '').slice(0, 16).replace('T', ' '))}</p>
                     </div>
+                    <span class="text-[10px] text-gray-400 shrink-0 ml-2">Ver detalle ›</span>
                 </div>
             `).join('');
         } catch (error) {
@@ -1258,6 +1310,75 @@
             feedback.classList.remove('hidden');
             feedback.textContent = 'Error de conexión al registrar el aviso.';
             feedback.className = 'text-xs font-medium text-center text-red-600';
+        }
+    }
+
+    // ===================== DETALLE AVISO + GENERAR MULTA =====================
+    function abrirModalDetalleAviso(id) {
+        const a = listaAvisosGlobal.find(x => x.id == id);
+        if (!a) return;
+        avisoAbiertoId = a.id;
+
+        document.getElementById('modal-aviso-titulo').textContent = a.tipo || 'Detalle del Aviso';
+        document.getElementById('modal-aviso-vecino').textContent = `${(a.vecino_nombre || '')} ${(a.vecino_apellido || '')}`.trim() || '-';
+        document.getElementById('modal-aviso-email').textContent = a.email || '-';
+        document.getElementById('modal-aviso-lote').textContent = a.lote_identificador || '-';
+        document.getElementById('modal-aviso-tipo').textContent = a.tipo || '-';
+        document.getElementById('modal-aviso-fecha').textContent = (a.created_at || '').slice(0, 16).replace('T', ' ');
+        document.getElementById('modal-aviso-estado').textContent = a.estado || '-';
+        document.getElementById('modal-aviso-observaciones').textContent = a.observaciones || '-';
+
+        const feedback = document.getElementById('aviso-multa-feedback');
+        feedback.classList.add('hidden');
+        feedback.textContent = '';
+        document.getElementById('aviso-multa-monto').value = '';
+
+        const modal = document.getElementById('modal-detalle-aviso');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function cerrarModalDetalleAviso() {
+        const modal = document.getElementById('modal-detalle-aviso');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    async function generarMultaDesdeAviso() {
+        if (!avisoAbiertoId) return;
+        const feedback = document.getElementById('aviso-multa-feedback');
+        const monto = parseFloat(document.getElementById('aviso-multa-monto').value);
+
+        if (isNaN(monto) || monto < 0) {
+            feedback.classList.remove('hidden');
+            feedback.textContent = 'Ingresá un monto válido.';
+            feedback.className = 'text-[11px] font-medium text-center text-red-600';
+            return;
+        }
+
+        try {
+            const response = await apiFetch(`index.php?route=/avisos/${avisoAbiertoId}/generar-multa`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ monto: monto })
+            });
+            const result = await response.json();
+
+            feedback.classList.remove('hidden');
+            if (response.ok && result.success) {
+                feedback.textContent = result.message || 'Multa generada correctamente.';
+                feedback.className = 'text-[11px] font-medium text-center text-green-600';
+                cargarAvisos();
+                setTimeout(cerrarModalDetalleAviso, 1200);
+            } else {
+                feedback.textContent = result.error || 'No se pudo generar la multa.';
+                feedback.className = 'text-[11px] font-medium text-center text-red-600';
+            }
+        } catch (error) {
+            console.error('Error al generar multa desde aviso:', error);
+            feedback.classList.remove('hidden');
+            feedback.textContent = 'Error de conexión al generar la multa.';
+            feedback.className = 'text-[11px] font-medium text-center text-red-600';
         }
     }
 
