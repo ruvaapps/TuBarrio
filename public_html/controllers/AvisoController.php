@@ -89,14 +89,20 @@ class AvisoController {
                 }
             }
 
-            // Registrar nuevo aviso
-            $stmtInsert = $db->prepare("INSERT INTO multas (barrio_id, lote_id, usuario_id, usuario_intendente_id, tipo_multa, tipo, monto, observaciones, estado) VALUES (:barrio_id, :lote_id, :usuario_id, :intendente_id, 'aviso', :tipo, NULL, :observaciones, 'pendiente')");
-
-            // Obtener lote_id del usuario
+            // Obtener lote_id del usuario (es NOT NULL en la tabla)
             $stmtLote = $db->prepare("SELECT lote_id FROM usuario_lote WHERE usuario_id = :usuario_id LIMIT 1");
             $stmtLote->execute([':usuario_id' => $usuario_id]);
             $lote = $stmtLote->fetch(PDO::FETCH_ASSOC);
             $lote_id = $lote['lote_id'] ?? null;
+
+            if (!$lote_id) {
+                http_response_code(400);
+                echo json_encode(['error' => 'El vecino no tiene un lote asignado. Asignale un lote antes de registrarle un aviso.']);
+                return;
+            }
+
+            // Registrar nuevo aviso (monto 0.00 porque la columna es NOT NULL)
+            $stmtInsert = $db->prepare("INSERT INTO multas (barrio_id, lote_id, usuario_id, usuario_intendente_id, tipo_multa, tipo, monto, observaciones, estado) VALUES (:barrio_id, :lote_id, :usuario_id, :intendente_id, 'aviso', :tipo, 0.00, :observaciones, 'pendiente')");
 
             $stmtInsert->execute([
                 ':barrio_id' => $barrio_id,
@@ -127,7 +133,7 @@ class AvisoController {
             ':usuario_id' => $aviso['usuario_id'],
             ':intendente_id' => $user['user_id'],
             ':tipo' => $aviso['tipo'],
-            ':monto' => 0, // o algún valor por defecto
+            ':monto' => 0.00,
             ':observaciones' => $aviso['observaciones'],
             ':id_aviso_relacionado' => $aviso['id']
         ]);
