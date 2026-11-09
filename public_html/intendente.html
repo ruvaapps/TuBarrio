@@ -1528,6 +1528,17 @@
         }
     }
 
+    async function cerrarSesion() {
+        try {
+            await apiFetch('index.php?route=/auth/logout', { method: 'POST' });
+        } catch (error) {
+            console.error('No se pudo limpiar cookie de sesion en servidor:', error);
+        } finally {
+            localStorage.clear();
+            window.location.href = 'login';
+        }
+    }
+
     // Recargar reclamos/multas al cambiar a esas secciones también
     const _cambiarSeccionOriginal = cambiarSeccion;
     cambiarSeccion = function (seccion) {
