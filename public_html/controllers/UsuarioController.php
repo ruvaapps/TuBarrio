@@ -128,4 +128,42 @@ public function storeVecino($user) {
             ]);
         }
     }
+
+    // Cambiar estado (activo/bloqueado) de un vecino
+    public function cambiarEstadoVecino($user, $usuarioId) {
+        header('Content-Type: application/json');
+
+        if (!in_array($user['rol'] ?? '', ['intendente', 'admin_general'], true)) {
+            http_response_code(403);
+            echo json_encode(['error' => 'No tenés permisos para cambiar el estado de vecinos']);
+            return;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $nuevoEstado = $input['estado'] ?? null;
+        if (!in_array($nuevoEstado, ['activo', 'bloqueado'], true)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Estado inválido']);
+            return;
+        }
+
+        try {
+            $db = Database::getConnection();
+
+            $stmt = $db->prepare("UPDATE usuarios SET estado = :estado WHERE id = :id AND rol = 'vecino'");
+            $stmt->execute([':estado' => $nuevoEstado, ':id' => $usuarioId]);
+
+            if ($stmt->rowCount() === 0) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Vecino no encontrado']);
+                return;
+            }
+
+            echo json_encode(['success' => true, 'message' => 'Estado actualizado correctamente']);
+        } catch (Exception $e) {
+            error_log('UsuarioController::cambiarEstadoVecino error: ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['error' => 'Error interno del servidor']);
+        }
+    }
 }

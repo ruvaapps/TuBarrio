@@ -102,6 +102,24 @@ switch (true) {
         (new UsuarioController())->storeVecino($user);
         break;
 // 6. INTENDENTE: Gestión de Multas (GET, POST y Enviar Aviso)
+    case ($route === '/avisos' && ($method === 'GET' || $method === 'POST')):
+        require_once __DIR__ . '/middlewares/AuthMiddleware.php';
+        $user = AuthMiddleware::verify();
+
+        require_once __DIR__ . '/controllers/AvisoController.php';
+        $controller = new AvisoController();
+
+        if ($method === 'GET') {
+            $controller->index($user);
+        } elseif ($method === 'POST') {
+            $controller->store($user);
+        } else {
+            http_response_code(405);
+            header('Allow: GET, POST');
+            echo json_encode(['error' => 'Metodo HTTP no permitido']);
+        }
+        break;
+
     case ($route === '/multas/mias' && $method === 'GET'):
         require_once __DIR__ . '/middlewares/AuthMiddleware.php';
         $user = AuthMiddleware::verify();
@@ -150,6 +168,13 @@ switch (true) {
 	    require_once __DIR__ . '/controllers/UsuarioController.php';
 	    (new UsuarioController())->listarVecinos($user);
 	    break;
+
+    case (preg_match('#^/vecinos/(\d+)/estado$#', $route, $matches) && $method === 'PUT'):
+        require_once __DIR__ . '/middlewares/AuthMiddleware.php';
+        $user = AuthMiddleware::verify();
+        require_once __DIR__ . '/controllers/UsuarioController.php';
+        (new UsuarioController())->cambiarEstadoVecino($user, $matches[1]);
+        break;
 // 9. Historial y comentarios de un reclamo
     case (preg_match('#^/reclamos/(\d+)/historial$#', $route, $matches) && $method === 'GET'):
         require_once __DIR__ . '/middlewares/AuthMiddleware.php';

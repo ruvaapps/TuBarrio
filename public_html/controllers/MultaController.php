@@ -255,7 +255,7 @@ class MultaController {
             $asunto = "Notificación de Infracción / Multa - Lote " . $multa['lote_identificador'];
             $mensaje = "Hola {$multa['nombre']} {$multa['apellido']},\n\n"
                      . "Se le ha registrado una multa en el barrio.\n"
-                     . "Motivo: {$multa['tipo']}\n"
+                     . "Motivo: {$multa['tipo_multa']}\n"
                      . "Monto: \${$multa['monto']}\n"
                      . "Observaciones: {$multa['observaciones']}\n\n"
                      . "Por favor, comuníquese con la intendencia para regularizar su situación.\n\n"
@@ -272,7 +272,7 @@ class MultaController {
                     $db, 
                     $multa['vecino_id'], 
                     "⚠️ Aviso de Multa - Lote {$multa['lote_identificador']}", 
-                    "Motivo: {$multa['tipo']} | Monto: \${$multa['monto']}"
+                    "Motivo: {$multa['tipo_multa']} | Monto: \${$multa['monto']}"
                 );
             }
 

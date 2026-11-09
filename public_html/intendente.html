@@ -44,6 +44,10 @@
                     <span>⚠️</span>
                     <span>Gestión de Multas</span>
                 </button>
+                <button onclick="cambiarSeccion('avisos')" id="nav-avisos" class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3">
+                    <span>📣</span>
+                    <span>Gestión de Avisos</span>
+                </button>
                 <button onclick="cambiarSeccion('documentos')" id="nav-documentos" class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3">
                     <span>📄</span>
                     <span>Documentación</span>
@@ -87,8 +91,38 @@
                 </div>
             </section>
 
-            <!-- SECCIÓN 2: ALTA DE VECINO -->
+            <!-- SECCIÓN 2: GESTIÓN DE VECINOS -->
             <section id="seccion-vecinos" class="space-y-4 hidden">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border-gray-200 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="font-bold text-gray-800 text-lg">Gestión de Vecinos</h2>
+                        <button onclick="cargarVecinos()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">Actualizar lista</button>
+                    </div>
+
+                    <div class="overflow-x-auto border-gray-100 rounded-xl">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 uppercase border-b border-gray-100 text-[11px]">
+                                    <th class="p-3">Nombre</th>
+                                    <th class="p-3">Apellido</th>
+                                    <th class="p-3">Email</th>
+                                    <th class="p-3">Teléfono</th>
+                                    <th class="p-3">Manzana</th>
+                                    <th class="p-3">Lote</th>
+                                    <th class="p-3">Tipo de Relación</th>
+                                    <th class="p-3">Estado</th>
+                                    <th class="p-3 text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-vecinos-body" class="divide-y divide-gray-100">
+                                <tr>
+                                    <td colspan="9" class="p-6 text-center text-gray-400">Cargando vecinos...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 space-y-4">
                     <h2 class="font-bold text-gray-800 text-lg">Dar de Alta a un Nuevo Vecino</h2>
                     <p class="text-xs text-gray-500">Completa los datos del residente y asígnale su lote correspondiente.</p>
@@ -182,6 +216,56 @@
 
             <!-- SECCIÓN 3: GESTIÓN DE MULTAS (Con Sub-pestañas: Ver / Registrar) -->
             <section id="seccion-multas" class="space-y-4 hidden">
+                <!-- Sección de Gestión de Avisos -->
+            </section>
+            <section id="seccion-avisos" class="space-y-4 hidden">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border-gray-200 space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-4">
+                        <div>
+                            <h2 class="font-bold text-gray-800 text-lg">Gestión de Avisos</h2>
+                            <p class="text-xs text-gray-500">Registrar y administrar avisos de infracción para vecinos.</p>
+                        </div>
+                        <button onclick="cargarAvisos()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">Actualizar lista</button>
+                    </div>
+
+                    <!-- Formulario para agregar aviso -->
+                    <form id="form-aviso" onsubmit="registrarAviso(event)" class="space-y-3">
+                        <div>
+                            <label for="aviso-select-vecino" class="block text-xs font-semibold text-gray-600 mb-1">Seleccionar Vecino</label>
+                            <select id="aviso-select-vecino" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500 bg-white" required>
+                                <option value="">Cargando lista de vecinos...</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="aviso-tipo" class="block text-xs font-semibold text-gray-600 mb-1">Tipo de Infracción</label>
+                            <select id="aviso-tipo" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500 bg-white" required>
+                                <option value="mal_estacionamiento">Mal estacionamiento</option>
+                                <option value="ruidos_molestos">Ruidos molestos</option>
+                                <option value="mascotas">Mascotas sueltas / Sin correa</option>
+                                <option value="obras">Incumplimiento reglamento de obra</option>
+                                <option value="otro">Otro motivo</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="aviso-observaciones" class="block text-xs font-semibold text-gray-600 mb-1">Observaciones / Detalle</label>
+                            <textarea id="aviso-observaciones" rows="3" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" placeholder="Describa el motivo y detalles del aviso..." required></textarea>
+                        </div>
+
+                        <div id="aviso-feedback" class="text-xs font-medium text-center hidden"></div>
+
+                        <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-3 rounded-xl transition shadow">
+                            Registrar Aviso
+                        </button>
+                    </form>
+
+                    <!-- Listado de avisos -->
+                    <div id="lista-avisos" class="space-y-2">
+                        <p class="text-xs text-gray-400 text-center py-4">Cargando avisos...</p>
+                    </div>
+                </div>
+            </section>
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 space-y-4">
                     
                     <!-- Cabecera de Multas y Sub-pestañas -->
@@ -237,7 +321,7 @@
 
                             <div>
                                 <label for="multa-tipo" class="block text-xs font-semibold text-gray-600 mb-1">Tipo de Infracción</label>
-                                <select id="multa-tipo" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500 bg-white">
+                                <select id="multa-tipo" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500 bg-white" data-field="tipo_multa">
                                     <option value="velocidad">Exceso de velocidad</option>
                                     <option value="mal_estacionamiento">Mal estacionamiento</option>
                                     <option value="ruidos_molestos">Ruidos molestos</option>
@@ -621,6 +705,259 @@
             const secReclamos = document.getElementById('seccion-reclamos');
             const secVecinos = document.getElementById('seccion-vecinos');
             const secMultas = document.getElementById('seccion-multas');
+            const secAvisos = document.getElementById('seccion-avisos');
+
+            const navReclamos = document.getElementById('nav-reclamos');
+            const navVecinos = document.getElementById('nav-vecinos');
+            const navMultas = document.getElementById('nav-multas');
+            const navAvisos = document.getElementById('nav-avisos');
+
+            secReclamos.classList.add('hidden');
+            secVecinos.classList.add('hidden');
+            secMultas.classList.add('hidden');
+            secAvisos.classList.add('hidden');
+
+            navReclamos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
+            navVecinos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
+            navMultas.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
+            navAvisos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
+
+            if (seccion === 'reclamos') {
+                secReclamos.classList.remove('hidden');
+                navReclamos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
+            } else if (seccion === 'vecinos') {
+                secVecinos.classList.remove('hidden');
+                navVecinos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
+            } else if (seccion === 'multas') {
+                secMultas.classList.remove('hidden');
+                navMultas.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
+            } else if (seccion === 'avisos') {
+                secAvisos.classList.remove('hidden');
+                navAvisos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
+                cargarAvisos();
+            } else if (seccion === 'documentos') {
+                secDocumentos.classList.remove('hidden');
+                navDocumentos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
+                cargarDocumentos();
+            }
+        }
+
+        async function cargarVecinos() {
+            try {
+                const response = await apiFetch('index.php?route=/vecinos/listar', { method: 'GET' });
+                const result = await response.json();
+                const vecinos = result.data || [];
+
+                const tbody = document.getElementById('tabla-vecinos-body');
+                tbody.innerHTML = '';
+
+                if (!Array.isArray(vecinos) || vecinos.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="9" class="p-6 text-center text-gray-400">No hay vecinos registrados.</td></tr>';
+                    return;
+                }
+
+                vecinos.forEach(v => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-gray-50/50 transition';
+
+                    tr.innerHTML = `
+                        <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.nombre)}</td>
+                        <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.apellido)}</td>
+                        <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.email)}</td>
+                        <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.telefono || '')}</td>
+                        <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.manzana || '')}</td>
+                        <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.lote_identificador || '')}</td>
+                        <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.tipo_relacion || '')}</td>
+                        <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.estado || 'activo')}</td>
+                        <td class="p-3 text-center">
+                            <button onclick="cambiarEstadoVecino(${v.usuario_id}, '${v.estado === 'activo' ? 'bloqueado' : 'activo'}')" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-1 rounded-lg transition shadow-sm">
+                                ${v.estado === 'activo' ? 'Bloquear' : 'Activar'}
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Error al cargar vecinos:', error);
+                document.getElementById('tabla-vecinos-body').innerHTML = '<tr><td colspan="9" class="p-6 text-center text-red-400">Error al cargar los vecinos.</td></tr>';
+            }
+        }
+
+        async function cambiarEstadoVecino(usuarioId, nuevoEstado) {
+            if (!confirm(`¿Seguro que querés ${nuevoEstado === 'activo' ? 'activar' : 'bloquear'} al vecino?`)) return;
+
+            try {
+                const response = await apiFetch(`index.php?route=/vecinos/${usuarioId}/estado`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ estado: nuevoEstado })
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert(result.message || 'Estado actualizado correctamente');
+                    cargarVecinos();
+                } else {
+                    alert(result.error || 'No se pudo actualizar el estado');
+                }
+            } catch (error) {
+                console.error('Error al cambiar estado del vecino:', error);
+                alert('Error de conexión al actualizar el estado');
+            }
+        }
+
+            const navReclamos = document.getElementById('nav-reclamos');
+            const navVecinos = document.getElementById('nav-vecinos');
+            const navMultas = document.getElementById('nav-multas');
+            const navAvisos = document.getElementById('nav-avisos');
+
+            secReclamos.classList.add('hidden');
+            secVecinos.classList.add('hidden');
+            secMultas.classList.add('hidden');
+            secAvisos.classList.add('hidden');
+
+            navReclamos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
+            navVecinos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
+            navMultas.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
+            navAvisos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
+
+            if (seccion === 'reclamos') {
+                secReclamos.classList.remove('hidden');
+                navReclamos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
+            } else if (seccion === 'vecinos') {
+                secVecinos.classList.remove('hidden');
+                navVecinos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
+            } else if (seccion === 'multas') {
+                secMultas.classList.remove('hidden');
+                navMultas.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
+            } else if (seccion === 'avisos') {
+                secAvisos.classList.remove('hidden');
+                navAvisos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
+                cargarAvisos();
+            }
+        }
+
+        async function cargarAvisos() {
+            try {
+                const response = await apiFetch('index.php?route=/avisos', { method: 'GET' });
+                const result = await response.json();
+                const avisos = result.data || [];
+
+                const select = document.getElementById('aviso-select-vecino');
+                select.innerHTML = '';
+
+                if (!Array.isArray(avisos) || avisos.length === 0) {
+                    document.getElementById('lista-avisos').innerHTML = '<p class="text-xs text-gray-400 text-center py-4">No hay avisos registrados.</p>';
+                    return;
+                }
+
+                avisos.forEach(aviso => {
+                    const fila = document.createElement('div');
+                    fila.className = 'flex items-center justify-between gap-3 border-gray-100 rounded-xl px-4 py-3 hover:bg-gray-50/50 transition';
+
+                    const izquierda = document.createElement('div');
+                    izquierda.className = 'flex items-center gap-3 min-w-0';
+
+                    const icono = document.createElement('span');
+                    icono.textContent = '📣';
+
+                    const nombre = document.createElement('span');
+                    nombre.className = 'text-sm font-medium text-gray-800 truncate';
+                    nombre.textContent = aviso.nombre;
+
+                    const badge = document.createElement('span');
+                    badge.className = `text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full ${aviso.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-500'}`;
+                    badge.textContent = aviso.estado || '';
+
+                    izquierda.appendChild(icono);
+                    izquierda.appendChild(nombre);
+                    izquierda.appendChild(badge);
+
+                    fila.appendChild(izquierda);
+                    select.appendChild(fila);
+                });
+            } catch (error) {
+                console.error('Error al cargar avisos:', error);
+                document.getElementById('lista-avisos').innerHTML = '<p class="text-xs text-red-400 text-center py-4">Error al cargar los avisos.</p>';
+            }
+        }
+
+        async function cargarVecinosParaAvisos() {
+            try {
+                const response = await apiFetch('index.php?route=/vecinos/listar', { method: 'GET' });
+                const result = await response.json();
+                const vecinos = result.data || [];
+
+                const select = document.getElementById('aviso-select-vecino');
+                select.innerHTML = '<option value="">-- Seleccionar Vecino --</option>';
+
+                vecinos.forEach(v => {
+                    const option = document.createElement('option');
+                    option.value = v.usuario_id;
+                    option.textContent = `${v.nombre} ${v.apellido} (${v.email || 'Sin Email'})`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error al cargar vecinos para avisos:', error);
+            }
+        }
+
+        async function registrarAviso(e) {
+            e.preventDefault();
+
+            const selectVecino = document.getElementById('aviso-select-vecino');
+            const tipo = document.getElementById('aviso-tipo').value;
+            const observaciones = document.getElementById('aviso-observaciones').value.trim();
+            const feedback = document.getElementById('aviso-feedback');
+
+            if (!selectVecino.value) {
+                alert('Seleccioná un vecino');
+                return;
+            }
+
+            if (!observaciones) {
+                alert('Completá las observaciones');
+                return;
+            }
+
+            feedback.classList.add('hidden');
+
+            try {
+                const data = {
+                    usuario_id: selectVecino.value,
+                    tipo: tipo,
+                    observaciones: observaciones
+                };
+
+                const response = await apiFetch('index.php?route=/avisos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    feedback.classList.remove('hidden');
+                    feedback.className = 'text-xs font-medium text-center text-emerald-600';
+                    feedback.innerText = result.message || 'Aviso registrado correctamente';
+                    document.getElementById('form-aviso').reset();
+                    cargarAvisos();
+                } else {
+                    feedback.classList.remove('hidden');
+                    feedback.className = 'text-xs font-medium text-center text-red-600';
+                    feedback.innerText = result.error || 'Error al registrar el aviso';
+                }
+            } catch (error) {
+                console.error('Error al registrar aviso:', error);
+                feedback.classList.remove('hidden');
+                feedback.className = 'text-xs font-medium text-center text-red-600';
+                feedback.innerText = 'Error de conexión al registrar el aviso';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await cargarVecinosParaAvisos();
+        });
             const secDocumentos = document.getElementById('seccion-documentos');
 
             const navReclamos = document.getElementById('nav-reclamos');
@@ -680,20 +1017,127 @@
                 const result = await response.json();
                 vecinosGlobal = result.data || [];
 
-                const select = document.getElementById('multa-select-vecino');
-                select.innerHTML = '<option value="">-- Seleccionar Vecino (Mza / Lote / Nombre) --</option>';
+                const selectMulta = document.getElementById('multa-select-vecino');
+                selectMulta.innerHTML = '<option value="">-- Seleccionar Vecino (Mza / Lote / Nombre) --</option>';
+
+                const selectAviso = document.getElementById('aviso-select-vecino');
+                selectAviso.innerHTML = '<option value="">-- Seleccionar Vecino --</option>';
 
                 vecinosGlobal.forEach(v => {
                     const mzaTexto = v.manzana ? `Mza: ${v.manzana} - ` : '';
                     const loteTexto = v.lote_identificador ? `Lote: ${v.lote_identificador}` : 'Sin lote';
-                    const option = document.createElement('option');
-                    option.value = v.usuario_id;
-                    option.dataset.lote = v.lote_id || '';
-                    option.textContent = `${mzaTexto}${loteTexto} - ${v.nombre || ''} ${v.apellido || ''} (${v.tipo_relacion || 'Residente'})`;
-                    select.appendChild(option);
+
+                    const optionMulta = document.createElement('option');
+                    optionMulta.value = v.usuario_id;
+                    optionMulta.dataset.lote = v.lote_id || '';
+                    optionMulta.textContent = `${mzaTexto}${loteTexto} - ${v.nombre || ''} ${v.apellido || ''} (${v.tipo_relacion || 'Residente'})`;
+                    selectMulta.appendChild(optionMulta);
+
+                    const optionAviso = document.createElement('option');
+                    optionAviso.value = v.usuario_id;
+                    optionAviso.textContent = `${v.nombre || ''} ${v.apellido || ''} (${v.email || 'Sin Email'})`;
+                    selectAviso.appendChild(optionAviso);
                 });
             } catch (error) {
                 console.error('Error al cargar vecinos:', error);
+            }
+        }
+
+        async function cargarAvisos() {
+            try {
+                const response = await apiFetch('index.php?route=/avisos', { method: 'GET' });
+                const result = await response.json();
+                const avisos = result.data || [];
+
+                const contenedor = document.getElementById('lista-avisos');
+                contenedor.innerHTML = '';
+
+                if (!Array.isArray(avisos) || avisos.length === 0) {
+                    contenedor.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">No hay avisos registrados.</p>';
+                    return;
+                }
+
+                avisos.forEach(aviso => {
+                    const fila = document.createElement('div');
+                    fila.className = 'flex items-center justify-between gap-3 border-gray-100 rounded-xl px-4 py-3 hover:bg-gray-50/50 transition';
+
+                    const izquierda = document.createElement('div');
+                    izquierda.className = 'flex items-center gap-3 min-w-0';
+
+                    const icono = document.createElement('span');
+                    icono.textContent = '📣';
+
+                    const nombre = document.createElement('span');
+                    nombre.className = 'text-sm font-medium text-gray-800 truncate';
+                    nombre.textContent = aviso.nombre;
+
+                    const badge = document.createElement('span');
+                    badge.className = `text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full ${aviso.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-500'}`;
+                    badge.textContent = aviso.estado || '';
+
+                    izquierda.appendChild(icono);
+                    izquierda.appendChild(nombre);
+                    izquierda.appendChild(badge);
+
+                    fila.appendChild(izquierda);
+                    contenedor.appendChild(fila);
+                });
+            } catch (error) {
+                console.error('Error al cargar avisos:', error);
+                document.getElementById('lista-avisos').innerHTML = '<p class="text-xs text-red-400 text-center py-4">Error al cargar los avisos.</p>';
+            }
+        }
+
+        async function registrarAviso(e) {
+            e.preventDefault();
+
+            const selectVecino = document.getElementById('aviso-select-vecino');
+            const tipo = document.getElementById('aviso-tipo').value;
+            const observaciones = document.getElementById('aviso-observaciones').value.trim();
+            const feedback = document.getElementById('aviso-feedback');
+
+            if (!selectVecino.value) {
+                alert('Seleccioná un vecino');
+                return;
+            }
+
+            if (!observaciones) {
+                alert('Completá las observaciones');
+                return;
+            }
+
+            feedback.classList.add('hidden');
+
+            try {
+                const data = {
+                    usuario_id: selectVecino.value,
+                    tipo: tipo,
+                    observaciones: observaciones
+                };
+
+                const response = await apiFetch('index.php?route=/avisos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    feedback.classList.remove('hidden');
+                    feedback.className = 'text-xs font-medium text-center text-emerald-600';
+                    feedback.innerText = result.message || 'Aviso registrado correctamente';
+                    document.getElementById('form-aviso').reset();
+                    cargarAvisos();
+                } else {
+                    feedback.classList.remove('hidden');
+                    feedback.className = 'text-xs font-medium text-center text-red-600';
+                    feedback.innerText = result.error || 'Error al registrar el aviso';
+                }
+            } catch (error) {
+                console.error('Error al registrar aviso:', error);
+                feedback.classList.remove('hidden');
+                feedback.className = 'text-xs font-medium text-center text-red-600';
+                feedback.innerText = 'Error de conexión al registrar el aviso';
             }
         }
 
