@@ -36,6 +36,45 @@ class MultaController {
     }
 
     // 1. Listar multas del barrio cruzando con lotes y usuarios (vecino sancionado)
+    // Listar las multas del propio vecino autenticado
+    public function listarMisMultas($user) {
+        header('Content-Type: application/json');
+
+        try {
+            $barrio_id = $user['barrio_id'] ?? null;
+            $user_id = $user['user_id'] ?? null;
+
+            if (!$barrio_id || !$user_id) {
+                http_response_code(400);
+                echo json_encode(['error' => 'No se pudo identificar el usuario o su barrio.']);
+                return;
+            }
+
+            $db = Database::getConnection();
+
+            $stmt = $db->prepare("
+                SELECT m.id, m.tipo, m.monto, m.estado, m.observaciones, m.created_at,
+                       l.identificador AS lote_identificador
+                FROM multas m
+                LEFT JOIN lotes l ON m.lote_id = l.id
+                WHERE m.barrio_id = :barrio_id AND m.usuario_id = :user_id
+                ORDER BY m.created_at DESC
+            ");
+            $stmt->execute([':barrio_id' => $barrio_id, ':user_id' => $user_id]);
+            $multas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            echo json_encode([
+                'success' => true,
+                'data' => $multas
+            ]);
+
+        } catch (Exception $e) {
+            error_log('MultaController::listarMisMultas error: ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['error' => 'Error interno del servidor']);
+        }
+    }
+
     public function index($user) {
         header('Content-Type: application/json');
 
