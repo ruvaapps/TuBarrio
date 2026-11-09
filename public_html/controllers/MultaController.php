@@ -64,13 +64,14 @@ class MultaController {
             $stmt->execute([':barrio_id' => $barrio_id, ':user_id' => $user_id]);
             $multas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            // Avisos (tipo_multa = 'aviso')
+            // Avisos (tipo_multa = 'aviso'), con los datos de la multa generada si existe
             $stmtAvisos = $db->prepare("
                 SELECT m.id, m.tipo, m.tipo_multa, m.estado, m.observaciones, m.created_at,
                        l.identificador AS lote_identificador,
-                       (SELECT COUNT(*) FROM multas mm WHERE mm.id_aviso_relacionado = m.id AND mm.tipo_multa = 'multa') AS multa_generada
+                       mg.id AS multa_id, mg.monto AS multa_monto, mg.estado AS multa_estado, mg.created_at AS multa_fecha
                 FROM multas m
                 LEFT JOIN lotes l ON m.lote_id = l.id
+                LEFT JOIN multas mg ON mg.id_aviso_relacionado = m.id AND mg.tipo_multa = 'multa'
                 WHERE m.barrio_id = :barrio_id AND m.usuario_id = :user_id AND m.tipo_multa = 'aviso'
                 ORDER BY m.created_at DESC
             ");

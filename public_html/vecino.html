@@ -197,6 +197,46 @@
         </div>
     </div>
 
+    <!-- MODAL DE DETALLE DE AVISO PARA EL VECINO -->
+    <div id="modal-detalle-aviso" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <div>
+                    <span id="modal-aviso-id-badge" class="text-xs font-bold px-2 py-0.5 rounded uppercase bg-blue-100 text-blue-800">Aviso</span>
+                    <h3 class="font-bold text-gray-800 text-base mt-1" id="modal-aviso-titulo">Detalle del Aviso</h3>
+                </div>
+                <button onclick="cerrarModalDetalleAviso()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div class="bg-gray-50 p-3 rounded-xl space-y-1 text-gray-600">
+                    <p><b>Lote:</b> <span id="modal-aviso-lote"></span></p>
+                    <p><b>Tipo de infracción:</b> <span id="modal-aviso-tipo"></span></p>
+                    <p><b>Fecha de registro:</b> <span id="modal-aviso-fecha"></span></p>
+                    <p><b>Estado:</b> <span id="modal-aviso-estado"></span></p>
+                </div>
+
+                <div>
+                    <p class="font-semibold text-gray-700 mb-1">Observaciones / Motivo:</p>
+                    <p id="modal-aviso-observaciones" class="text-gray-600 bg-slate-50 p-3 rounded-xl border border-gray-100 leading-relaxed"></p>
+                </div>
+
+                <!-- Bloque visible solo si el aviso tiene multa generada -->
+                <div id="modal-aviso-bloque-multa" class="hidden">
+                    <div class="bg-yellow-50 border border-yellow-100 p-4 rounded-xl space-y-1 text-center">
+                        <p class="text-[10px] uppercase font-semibold text-yellow-700 mb-1">⚡ Multa generada a partir de este aviso</p>
+                        <p class="text-2xl font-bold text-yellow-800" id="modal-aviso-multa-monto">$0.00</p>
+                        <p>Estado: <span id="modal-aviso-multa-estado" class="px-2 py-0.5 rounded-full font-semibold text-[10px] uppercase"></span></p>
+                        <p class="text-[10px] text-gray-500">Emitida el <span id="modal-aviso-multa-fecha"></span></p>
+                        <button onclick="verMultaDelAviso()" class="mt-2 bg-yellow-600 hover:bg-yellow-700 text-white font-semibold px-4 py-2 rounded-xl transition text-xs">
+                            Ver detalle de la multa
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL DE DETALLE DE RECLAMO PARA EL VECINO -->
     <div id="modal-detalle-reclamo" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
@@ -245,6 +285,8 @@
         let listaReclamosGlobal = [];
         let reclamoSeleccionadoId = null;
         let multasPendientesGlobal = false;
+        let avisoAbierto = null;
+        let listaMultasVecinoGlobal = [];
 
         // Clave VAPID Pública de prueba
         const VAPID_PUBLIC_KEY = 'BI_JeTpLT-ltMz2pqM1jZZD8lS-ZZwJEVhUACXl-iQmYqpREU2oFWwkdI7JYMra8l40n0c1MqBuzYttooULkoK0';
@@ -552,8 +594,9 @@
                     contAvisos.innerHTML = '<p class="text-xs text-gray-400 text-center py-2 bg-white rounded-2xl border border-gray-200">No tenés avisos registrados. 👍</p>';
                 } else {
                     avisos.forEach(a => {
+                        const tieneMulta = a.multa_id != null;
                         const fila = document.createElement('div');
-                        fila.className = 'bg-white rounded-2xl shadow-sm border border-gray-200 px-4 py-3 flex items-center gap-3';
+                        fila.className = `bg-white rounded-2xl shadow-sm border px-4 py-3 flex items-center gap-3 cursor-pointer transition hover:border-blue-300 ${tieneMulta ? 'border-green-300 bg-green-50/50' : 'border-gray-200'}`;
 
                         const id = document.createElement('span');
                         id.className = 'text-[10px] font-bold text-gray-400 shrink-0';
@@ -569,13 +612,13 @@
                         const detalle = document.createElement('span');
                         detalle.className = 'block text-[10px] text-gray-500 truncate';
                         const fecha = a.created_at ? new Date(a.created_at).toLocaleDateString() : '';
-                        detalle.textContent = (a.multa_generada > 0 ? '⚡ Multa generada · ' : '') + (a.observaciones || '') + (fecha ? ` · ${fecha}` : '');
+                        detalle.textContent = (tieneMulta ? '⚡ Con multa · ' : '') + (a.observaciones || '') + (fecha ? ` · ${fecha}` : '');
 
                         centro.appendChild(tipo);
                         centro.appendChild(detalle);
 
                         const badge = document.createElement('span');
-                        if (a.multa_generada > 0) {
+                        if (tieneMulta) {
                             badge.className = 'px-2 py-0.5 rounded-full font-semibold text-[9px] uppercase shrink-0 bg-green-100 text-green-800';
                             badge.textContent = 'Con multa';
                         } else {
@@ -586,11 +629,13 @@
                         fila.appendChild(id);
                         fila.appendChild(centro);
                         fila.appendChild(badge);
+                        fila.onclick = () => abrirDetalleAviso(a);
                         contAvisos.appendChild(fila);
                     });
                 }
 
                 // --- RENDER MULTAS ---
+                listaMultasVecinoGlobal = Array.isArray(multas) ? multas : [];
                 if (!Array.isArray(multas) || multas.length === 0) {
                     contenedor.innerHTML = '<p class="text-xs text-gray-400 text-center py-2 bg-white rounded-2xl border border-gray-200">No tenés multas registradas. 👍</p>';
                     return;
@@ -659,6 +704,47 @@
 
         function cerrarModalDetalleMulta() {
             document.getElementById('modal-detalle-multa').classList.add('hidden');
+        }
+
+        function abrirDetalleAviso(a) {
+            avisoAbierto = a;
+            const tipoTexto = obtenerTextoTipoMulta(a.tipo);
+
+            document.getElementById('modal-aviso-titulo').innerText = tipoTexto;
+            document.getElementById('modal-aviso-lote').innerText = a.lote_identificador || 'N/D';
+            document.getElementById('modal-aviso-tipo').innerText = tipoTexto;
+            document.getElementById('modal-aviso-fecha').innerText = a.created_at ? new Date(a.created_at).toLocaleString() : 'N/D';
+            document.getElementById('modal-aviso-estado').innerText = a.estado || 'N/D';
+            document.getElementById('modal-aviso-observaciones').innerText = a.observaciones || 'Sin observaciones registradas.';
+
+            // Mostrar u ocultar el bloque de la multa generada
+            const bloqueMulta = document.getElementById('modal-aviso-bloque-multa');
+            if (a.multa_id != null) {
+                document.getElementById('modal-aviso-multa-monto').innerText = '$' + parseFloat(a.multa_monto || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
+                const badgeEstado = document.getElementById('modal-aviso-multa-estado');
+                badgeEstado.innerText = a.multa_estado || 'N/D';
+                badgeEstado.className = `px-2 py-0.5 rounded-full font-semibold text-[10px] uppercase ${obtenerBadgeEstadoMulta(a.multa_estado)}`;
+                document.getElementById('modal-aviso-multa-fecha').innerText = a.multa_fecha ? new Date(a.multa_fecha).toLocaleDateString() : 'N/D';
+                bloqueMulta.classList.remove('hidden');
+            } else {
+                bloqueMulta.classList.add('hidden');
+            }
+
+            document.getElementById('modal-detalle-aviso').classList.remove('hidden');
+        }
+
+        function cerrarModalDetalleAviso() {
+            document.getElementById('modal-detalle-aviso').classList.add('hidden');
+        }
+
+        function verMultaDelAviso() {
+            if (!avisoAbierto || avisoAbierto.multa_id == null) return;
+            cerrarModalDetalleAviso();
+            const a = avisoAbierto;
+            // Buscar en la lista de multas ya cargada; si no está, construir desde los datos del aviso
+            const multa = (listaMultasVecinoGlobal || []).find(x => x.id == a.multa_id)
+                || { id: a.multa_id, tipo: a.tipo, monto: a.multa_monto, estado: a.multa_estado, observaciones: a.observaciones, lote_identificador: a.lote_identificador, created_at: a.multa_fecha };
+            abrirDetalleMulta(multa);
         }
 
         function obtenerTextoTipoMulta(tipo) {
