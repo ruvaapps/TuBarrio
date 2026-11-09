@@ -706,21 +706,25 @@
             const secVecinos = document.getElementById('seccion-vecinos');
             const secMultas = document.getElementById('seccion-multas');
             const secAvisos = document.getElementById('seccion-avisos');
+            const secDocumentos = document.getElementById('seccion-documentos');
 
             const navReclamos = document.getElementById('nav-reclamos');
             const navVecinos = document.getElementById('nav-vecinos');
             const navMultas = document.getElementById('nav-multas');
             const navAvisos = document.getElementById('nav-avisos');
+            const navDocumentos = document.getElementById('nav-documentos');
 
             secReclamos.classList.add('hidden');
             secVecinos.classList.add('hidden');
             secMultas.classList.add('hidden');
             secAvisos.classList.add('hidden');
+            secDocumentos.classList.add('hidden');
 
             navReclamos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
             navVecinos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
             navMultas.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
             navAvisos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
+            navDocumentos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
 
             if (seccion === 'reclamos') {
                 secReclamos.classList.remove('hidden');
