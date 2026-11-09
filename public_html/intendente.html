@@ -8,238 +8,240 @@
 </head>
 <body class="bg-gray-100 font-sans antialiased min-h-screen flex-col">
 
-    <!-- Barra Superior -->
-    <header class="bg-slate-800 text-white shadow-md p-4 flex justify-between items-center z-30">
-        <div>
-            <h1 class="font-bold text-lg" id="barrio-nombre">Panel de Intendencia</h1>
-            <p class="text-xs text-slate-300" id="usuario-info">Cargando...</p>
-        </div>
-        <div class="flex items-center space-x-2">
-            <!-- Botón de Notificaciones Push (Campanita) -->
-            <button onclick="toggleNotificacionesPush()" id="btn-push-toggle" class="bg-slate-700 hover:bg-slate-600 p-2 rounded-lg transition text-sm flex items-center justify-center shadow" title="Activar/Desactivar Notificaciones">
-                🔕
-            </button>
-            <button onclick="probarPushManual(this)" id="btn-push-test" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg transition shadow" title="Enviar una notificacion de prueba">
-                Probar Push
-            </button>
-            <button onclick="cerrarSesion()" class="text-sm bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg transition shadow">Salir</button>
-        </div>
-    </header>
+<!-- Barra Superior -->
+<header class="bg-slate-800 text-white shadow-md p-4 flex justify-between items-center z-30">
+    <div>
+        <h1 class="font-bold text-lg" id="barrio-nombre">Panel de Intendencia</h1>
+        <p class="text-xs text-slate-300" id="usuario-info">Cargando...</p>
+    </div>
+    <div class="flex items-center space-x-2">
+        <!-- Botón de Notificaciones Push (Campanita) -->
+        <button onclick="toggleNotificacionesPush()" id="btn-push-toggle" class="bg-slate-700 hover:bg-slate-600 p-2 rounded-lg transition text-sm flex items-center justify-center shadow" title="Activar/Desactivar Notificaciones">
+            🔕
+        </button>
+        <button onclick="probarPushManual(this)" id="btn-push-test" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg transition shadow" title="Enviar una notificacion de prueba">
+            Probar Push
+        </button>
+        <button onclick="cerrarSesion()" class="text-sm bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg transition shadow">Salir</button>
+    </div>
+</header>
 
-    <!-- Contenedor Principal con Menú Lateral y Secciones -->
-    <div class="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6 grid md:grid-cols-4 gap-6">
+<!-- Contenedor Principal con Menú Lateral y Secciones -->
+<div class="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6 grid md:grid-cols-4 gap-6">
 
-        <!-- Menú Lateral -->
-        <aside class="md:col-span-1 space-y-2">
-            <div class="bg-white p-3 rounded-2xl shadow-sm border-gray-200 space-y-1">
-                <button onclick="cambiarSeccion('reclamos')" id="nav-reclamos" class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3">
-                    <span>📢</span>
-                    <span>Gestión de Reclamos</span>
-                </button>
-                <button onclick="cambiarSeccion('vecinos')" id="nav-vecinos" class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3">
-                    <span>👤</span>
-                    <span>Alta de Vecinos</span>
-                </button>
-                <button onclick="cambiarSeccion('multas')" id="nav-multas" class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3">
-                    <span>⚠️</span>
-                    <span>Gestión de Multas</span>
-                </button>
-                <button onclick="cambiarSeccion('avisos')" id="nav-avisos" class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3">
-                    <span>📣</span>
-                    <span>Gestión de Avisos</span>
-                </button>
-                <button onclick="cambiarSeccion('documentos')" id="nav-documentos" class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3">
-                    <span>📄</span>
-                    <span>Documentación</span>
-                </button>
+    <!-- Menú Lateral -->
+    <aside class="md:col-span-1 space-y-2">
+        <div class="bg-white p-3 rounded-2xl shadow-sm border-gray-200 space-y-1">
+            <button onclick="cambiarSeccion('reclamos')" id="nav-reclamos" class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3">
+                <span>📢</span>
+                <span>Gestión de Reclamos</span>
+            </button>
+            <button onclick="cambiarSeccion('vecinos')" id="nav-vecinos" class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3">
+                <span>👤</span>
+                <span>Alta de Vecinos</span>
+            </button>
+            <button onclick="cambiarSeccion('multas')" id="nav-multas" class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3">
+                <span>⚠️</span>
+                <span>Gestión de Multas</span>
+            </button>
+            <button onclick="cambiarSeccion('avisos')" id="nav-avisos" class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3">
+                <span>📣</span>
+                <span>Gestión de Avisos</span>
+            </button>
+            <button onclick="cambiarSeccion('documentos')" id="nav-documentos" class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3">
+                <span>📄</span>
+                <span>Documentación</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Contenido Dinámico -->
+    <main class="md:col-span-3 space-y-6">
+
+        <!-- SECCIÓN 1: RECLAMOS -->
+        <section id="seccion-reclamos" class="space-y-4">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border-gray-200 space-y-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="font-bold text-gray-800 text-lg">Reclamos del Barrio</h2>
+                        <p class="text-xs text-gray-500">Hacé <b>doble clic</b> en cualquier fila para ver el detalle y gestionar el reclamo.</p>
+                    </div>
+                    <button onclick="cargarReclamos()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">Actualizar lista</button>
+                </div>
+
+                <!-- Tabla de Reclamos -->
+                <div class="overflow-x-auto border-gray-100 rounded-xl">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                        <tr class="bg-gray-50 text-gray-500 uppercase border-b border-gray-100 text-[11px]">
+                            <th class="p-3">ID</th>
+                            <th class="p-3">Quién lo cargó</th>
+                            <th class="p-3">Título / Categoría</th>
+                            <th class="p-3">Estado</th>
+                            <th class="p-3 text-right">Fecha</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tabla-reclamos-body" class="divide-y divide-gray-100">
+                        <tr>
+                            <td colspan="5" class="p-6 text-center text-gray-400">Cargando reclamos...</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </aside>
+        </section>
 
-        <!-- Contenido Dinámico -->
-        <main class="md:col-span-3 space-y-6">
+        <!-- SECCIÓN 2: GESTIÓN DE VECINOS -->
+        <section id="seccion-vecinos" class="space-y-4 hidden">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border-gray-200 space-y-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="font-bold text-gray-800 text-lg">Gestión de Vecinos</h2>
+                    <button onclick="cargarVecinos()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">Actualizar lista</button>
+                </div>
 
-            <!-- SECCIÓN 1: RECLAMOS -->
-            <section id="seccion-reclamos" class="space-y-4">
-                <div class="bg-white rounded-2xl p-6 shadow-sm border-gray-200 space-y-4">
-                    <div class="flex justify-between items-center">
+                <div class="overflow-x-auto border-gray-100 rounded-xl">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                        <tr class="bg-gray-50 text-gray-500 uppercase border-b border-gray-100 text-[11px]">
+                            <th class="p-3">Nombre</th>
+                            <th class="p-3">Apellido</th>
+                            <th class="p-3">Email</th>
+                            <th class="p-3">Teléfono</th>
+                            <th class="p-3">Manzana</th>
+                            <th class="p-3">Lote</th>
+                            <th class="p-3">Tipo de Relación</th>
+                            <th class="p-3">Estado</th>
+                            <th class="p-3 text-center">Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tabla-vecinos-body" class="divide-y divide-gray-100">
+                        <tr>
+                            <td colspan="9" class="p-6 text-center text-gray-400">Cargando vecinos...</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-6 shadow-sm border-gray-200 space-y-4">
+                <h2 class="font-bold text-gray-800 text-lg">Dar de Alta a un Nuevo Vecino</h2>
+                <p class="text-xs text-gray-500">Completa los datos del residente y asígnale su lote correspondiente.</p>
+
+                <form id="form-alta-vecino" onsubmit="registrarVecino(event)" class="space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <h2 class="font-bold text-gray-800 text-lg">Reclamos del Barrio</h2>
-                            <p class="text-xs text-gray-500">Hacé <b>doble clic</b> en cualquier fila para ver el detalle y gestionar el reclamo.</p>
+                            <label for="nombre" class="block text-xs font-semibold text-gray-600 mb-1">Nombre</label>
+                            <input type="text" id="nombre" placeholder="Ej: Juan" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
                         </div>
-                        <button onclick="cargarReclamos()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">Actualizar lista</button>
+                        <div>
+                            <label for="apellido" class="block text-xs font-semibold text-gray-600 mb-1">Apellido</label>
+                            <input type="text" id="apellido" placeholder="Ej: Pérez" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
+                        </div>
                     </div>
 
-                    <!-- Tabla de Reclamos -->
+                    <div>
+                        <label for="email" class="block text-xs font-semibold text-gray-600 mb-1">Correo electrónico</label>
+                        <input type="email" id="email" placeholder="vecino@email.com" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="telefono" class="block text-xs font-semibold text-gray-600 mb-1">Teléfono / WhatsApp</label>
+                            <input type="text" id="telefono" placeholder="351XXXXXXX" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500">
+                        </div>
+                        <div>
+                            <label for="password" class="block text-xs font-semibold text-gray-600 mb-1">Contraseña temporal</label>
+                            <input type="password" id="password" placeholder="••" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="manzana" class="block text-xs font-semibold text-gray-600 mb-1">Manzana</label>
+                            <input type="text" id="manzana" placeholder="Ej: Mza. B" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500">
+                        </div>
+                        <div>
+                            <label for="lote_identificador" class="block text-xs font-semibold text-gray-600 mb-1">Número de Lote</label>
+                            <input type="text" id="lote_identificador" placeholder="Ej: 12" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="tipo_relacion" class="block text-xs font-semibold text-gray-600 mb-1">Tipo de Relación</label>
+                        <select id="tipo_relacion" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500 bg-white">
+                            <option value="propietario">Propietario</option>
+                            <option value="inquilino">Inquilino</option>
+                            <option value="familiar">Familiar</option>
+                        </select>
+                    </div>
+
+                    <div id="mensaje-feedback" class="text-xs font-medium text-center hidden"></div>
+
+                    <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-3 rounded-xl transition shadow">
+                        Registrar y Vincular Vecino
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 3: GESTIÓN DE MULTAS -->
+        <section id="seccion-multas" class="space-y-4 hidden">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border-gray-200 space-y-4">
+                <!-- Cabecera de Multas y Sub-pestañas -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-4">
+                    <div>
+                        <h2 class="font-bold text-gray-800 text-lg">Módulo de Multas e Infracciones</h2>
+                        <p class="text-xs text-gray-500">Administrá las multas emitidas y notificá a los residentes.</p>
+                    </div>
+                    <div class="flex bg-gray-100 p-1 rounded-xl text-xs font-semibold">
+                        <button onclick="cambiarSubSeccionMultas('ver')" id="subnav-ver" class="px-4 py-2 rounded-lg transition bg-white text-slate-800 shadow-sm">Ver Multas</button>
+                        <button onclick="cambiarSubSeccionMultas('registrar')" id="subnav-registrar" class="px-4 py-2 rounded-lg transition text-gray-600 hover:text-slate-900">Registrar Multa</button>
+                    </div>
+                </div>
+
+                <!-- SUB-SECCIÓN A: VER MULTAS (TABLA) -->
+                <div id="subseccion-ver-multas" class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500 font-medium">Listado histórico de infracciones registradas</span>
+                        <button onclick="cargarMultas()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">Actualizar lista</button>
+                    </div>
+
                     <div class="overflow-x-auto border-gray-100 rounded-xl">
                         <table class="w-full text-left border-collapse text-xs">
                             <thead>
-                                <tr class="bg-gray-50 text-gray-500 uppercase border-b border-gray-100 text-[11px]">
-                                    <th class="p-3">ID</th>
-                                    <th class="p-3">Quién lo cargó</th>
-                                    <th class="p-3">Título / Categoría</th>
-                                    <th class="p-3">Estado</th>
-                                    <th class="p-3 text-right">Fecha</th>
-                                </tr>
+                            <tr class="bg-gray-50 text-gray-500 uppercase border-b border-gray-100 text-[11px]">
+                                <th class="p-3">ID</th>
+                                <th class="p-3">Lote / Vecino Sancionado</th>
+                                <th class="p-3">Motivo / Monto</th>
+                                <th class="p-3">Estado</th>
+                                <th class="p-3 text-right">Acciones</th>
+                            </tr>
                             </thead>
-                            <tbody id="tabla-reclamos-body" class="divide-y divide-gray-100">
-                                <tr>
-                                    <td colspan="5" class="p-6 text-center text-gray-400">Cargando reclamos...</td>
-                                </tr>
+                            <tbody id="tabla-multas-body" class="divide-y divide-gray-100">
+                            <tr>
+                                <td colspan="5" class="p-6 text-center text-gray-400">Cargando multas...</td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-            </section>
 
-            <!-- SECCIÓN 2: GESTIÓN DE VECINOS -->
-            <section id="seccion-vecinos" class="space-y-4 hidden">
-                <div class="bg-white rounded-2xl p-6 shadow-sm border-gray-200 space-y-4">
-                    <div class="flex justify-between items-center">
-                        <h2 class="font-bold text-gray-800 text-lg">Gestión de Vecinos</h2>
-                        <button onclick="cargarVecinos()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">Actualizar lista</button>
-                    </div>
-
-                    <div class="overflow-x-auto border-gray-100 rounded-xl">
-                        <table class="w-full text-left border-collapse text-xs">
-                            <thead>
-                                <tr class="bg-gray-50 text-gray-500 uppercase border-b border-gray-100 text-[11px]">
-                                    <th class="p-3">Nombre</th>
-                                    <th class="p-3">Apellido</th>
-                                    <th class="p-3">Email</th>
-                                    <th class="p-3">Teléfono</th>
-                                    <th class="p-3">Manzana</th>
-                                    <th class="p-3">Lote</th>
-                                    <th class="p-3">Tipo de Relación</th>
-                                    <th class="p-3">Estado</th>
-                                    <th class="p-3 text-center">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabla-vecinos-body" class="divide-y divide-gray-100">
-                                <tr>
-                                    <td colspan="9" class="p-6 text-center text-gray-400">Cargando vecinos...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-                <div class="bg-white rounded-2xl p-6 shadow-sm border-gray-200 space-y-4">
-                    <h2 class="font-bold text-gray-800 text-lg">Dar de Alta a un Nuevo Vecino</h2>
-                    <p class="text-xs text-gray-500">Completa los datos del residente y asígnale su lote correspondiente.</p>
-
-                    <form id="form-alta-vecino" onsubmit="registrarVecino(event)" class="space-y-3">
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label for="nombre" class="block text-xs font-semibold text-gray-600 mb-1">Nombre</label>
-                                <input type="text" id="nombre" placeholder="Ej: Juan" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
-                            </div>
-                            <div>
-                                <label for="apellido" class="block text-xs font-semibold text-gray-600 mb-1">Apellido</label>
-                                <input type="text" id="apellido" placeholder="Ej: Pérez" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
-                            </div>
-                        </div>
-
+                <!-- SUB-SECCIÓN B: REGISTRAR NUEVA MULTA -->
+                <div id="subseccion-registrar-multa" class="space-y-4 hidden">
+                    <form id="form-multa" onsubmit="registrarMulta(event)" class="space-y-3">
                         <div>
-                            <label for="email" class="block text-xs font-semibold text-gray-600 mb-1">Correo electrónico</label>
-                            <input type="email" id="email" placeholder="vecino@email.com" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label for="telefono" class="block text-xs font-semibold text-gray-600 mb-1">Teléfono / WhatsApp</label>
-                                <input type="text" id="telefono" placeholder="351XXXXXXX" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500">
-                            </div>
-                            <div>
-                                <label for="password" class="block text-xs font-semibold text-gray-600 mb-1">Contraseña temporal</label>
-                                <input type="password" id="password" placeholder="••" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label for="manzana" class="block text-xs font-semibold text-gray-600 mb-1">Manzana</label>
-                                <input type="text" id="manzana" placeholder="Ej: Mza. B" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500">
-                            </div>
-                            <div>
-                                <label for="lote_identificador" class="block text-xs font-semibold text-gray-600 mb-1">Número de Lote</label>
-                                <input type="text" id="lote_identificador"="Ej: 12" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label for="tipo_relacion" class="block text-xs font-semibold text-gray-600 mb-1">Tipo de Relación</label>
-                            <select id="tipo_relacion" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500 bg-white">
-                                <option value="propietario">Propietario</option>
-                                <option value="inquilino">Inquilino</option>
-                                <option value="familiar">Familiar</option>
-                            </select>
-                        </div>
-
-                        <div id="mensaje-feedback" class="text-xs font-medium text-center hidden"></div>
-
-                        <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-3 rounded-xl transition shadow">
-                            Registrar y Vincular Vecino
-                        </button>
-                    </form>
-                </div>
-            </section>
-
-            <!-- SECCIÓN 4: ADMINISTRAR DOCUMENTACIÓN -->
-            <section id="seccion-documentos" class="space-y-4 hidden">
-                <div class="bg-white rounded-2xl p-6 shadow-sm border-gray-200 space-y-4">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-4">
-                        <div>
-                            <h2 class="font-bold text-gray-800 text-lg">Administrar Documentación</h2>
-                            <p class="text-xs text-gray-500">Agregá o quitá documentos. El tilde indica si el documento está disponible para los vecinos.</p>
-                        </div>
-                        <button onclick="cargarDocumentos()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">Actualizar lista</button>
-                    </div>
-
-                    <!-- Formulario para agregar documento (con archivo opcional) -->
-                    <form id="form-documento" onsubmit="agregarDocumento(event)" class="flex flex-col sm:flex-row gap-2">
-                        <input type="text" id="documento-nombre" placeholder="Nombre del documento (Ej: Reglamento Interno)" class="flex-1 border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
-                        <input type="file" id="documento-archivo" class="sm:w-64 text-xs text-gray-500 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.txt,.csv">
-                        <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-5 py-2.5 rounded-lg transition text-sm shadow">
-                            + Agregar Documento
-                        </button>
-                    </form>
-                    <p class="text-[10px] text-gray-400">El archivo es opcional (PDF, imagen, Word, Excel, TXT o CSV, max 10 MB). Si no adjuntás archivo, el documento se lista solo con su nombre.</p>
-
-                    <div id="documento-feedback" class="text-xs font-medium text-center hidden"></div>
-
-                    <!-- Listado de documentos -->
-                    <div id="lista-documentos" class="space-y-2">
-                        <p class="text-xs text-gray-400 text-center py-4">Cargando documentos...</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SECCIÓN 3: GESTIÓN DE MULTAS (Con Sub-pestañas: Ver / Registrar) -->
-            <section id="seccion-multas" class="space-y-4 hidden">
-                <!-- Sección de Gestión de Avisos -->
-            </section>
-            <section id="seccion-avisos" class="space-y-4 hidden">
-                <div class="bg-white rounded-2xl p-6 shadow-sm border-gray-200 space-y-4">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-4">
-                        <div>
-                            <h2 class="font-bold text-gray-800 text-lg">Gestión de Avisos</h2>
-                            <p class="text-xs text-gray-500">Registrar y administrar avisos de infracción para vecinos.</p>
-                        </div>
-                        <button onclick="cargarAvisos()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">Actualizar lista</button>
-                    </div>
-
-                    <!-- Formulario para agregar aviso -->
-                    <form id="form-aviso" onsubmit="registrarAviso(event)" class="space-y-3">
-                        <div>
-                            <label for="aviso-select-vecino" class="block text-xs font-semibold text-gray-600 mb-1">Seleccionar Vecino</label>
-                            <select id="aviso-select-vecino" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500 bg-white" required>
+                            <label for="multa-select-vecino" class="block text-xs font-semibold text-gray-600 mb-1">Seleccionar Vecino (Mza / Lote / Nombre)</label>
+                            <select id="multa-select-vecino" onchange="seleccionarVecino()" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500 bg-white" required>
                                 <option value="">Cargando lista de vecinos...</option>
                             </select>
                         </div>
 
+                        <input type="hidden" id="multa-lote-id">
+
                         <div>
-                            <label for="aviso-tipo" class="block text-xs font-semibold text-gray-600 mb-1">Tipo de Infracción</label>
-                            <select id="aviso-tipo" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500 bg-white" required>
+                            <label for="multa-tipo" class="block text-xs font-semibold text-gray-600 mb-1">Tipo de Infracción</label>
+                            <select id="multa-tipo" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500 bg-white" data-field="tipo_multa">
+                                <option value="velocidad">Exceso de velocidad</option>
                                 <option value="mal_estacionamiento">Mal estacionamiento</option>
                                 <option value="ruidos_molestos">Ruidos molestos</option>
                                 <option value="mascotas">Mascotas sueltas / Sin correa</option>
@@ -249,383 +251,351 @@
                         </div>
 
                         <div>
-                            <label for="aviso-observaciones" class="block text-xs font-semibold text-gray-600 mb-1">Observaciones / Detalle</label>
-                            <textarea id="aviso-observaciones" rows="3" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" placeholder="Describa el motivo y detalles del aviso..." required></textarea>
+                            <label for="multa-monto" class="block text-xs font-semibold text-gray-600 mb-1">Monto de la Multa ($)</label>
+                            <input type="number" step="0.01" id="multa-monto" placeholder="Ej: 15000.00" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
                         </div>
 
-                        <div id="aviso-feedback" class="text-xs font-medium text-center hidden"></div>
+                        <div>
+                            <label for="multa-observaciones" class="block text-xs font-semibold text-gray-600 mb-1">Observaciones / Motivo detallado</label>
+                            <textarea id="multa-observaciones" rows="3" placeholder="Describa el hecho, fecha y hora de la infracción..." class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required></textarea>
+                        </div>
+
+                        <div id="multa-feedback" class="text-xs font-medium text-center hidden"></div>
 
                         <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-3 rounded-xl transition shadow">
-                            Registrar Aviso
+                            Emitir y Registrar Multa
                         </button>
                     </form>
-
-                    <!-- Listado de avisos -->
-                    <div id="lista-avisos" class="space-y-2">
-                        <p class="text-xs text-gray-400 text-center py-4">Cargando avisos...</p>
-                    </div>
-                </div>
-            </section>
-                <div class="bg-white rounded-2xl p-6 shadow-sm border-gray-200 space-y-4">
-
-                    <!-- Cabecera de Multas y Sub-pestañas -->
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-4">
-                        <div>
-                            <h2 class="font-bold text-gray-800 text-lg">Módulo de Multas e Infracciones</h2>
-                            <p class="text-xs text-gray-500">Administrá las multas emitidas y notificá a los residentes.</p>
-                        </div>
-                        <div class="flex bg-gray-100 p-1 rounded-xl text-xs font-semibold">
-                            <button onclick="cambiarSubSeccionMultas('ver')" id="subnav-ver" class="px-4 py-2 rounded-lg transition bg-white text-slate-800 shadow-sm">Ver Multas</button>
-                            <button onclick="cambiarSubSeccionMultas('registrar')" id="subnav-registrar" class="px-4 py-2 rounded-lg transition text-gray-600 hover:text-slate-900">Registrar Multa</button>
-                        </div>
-                    </div>
-
-                    <!-- SUB-SECCIÓN A: VER MULTAS (TABLA) -->
-                    <div id="subseccion-ver-multas" class="space-y-3">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-gray-500 font-medium">Listado histórico de infracciones registradas</span>
-                            <button onclick="cargarMultas()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">Actualizar lista</button>
-                        </div>
-
-                        <div class="overflow-x-auto border-gray-100 rounded-xl">
-                            <table class="w-full text-left border-collapse text-xs">
-                                <thead>
-                                    <tr class="bg-gray-50 text-gray-500 uppercase border-b border-gray-100 text-[11px]">
-                                        <th class="p-3">ID</th>
-                                        <th class="p-3">Lote / Vecino Sancionado</th>
-                                        <th class="p-3">Motivo / Monto</th>
-                                        <th class="p-3">Estado</th>
-                                        <th class="p-3 text-right">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabla-multas-body" class="divide-y divide-gray-100">
-                                    <tr>
-                                        <td colspan="5" class="p-6 text-center text-gray-400">Cargando multas...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- SUB-SECCIÓN B: REGISTRAR NUEVA MULTA -->
-                    <div id="subseccion-registrar-multa" class="space-y-4 hidden">
-                        <form id="form-multa" onsubmit="registrarMulta(event)" class="space-y-3">
-                            <div>
-                                <label for="multa-select-vecino" class="block text-xs font-semibold text-gray-600 mb-1">Seleccionar Vecino (Mza / Lote / Nombre)</label>
-                                <select id="multa-select-vecino" onchange="seleccionarVecino()" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500 bg-white" required>
-                                    <option value="">Cargando lista de vecinos...</option>
-                                </select>
-                            </div>
-
-                            <input type="hidden" id="multa-lote-id">
-
-                            <div>
-                                <label for="multa-tipo" class="block text-xs font-semibold text-gray-600 mb-1">Tipo de Infracción</label>
-                                <select id="multa-tipo" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500 bg-white" data-field="tipo_multa">
-                                    <option value="velocidad">Exceso de velocidad</option>
-                                    <option value="mal_estacionamiento">Mal estacionamiento</option>
-                                    <option value="ruidos_molestos">Ruidos molestos</option>
-                                    <option value="mascotas">Mascotas sueltas / Sin correa</option>
-                                    <option value="obras">Incumplimiento reglamento de obra</option>
-                                    <option value="otro">Otro motivo</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label for="multa-monto" class="block text-xs font-semibold text-gray-600 mb-1">Monto de la Multa ($)</label>
-                                <input type="number" step="0.01" id="multa-monto" placeholder="Ej: 15000.00" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
-                            </div>
-
-                            <div>
-                                <label for="multa-observaciones" class="block text-xs font-semibold text-gray-600 mb-1">Observaciones / Motivo detallado</label>
-                                <textarea id="multa-observaciones" rows="3" placeholder="Describa el hecho, fecha y hora de la infracción..." class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required></textarea>
-                            </div>
-
-                            <div id="multa-feedback" class="text-xs font-medium text-center hidden"></div>
-
-                            <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-3 rounded-xl transition shadow">
-                                Emitir y Registrar Multa
-                            </button>
-                        </form>
-                    </div>
-
-                </div>
-            </section>
-
-        </main>
-    </div>
-
-    <!-- MODAL DE DETALLE DE MULTA (Intendencia) -->
-    <div id="modal-detalle-multa" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b pb-3">
-                <div>
-                    <span id="modal-multa-id-badge" class="text-xs font-bold px-2 py-0.5 rounded uppercase"></span>
-                    <h3 class="font-bold text-gray-800 text-base mt-1" id="modal-multa-titulo">Detalle de la Multa</h3>
-                </div>
-                <button onclick="cerrarModalDetalleMulta()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
-            </div>
-
-            <div class="space-y-3 text-xs">
-                <div class="bg-gray-50 p-3 rounded-xl space-y-1 text-gray-600">
-                    <p><b>Vecino sancionado:</b> <span id="modal-multa-vecino"></span></p>
-                    <p><b>Correo:</b> <span id="modal-multa-email"></span></p>
-                    <p><b>Lote:</b> <span id="modal-multa-lote"></span></p>
-                    <p><b>Fecha de emisión:</b> <span id="modal-multa-fecha"></span></p>
-                    <p><b>Estado:</b> <span id="modal-multa-estado"></span></p>
-                </div>
-
-                <div class="bg-yellow-50 border-yellow-100 p-4 rounded-xl text-center">
-                    <p class="text-[10px] uppercase font-semibold text-yellow-700 mb-1">Monto de la multa</p>
-                    <p class="text-2xl font-bold text-yellow-800" id="modal-multa-monto">$0.00</p>
-                </div>
-
-                <div>
-                    <p class="font-semibold text-gray-700 mb-1">Observaciones / Motivo:</p>
-                    <p id="modal-multa-observaciones" class="text-gray-600 bg-slate-50 p-3 rounded-xl border-gray-100 leading-relaxed"></p>
-                </div>
-
-                <div class="pt-2 border-t flex justify-end gap-2">
-                    <button onclick="cerrarModalDetalleMulta(); enviarAvisoMulta(multaAbiertaId)" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition text-xs">
-                        ✉️ Enviar Aviso al Vecino
-                    </button>
-                    <button onclick="cerrarModalDetalleMulta()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-xl transition text-xs">
-                        Cerrar
-                    </button>
                 </div>
             </div>
-        </div>
-    </div>
+        </section>
 
-    <!-- MODAL DE DETALLE DE RECLAMO (Doble Clic) con Comentarios de Gestión -->
-    <div id="modal-detalle-reclamo" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b pb-3">
-                <div>
-                    <span id="modal-id-badge" class="text-xs font-bold px-2 py-0.5 rounded uppercase"></span>
-                    <h3 class="font-bold text-gray-800 text-base mt-1" id="modal-titulo">Detalle del Reclamo</h3>
-                </div>
-                <button onclick="cerrarModalDetalle()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
-            </div>
-
-            <div class="space-y-3 text-xs">
-                <div class="bg-gray-50 p-3 rounded-xl space-y-1 text-gray-600">
-                    <p><b>Vecino:</b> <span id="modal-vecino"></span></p>
-                    <p><b>Lote:</b> <span id="modal-lote"></span></p>
-                    <p><b>Categoría:</b> <span id="modal-categoria"></span></p>
-                    <p><b>Fecha de creación:</b> <span id="modal-fecha"></span></p>
-                </div>
-
-                <div>
-                    <p class="font-semibold text-gray-700 mb-1">Descripción detallada:</p>
-                    <p id="modal-descripcion" class="text-gray-600 bg-slate-50 p-3 rounded-xl border-gray-100 leading-relaxed"></p>
-                </div>
-
-                <div id="modal-contenedor-imagen" class="hidden">
-                    <p class="font-semibold text-gray-700 mb-1">Evidencia Fotográfica:</p>
-                    <a id="modal-imagen-link" href="#" target="_blank" class="inline-block">
-                        <img id="modal-imagen-src" src="" alt="Foto adjunta" class="w-full max-h-56 object-cover rounded-xl border shadow-sm">
-                    </a>
-                </div>
-
-                <!-- Historial de Comentarios de Gestión -->
-                <div>
-                    <p class="font-semibold text-gray-700 mb-1">Historial de Gestión / Comentarios:</p>
-                    <div id="modal-historial-comentarios" class="bg-slate-50 p-3 rounded-xl border-gray-100 max-h-36 overflow-y-auto space-y-2 text-[11px]">
-                        <span class="text-gray-400 italic">Cargando comentarios...</span>
+        <!-- SECCIÓN 4: GESTIÓN DE AVISOS -->
+        <section id="seccion-avisos" class="space-y-4 hidden">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border-gray-200 space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-4">
+                    <div>
+                        <h2 class="font-bold text-gray-800 text-lg">Gestión de Avisos</h2>
+                        <p class="text-xs text-gray-500">Registrar y administrar avisos de infracción para vecinos.</p>
                     </div>
+                    <button onclick="cargarAvisos()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">Actualizar lista</button>
                 </div>
 
-                <!-- Agregar nuevo comentario -->
-                <div class="space-y-1">
-                    <label for="modal-nuevo-comentario" class="block font-semibold text-gray-700">Agregar Nota / Comentario de Gestión:</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="modal-nuevo-comentario" placeholder="Escribí una nota interna o para el vecino..." class="flex-1 border rounded-xl p-2 text-xs outline-none focus:ring-2 focus:ring-slate-500">
-                        <button type="button" onclick="agregarComentarioReclamo()" class="bg-slate-700 hover:bg-slate-800 text-white font-semibold px-3 py-2 rounded-xl transition text-[11px]">
-                            Comentar
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Modificar Estado del Reclamo -->
-                <div class="pt-2 border-t space-y-2">
-                    <label for="modal-select-estado" class="block font-semibold text-gray-700">Modificar Estado del Reclamo:</label>
-                    <div class="flex space-x-2">
-                        <select id="modal-select-estado" class="flex-1 border rounded-xl p-2 text-xs outline-none bg-white font-medium">
-                            <option value="pendiente">Pendiente</option>
-                            <option value="en_proceso">En Proceso</option>
-                            <option value="resuelto">Resuelto</option>
-                            <option value="rechazado">Rechazado</option>
+                <!-- Formulario para agregar aviso -->
+                <form id="form-aviso" onsubmit="registrarAviso(event)" class="space-y-3">
+                    <div>
+                        <label for="aviso-select-vecino" class="block text-xs font-semibold text-gray-600 mb-1">Seleccionar Vecino</label>
+                        <select id="aviso-select-vecino" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500 bg-white" required>
+                            <option value="">Cargando lista de vecinos...</option>
                         </select>
-                        <button type="button" onclick="actualizarEstadoDesdeModal()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2 rounded-xl transition">
-                            Guardar Cambios
-                        </button>
                     </div>
+
+                    <div>
+                        <label for="aviso-tipo" class="block text-xs font-semibold text-gray-600 mb-1">Tipo de Infracción</label>
+                        <select id="aviso-tipo" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500 bg-white" required>
+                            <option value="mal_estacionamiento">Mal estacionamiento</option>
+                            <option value="ruidos_molestos">Ruidos molestos</option>
+                            <option value="mascotas">Mascotas sueltas / Sin correa</option>
+                            <option value="obras">Incumplimiento reglamento de obra</option>
+                            <option value="otro">Otro motivo</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="aviso-observaciones" class="block text-xs font-semibold text-gray-600 mb-1">Observaciones / Detalle</label>
+                        <textarea id="aviso-observaciones" rows="3" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" placeholder="Describa el motivo y detalles del aviso..." required></textarea>
+                    </div>
+
+                    <div id="aviso-feedback" class="text-xs font-medium text-center hidden"></div>
+
+                    <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-3 rounded-xl transition shadow">
+                        Registrar Aviso
+                    </button>
+                </form>
+
+                <!-- Listado de avisos -->
+                <div id="lista-avisos" class="space-y-2">
+                    <p class="text-xs text-gray-400 text-center py-4">Cargando avisos...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 5: ADMINISTRAR DOCUMENTACIÓN -->
+        <section id="seccion-documentos" class="space-y-4 hidden">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border-gray-200 space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-4">
+                    <div>
+                        <h2 class="font-bold text-gray-800 text-lg">Administrar Documentación</h2>
+                        <p class="text-xs text-gray-500">Agregá o quitá documentos. El tilde indica si el documento está disponible para los vecinos.</p>
+                    </div>
+                    <button onclick="cargarDocumentos()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">Actualizar lista</button>
+                </div>
+
+                <!-- Formulario para agregar documento (con archivo opcional) -->
+                <form id="form-documento" onsubmit="agregarDocumento(event)" class="flex flex-col sm:flex-row gap-2">
+                    <input type="text" id="documento-nombre" placeholder="Nombre del documento (Ej: Reglamento Interno)" class="flex-1 border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
+                    <input type="file" id="documento-archivo" class="sm:w-64 text-xs text-gray-500 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.txt,.csv">
+                    <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-5 py-2.5 rounded-lg transition text-sm shadow">
+                        + Agregar Documento
+                    </button>
+                </form>
+                <p class="text-[10px] text-gray-400">El archivo es opcional (PDF, imagen, Word, Excel, TXT o CSV, max 10 MB). Si no adjuntás archivo, el documento se lista solo con su nombre.</p>
+
+                <div id="documento-feedback" class="text-xs font-medium text-center hidden"></div>
+
+                <!-- Listado de documentos -->
+                <div id="lista-documentos" class="space-y-2">
+                    <p class="text-xs text-gray-400 text-center py-4">Cargando documentos...</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<!-- MODALES -->
+<!-- MODAL DE DETALLE DE MULTA (Intendencia) -->
+<div id="modal-detalle-multa" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center border-b pb-3">
+            <div>
+                <span id="modal-multa-id-badge" class="text-xs font-bold px-2 py-0.5 rounded uppercase"></span>
+                <h3 class="font-bold text-gray-800 text-base mt-1" id="modal-multa-titulo">Detalle de la Multa</h3>
+            </div>
+            <button onclick="cerrarModalDetalleMulta()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+        </div>
+
+        <div class="space-y-3 text-xs">
+            <div class="bg-gray-50 p-3 rounded-xl space-y-1 text-gray-600">
+                <p><b>Vecino sancionado:</b> <span id="modal-multa-vecino"></span></p>
+                <p><b>Correo:</b> <span id="modal-multa-email"></span></p>
+                <p><b>Lote:</b> <span id="modal-multa-lote"></span></p>
+                <p><b>Fecha de emisión:</b> <span id="modal-multa-fecha"></span></p>
+                <p><b>Estado:</b> <span id="modal-multa-estado"></span></p>
+            </div>
+
+            <div class="bg-yellow-50 border-yellow-100 p-4 rounded-xl text-center">
+                <p class="text-[10px] uppercase font-semibold text-yellow-700 mb-1">Monto de la multa</p>
+                <p class="text-2xl font-bold text-yellow-800" id="modal-multa-monto">$0.00</p>
+            </div>
+
+            <div>
+                <p class="font-semibold text-gray-700 mb-1">Observaciones / Motivo:</p>
+                <p id="modal-multa-observaciones" class="text-gray-600 bg-slate-50 p-3 rounded-xl border-gray-100 leading-relaxed"></p>
+            </div>
+
+            <div class="pt-2 border-t flex justify-end gap-2">
+                <button onclick="cerrarModalDetalleMulta(); enviarAvisoMulta(multaAbiertaId)" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition text-xs">
+                    ✉️ Enviar Aviso al Vecino
+                </button>
+                <button onclick="cerrarModalDetalleMulta()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-xl transition text-xs">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE DETALLE DE RECLAMO (Doble Clic) con Comentarios de Gestión -->
+<div id="modal-detalle-reclamo" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center border-b pb-3">
+            <div>
+                <span id="modal-id-badge" class="text-xs font-bold px-2 py-0.5 rounded uppercase"></span>
+                <h3 class="font-bold text-gray-800 text-base mt-1" id="modal-titulo">Detalle del Reclamo</h3>
+            </div>
+            <button onclick="cerrarModalDetalle()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+        </div>
+
+        <div class="space-y-3 text-xs">
+            <div class="bg-gray-50 p-3 rounded-xl space-y-1 text-gray-600">
+                <p><b>Vecino:</b> <span id="modal-vecino"></span></p>
+                <p><b>Lote:</b> <span id="modal-lote"></span></p>
+                <p><b>Categoría:</b> <span id="modal-categoria"></span></p>
+                <p><b>Fecha de creación:</b> <span id="modal-fecha"></span></p>
+            </div>
+
+            <div>
+                <p class="font-semibold text-gray-700 mb-1">Descripción detallada:</p>
+                <p id="modal-descripcion" class="text-gray-600 bg-slate-50 p-3 rounded-xl border-gray-100 leading-relaxed"></p>
+            </div>
+
+            <div id="modal-contenedor-imagen" class="hidden">
+                <p class="font-semibold text-gray-700 mb-1">Evidencia Fotográfica:</p>
+                <a id="modal-imagen-link" href="#" target="_blank" class="inline-block">
+                    <img id="modal-imagen-src" src="" alt="Foto adjunta" class="w-full max-h-56 object-cover rounded-xl border shadow-sm">
+                </a>
+            </div>
+
+            <!-- Historial de Comentarios de Gestión -->
+            <div>
+                <p class="font-semibold text-gray-700 mb-1">Historial de Gestión / Comentarios:</p>
+                <div id="modal-historial-comentarios" class="bg-slate-50 p-3 rounded-xl border-gray-100 max-h-36 overflow-y-auto space-y-2 text-[11px]">
+                    <span class="text-gray-400 italic">Cargando comentarios...</span>
+                </div>
+            </div>
+
+            <!-- Agregar nuevo comentario -->
+            <div class="space-y-1">
+                <label for="modal-nuevo-comentario" class="block font-semibold text-gray-700">Agregar Nota / Comentario de Gestión:</label>
+                <div class="flex gap-2">
+                    <input type="text" id="modal-nuevo-comentario" placeholder="Escribí una nota interna o para el vecino..." class="flex-1 border rounded-xl p-2 text-xs outline-none focus:ring-2 focus:ring-slate-500">
+                    <button type="button" onclick="agregarComentarioReclamo()" class="bg-slate-700 hover:bg-slate-800 text-white font-semibold px-3 py-2 rounded-xl transition text-[11px]">
+                        Comentar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modificar Estado del Reclamo -->
+            <div class="pt-2 border-t space-y-2">
+                <label for="modal-select-estado" class="block font-semibold text-gray-700">Modificar Estado del Reclamo:</label>
+                <div class="flex space-x-2">
+                    <select id="modal-select-estado" class="flex-1 border rounded-xl p-2 text-xs outline-none bg-white font-medium">
+                        <option value="pendiente">Pendiente</option>
+                        <option value="en_proceso">En Proceso</option>
+                        <option value="resuelto">Resuelto</option>
+                        <option value="rechazado">Rechazado</option>
+                    </select>
+                    <button type="button" onclick="actualizarEstadoDesdeModal()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2 rounded-xl transition">
+                        Guardar Cambios
+                    </button>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <script src="session-guard.js"></script>
-    <!-- Script de lógica y Notificaciones Push -->
-    <script>
-        const API_URL = 'index.php?route=';
-        let usuario = null;
-        let listaReclamosGlobal = [];
-        let listaMultasGlobal = [];
-        let vecinosGlobal = [];
-        let reclamoSeleccionadoId = null;
-        let multaAbiertaId = null;
+<script src="session-guard.js"></script>
+<!-- Script de lógica y Notificaciones Push -->
+<script>
+    const API_URL = 'index.php?route=';
+    let usuario = null;
+    let listaReclamosGlobal = [];
+    let listaMultasGlobal = [];
+    let vecinosGlobal = [];
+    let reclamoSeleccionadoId = null;
+    let multaAbiertaId = null;
 
-        function escapeHtml(value) {
-            return String(value ?? '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        }
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
 
-        function apiFetch(url, options = {}) {
-            return SessionGuard.apiFetch(url, options);
-        }
+    function apiFetch(url, options = {}) {
+        return SessionGuard.apiFetch(url, options);
+    }
 
-        async function validarSesion() {
-            const sesion = await SessionGuard.requireSession({
-                apiBase: API_URL,
-                allowedRoles: ['intendente', 'admin_general'],
-                redirectTo: 'login'
-            });
+    async function validarSesion() {
+        const sesion = await SessionGuard.requireSession({
+            apiBase: API_URL,
+            allowedRoles: ['intendente', 'admin_general'],
+            redirectTo: 'login'
+        });
 
-            usuario = sesion;
-            return sesion;
-        }
+        usuario = sesion;
+        return sesion;
+    }
 
-        // Clave VAPID Pública de prueba
-        const VAPID_PUBLIC_KEY = 'BI_JeTpLT-ltMz2pqM1jZZD8lS-ZZwJEVhUACXl-iQmYqpREU2oFWwkdI7JYMra8l40n0c1MqBuzYttooULkoK0';
+    // Clave VAPID Pública de prueba
+    const VAPID_PUBLIC_KEY = 'BI_JeTpLT-ltMz2pqM1jZZD8lS-ZZwJEVhUACXl-iQmYqpREU2oFWwkdI7JYMra8l40n0c1MqBuzYttooULkoK0';
 
-        // --- FUNCIONES DE NOTIFICACIONES PUSH Y CAMPANA ---
-        async function chequearEstadoPush() {
-            if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    // --- FUNCIONES DE NOTIFICACIONES PUSH Y CAMPANA ---
+    async function chequearEstadoPush() {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
-            try {
-                const registro = await navigator.serviceWorker.register('sw.js');
-                const suscripcion = await registro.pushManager.getSubscription();
-                const btn = document.getElementById('btn-push-toggle');
+        try {
+            const registro = await navigator.serviceWorker.register('sw.js');
+            const suscripcion = await registro.pushManager.getSubscription();
+            const btn = document.getElementById('btn-push-toggle');
 
-                if (suscripcion && Notification.permission === 'granted') {
-                    btn.innerHTML = '🔔';
-                    btn.title = 'Notificaciones activas (Clic para desactivar)';
-                    btn.classList.add('ring-2', 'ring-white');
-                } else {
-                    btn.innerHTML = '🔕';
-                    btn.title = 'Notificaciones desactivadas (Clic para activar)';
-                    btn.classList.remove('ring-2', 'ring-white');
-                }
-            } catch (err) {
-                console.error('Error al chequear estado push:', err);
+            if (suscripcion && Notification.permission === 'granted') {
+                btn.innerHTML = '🔔';
+                btn.title = 'Notificaciones activas (Clic para desactivar)';
+                btn.classList.add('ring-2', 'ring-white');
+            } else {
+                btn.innerHTML = '🔕';
+                btn.title = 'Notificaciones desactivadas (Clic para activar)';
+                btn.classList.remove('ring-2', 'ring-white');
             }
+        } catch (err) {
+            console.error('Error al chequear estado push:', err);
+        }
+    }
+
+    async function toggleNotificacionesPush() {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+            alert('Tu navegador no soporta notificaciones push.');
+            return;
         }
 
-        async function toggleNotificacionesPush() {
-            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-                alert('Tu navegador no soporta notificaciones push.');
-                return;
-            }
+        try {
+            const registro = await navigator.serviceWorker.ready;
+            let suscripcion = await registro.pushManager.getSubscription();
 
-            try {
-                const registro = await navigator.serviceWorker.ready;
-                let suscripcion = await registro.pushManager.getSubscription();
-
-                if (suscripcion) {
-                    const endpointActual = suscripcion.endpoint;
-                    await suscripcion.unsubscribe();
-                    await eliminarSuscripcionEnServidor(endpointActual);
-                    alert('Notificaciones desactivadas correctamente.');
+            if (suscripcion) {
+                const endpointActual = suscripcion.endpoint;
+                await suscripcion.unsubscribe();
+                await eliminarSuscripcionEnServidor(endpointActual);
+                alert('Notificaciones desactivadas correctamente.');
+                chequearEstadoPush();
+            } else {
+                const permiso = await Notification.requestPermission();
+                if (permiso !== 'granted') {
+                    alert('No se concedieron los permisos para las notificaciones.');
                     chequearEstadoPush();
-                } else {
-                    const permiso = await Notification.requestPermission();
-                    if (permiso !== 'granted') {
-                        alert('No se concedieron los permisos para las notificaciones.');
-                        chequearEstadoPush();
-                        return;
-                    }
-
-                    const claveConvertida = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
-                    suscripcion = await registro.pushManager.subscribe({
-                        userVisibleOnly: true,
-                        applicationServerKey: claveConvertida
-                    });
-
-                    const guardado = await guardarSuscripcionEnServidor(suscripcion);
-                    await enviarPushDePrueba();
-                    alert(`Notificaciones activadas para usuario ID ${guardado.usuario_id} y validadas con una prueba.`);
-                    chequearEstadoPush();
+                    return;
                 }
-            } catch (error) {
-                console.error('Error al alternar notificaciones:', error);
-                alert('No se pudo activar push. Revisá sesion/token y permisos del navegador.');
-            }
-        }
 
-        function urlBase64ToUint8Array(base64String) {
-            const padding = '='.repeat((4 - base64String.length % 4) % 4);
-            const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
-            const rawData = window.atob(base64);
-            const outputArray = new Uint8Array(rawData.length);
-
-            for (let i = 0; i < rawData.length; ++i) {
-                outputArray[i] = rawData.charCodeAt(i);
-            }
-            return outputArray;
-        }
-
-        async function guardarSuscripcionEnServidor(suscripcion) {
-            const subJson = suscripcion.toJSON();
-            const payload = {
-                endpoint: subJson.endpoint,
-                keys: {
-                    p256dh: subJson.keys.p256dh,
-                    auth: subJson.keys.auth
-                }
-            };
-
-            try {
-                const response = await apiFetch('index.php?route=/push/suscripcion', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
+                const claveConvertida = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+                suscripcion = await registro.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: claveConvertida
                 });
 
-                let result = {};
-                try {
-                    result = await response.json();
-                } catch (parseError) {
-                    result = {};
-                }
-
-                if (!response.ok || !result.success) {
-                    const msg = result.error || `Error ${response.status} al guardar suscripcion push.`;
-                    throw new Error(msg);
-                }
-
-                console.log('Suscripción Push registrada en el servidor.', result);
-                return result;
-            } catch (error) {
-                console.error('Error enviando suscripción al servidor:', error);
-                throw error;
+                const guardado = await guardarSuscripcionEnServidor(suscripcion);
+                await enviarPushDePrueba();
+                alert(`Notificaciones activadas para usuario ID ${guardado.usuario_id} y validadas con una prueba.`);
+                chequearEstadoPush();
             }
+        } catch (error) {
+            console.error('Error al alternar notificaciones:', error);
+            alert('No se pudo activar push. Revisá sesion/token y permisos del navegador.');
         }
+    }
 
-        async function eliminarSuscripcionEnServidor(endpoint) {
-            const response = await apiFetch('index.php?route=/push/desuscripcion', {
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    }
+
+    async function guardarSuscripcionEnServidor(suscripcion) {
+        const subJson = suscripcion.toJSON();
+        const payload = {
+            endpoint: subJson.endpoint,
+            keys: {
+                p256dh: subJson.keys.p256dh,
+                auth: subJson.keys.auth
+            }
+        };
+
+        try {
+            const response = await apiFetch('index.php?route=/push/suscripcion', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ endpoint: endpoint })
+                body: JSON.stringify(payload)
             });
 
             let result = {};
@@ -636,178 +606,207 @@
             }
 
             if (!response.ok || !result.success) {
-                const msg = result.error || `Error ${response.status} al eliminar suscripcion push.`;
+                const msg = result.error || `Error ${response.status} al guardar suscripcion push.`;
                 throw new Error(msg);
             }
 
-            console.log('Suscripción Push eliminada en el servidor.', result);
+            console.log('Suscripción Push registrada en el servidor.', result);
             return result;
+        } catch (error) {
+            console.error('Error enviando suscripción al servidor:', error);
+            throw error;
         }
+    }
 
-        async function enviarPushDePrueba() {
-            const response = await apiFetch('index.php?route=/push/prueba', { method: 'POST' });
-
-            let result = {};
-            try {
-                result = await response.json();
-            } catch (parseError) {
-                result = {};
-            }
-
-            if (!response.ok || !result.success) {
-                const msg = result.error || `Error ${response.status} al enviar push de prueba.`;
-                throw new Error(msg);
-            }
-        }
-
-        async function probarPushManual(btn) {
-            const boton = btn || document.getElementById('btn-push-test');
-            const textoOriginal = boton ? boton.innerText : '';
-
-            try {
-                if (boton) {
-                    boton.disabled = true;
-                    boton.innerText = 'Enviando...';
-                }
-
-                await enviarPushDePrueba();
-                alert('Push de prueba enviado correctamente.');
-            } catch (error) {
-                console.error('Error al enviar push de prueba:', error);
-                alert(error.message || 'No se pudo enviar el push de prueba.');
-            } finally {
-                if (boton) {
-                    boton.disabled = false;
-                    boton.innerText = textoOriginal || 'Probar Push';
-                }
-            }
-        }
-        // --------------------------------------------------
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            const sesion = await validarSesion();
-            if (!sesion) return;
-
-            document.getElementById('barrio-nombre').innerText = `Intendencia - ${sesion.barrio_nombre || 'Barrio'}`;
-            document.getElementById('usuario-info').innerText = `${sesion.nombre} (${sesion.rol})`;
-
-            cargarReclamos();
-            cargarMultas();
-            cargarTodosLosVecinos();
-            cargarDocumentos();
-
-            // Verificar estado y activar notificaciones push de forma automática e inteligente
-            chequearEstadoPush();
+    async function eliminarSuscripcionEnServidor(endpoint) {
+        const response = await apiFetch('index.php?route=/push/desuscripcion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ endpoint: endpoint })
         });
 
-        function cambiarSeccion(seccion) {
-            const secReclamos = document.getElementById('seccion-reclamos');
-            const secVecinos = document.getElementById('seccion-vecinos');
-            const secMultas = document.getElementById('seccion-multas');
-            const secAvisos = document.getElementById('seccion-avisos');
-            const secDocumentos = document.getElementById('seccion-documentos');
-
-            const navReclamos = document.getElementById('nav-reclamos');
-            const navVecinos = document.getElementById('nav-vecinos');
-            const navMultas = document.getElementById('nav-multas');
-            const navAvisos = document.getElementById('nav-avisos');
-            const navDocumentos = document.getElementById('nav-documentos');
-
-            secReclamos.classList.add('hidden');
-            secVecinos.classList.add('hidden');
-            secMultas.classList.add('hidden');
-            secAvisos.classList.add('hidden');
-            secDocumentos.classList.add('hidden');
-
-            navReclamos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
-            navVecinos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
-            navMultas.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
-            navAvisos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
-            navDocumentos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
-
-            if (seccion === 'reclamos') {
-                secReclamos.classList.remove('hidden');
-                navReclamos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
-            } else if (seccion === 'vecinos') {
-                secVecinos.classList.remove('hidden');
-                navVecinos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
-            } else if (seccion === 'multas') {
-                secMultas.classList.remove('hidden');
-                navMultas.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
-            } else if (seccion === 'avisos') {
-                secAvisos.classList.remove('hidden');
-                navAvisos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
-                cargarAvisos();
-            } else if (seccion === 'documentos') {
-                secDocumentos.classList.remove('hidden');
-                navDocumentos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
-                cargarDocumentos();
-            }
+        let result = {};
+        try {
+            result = await response.json();
+        } catch (parseError) {
+            result = {};
         }
 
-        async function cargarVecinos() {
-            try {
-                const response = await apiFetch('index.php?route=/vecinos/listar', { method: 'GET' });
-                const result = await response.json();
-                const vecinos = result.data || [];
-
-                const tbody = document.getElementById('tabla-vecinos-body');
-                tbody.innerHTML = '';
-
-                if (!Array.isArray(vecinos) || vecinos.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="9" class="p-6 text-center text-gray-400">No hay vecinos registrados.</td></tr>';
-                    return;
-                }
-
-                vecinos.forEach(v => {
-                    const tr = document.createElement('tr');
-                    tr.className = 'hover:bg-gray-50/50 transition';
-
-                    tr.innerHTML = `
-                        <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.nombre)}</td>
-                        <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.apellido)}</td>
-                        <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.email)}</td>
-                        <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.telefono || '')}</td>
-                        <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.manzana || '')}</td>
-                        <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.lote_identificador || '')}</td>
-                        <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.tipo_relacion || '')}</td>
-                        <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.estado || 'activo')}</td>
-                        <td class="p-3 text-center">
-                            <button onclick="cambiarEstadoVecino(${v.usuario_id}, '${v.estado === 'activo' ? 'bloqueado' : 'activo'}')" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-1 rounded-lg transition shadow-sm">
-                                ${v.estado === 'activo' ? 'Bloquear' : 'Activar'}
-                            </button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            } catch (error) {
-                console.error('Error al cargar vecinos:', error);
-                document.getElementById('tabla-vecinos-body').innerHTML = '<tr><td colspan="9" class="p-6 text-center text-red-400">Error al cargar los vecinos.</td></tr>';
-            }
+        if (!response.ok || !result.success) {
+            const msg = result.error || `Error ${response.status} al eliminar suscripcion push.`;
+            throw new Error(msg);
         }
 
-        async function cambiarEstadoVecino(usuarioId, nuevoEstado) {
-            if (!confirm(`¿Seguro que querés ${nuevoEstado === 'activo' ? 'activar' : 'bloquear'} al vecino?`)) return;
+        console.log('Suscripción Push eliminada en el servidor.', result);
+        return result;
+    }
 
-            try {
-                const response = await apiFetch(`index.php?route=/vecinos/${usuarioId}/estado`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ estado: nuevoEstado })
-                });
+    async function enviarPushDePrueba() {
+        const response = await apiFetch('index.php?route=/push/prueba', { method: 'POST' });
 
-                const result = await response.json();
-                if (response.ok) {
-                    alert(result.message || 'Estado actualizado correctamente');
-                    cargarVecinos();
-                } else {
-                    alert(result.error || 'No se pudo actualizar el estado');
-                }
-            } catch (error) {
-                console.error('Error al cambiar estado del vecino:', error);
-                alert('Error de conexión al actualizar el estado');
+        let result = {};
+        try {
+            result = await response.json();
+        } catch (parseError) {
+            result = {};
+        }
+
+        if (!response.ok || !result.success) {
+            const msg = result.error || `Error ${response.status} al enviar push de prueba.`;
+            throw new Error(msg);
+        }
+    }
+
+    async function probarPushManual(btn) {
+        const boton = btn || document.getElementById('btn-push-test');
+        const textoOriginal = boton ? boton.innerText : '';
+
+        try {
+            if (boton) {
+                boton.disabled = true;
+                boton.innerText = 'Enviando...';
+            }
+
+            await enviarPushDePrueba();
+            alert('Push de prueba enviado correctamente.');
+        } catch (error) {
+            console.error('Error al enviar push de prueba:', error);
+            alert(error.message || 'No se pudo enviar el push de prueba.');
+        } finally {
+            if (boton) {
+                boton.disabled = false;
+                boton.innerText = textoOriginal || 'Probar Push';
             }
         }
-    </script>
+    }
+    // --------------------------------------------------
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const sesion = await validarSesion();
+        if (!sesion) return;
+
+        document.getElementById('barrio-nombre').innerText = `Intendencia - ${sesion.barrio_nombre || 'Barrio'}`;
+        document.getElementById('usuario-info').innerText = `${sesion.nombre} (${sesion.rol})`;
+
+        cargarReclamos();
+        cargarMultas();
+        cargarTodosLosVecinos();
+        cargarDocumentos();
+
+        // Verificar estado y activar notificaciones push de forma automática e inteligente
+        chequearEstadoPush();
+    });
+
+    function cambiarSeccion(seccion) {
+        const secReclamos = document.getElementById('seccion-reclamos');
+        const secVecinos = document.getElementById('seccion-vecinos');
+        const secMultas = document.getElementById('seccion-multas');
+        const secAvisos = document.getElementById('seccion-avisos');
+        const secDocumentos = document.getElementById('seccion-documentos');
+
+        const navReclamos = document.getElementById('nav-reclamos');
+        const navVecinos = document.getElementById('nav-vecinos');
+        const navMultas = document.getElementById('nav-multas');
+        const navAvisos = document.getElementById('nav-avisos');
+        const navDocumentos = document.getElementById('nav-documentos');
+
+        secReclamos.classList.add('hidden');
+        secVecinos.classList.add('hidden');
+        secMultas.classList.add('hidden');
+        secAvisos.classList.add('hidden');
+        secDocumentos.classList.add('hidden');
+
+        navReclamos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
+        navVecinos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
+        navMultas.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
+        navAvisos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
+        navDocumentos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
+
+        if (seccion === 'reclamos') {
+            secReclamos.classList.remove('hidden');
+            navReclamos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
+        } else if (seccion === 'vecinos') {
+            secVecinos.classList.remove('hidden');
+            navVecinos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
+        } else if (seccion === 'multas') {
+            secMultas.classList.remove('hidden');
+            navMultas.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
+        } else if (seccion === 'avisos') {
+            secAvisos.classList.remove('hidden');
+            navAvisos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
+            cargarAvisos();
+        } else if (seccion === 'documentos') {
+            secDocumentos.classList.remove('hidden');
+            navDocumentos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
+            cargarDocumentos();
+        }
+    }
+
+    async function cargarVecinos() {
+        try {
+            const response = await apiFetch('index.php?route=/vecinos/listar', { method: 'GET' });
+            const result = await response.json();
+            const vecinos = result.data || [];
+
+            const tbody = document.getElementById('tabla-vecinos-body');
+            tbody.innerHTML = '';
+
+            if (!Array.isArray(vecinos) || vecinos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="p-6 text-center text-gray-400">No hay vecinos registrados.</td></tr>';
+                return;
+            }
+
+            vecinos.forEach(v => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50/50 transition';
+
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.nombre)}</td>
+                    <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.apellido)}</td>
+                    <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.email)}</td>
+                    <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.telefono || '')}</td>
+                    <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.manzana || '')}</td>
+                    <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.lote_identificador || '')}</td>
+                    <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.tipo_relacion || '')}</td>
+                    <td class="p-3 font-semibold text-gray-800">${escapeHtml(v.estado || 'activo')}</td>
+                    <td class="p-3 text-center">
+                        <button onclick="cambiarEstadoVecino(${v.usuario_id}, '${v.estado === 'activo' ? 'bloqueado' : 'activo'}')" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-1 rounded-lg transition shadow-sm">
+                            ${v.estado === 'activo' ? 'Bloquear' : 'Activar'}
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (error) {
+            console.error('Error al cargar vecinos:', error);
+            document.getElementById('tabla-vecinos-body').innerHTML = '<tr><td colspan="9" class="p-6 text-center text-red-400">Error al cargar los vecinos.</td></tr>';
+        }
+    }
+
+    async function cambiarEstadoVecino(usuarioId, nuevoEstado) {
+        if (!confirm(`¿Seguro que querés ${nuevoEstado === 'activo' ? 'activar' : 'bloquear'} al vecino?`)) return;
+
+        try {
+            const response = await apiFetch(`index.php?route=/vecinos/${usuarioId}/estado`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ estado: nuevoEstado })
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert(result.message || 'Estado actualizado correctamente');
+                cargarVecinos();
+            } else {
+                alert(result.error || 'No se pudo actualizar el estado');
+            }
+        } catch (error) {
+            console.error('Error al cambiar estado del vecino:', error);
+            alert('Error de conexión al actualizar el estado');
+        }
+    }
+</script>
 </body>
 </html>
