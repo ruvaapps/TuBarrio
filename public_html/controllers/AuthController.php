@@ -113,6 +113,75 @@ class AuthController {
         return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
     }
 
+    private const MAX_LOGIN_ATTEMPTS = 3;
+    private const LOGIN_LOCK_MINUTES = 5;
+
+    // Asegura las columnas de control de intentos en la tabla usuarios
+    private function ensureLoginAttemptColumns(PDO $db) {
+        $stmt = $db->query("SHOW COLUMNS FROM usuarios LIKE 'intentos_fallidos'");
+        if (!$stmt->fetch()) {
+            $db->exec("ALTER TABLE usuarios ADD COLUMN intentos_fallidos INT NOT NULL DEFAULT 0");
+        }
+        $stmt = $db->query("SHOW COLUMNS FROM usuarios LIKE 'bloqueado_hasta'");
+        if (!$stmt->fetch()) {
+            $db->exec("ALTER TABLE usuarios ADD COLUMN bloqueado_hasta DATETIME NULL DEFAULT NULL");
+        }
+    }
+
+    // Devuelve segundos restantes de bloqueo (0 = no bloqueado)
+    private function getLockRemainingSeconds(array $user) {
+        if (empty($user['bloqueado_hasta'])) {
+            return 0;
+        }
+        $until = strtotime((string) $user['bloqueado_hasta']);
+        if ($until === false || $until <= time()) {
+            return 0;
+        }
+        return $until - time();
+    }
+
+    // Registra un intento fallido y bloquea temporalmente al llegar al limite
+    private function registerFailedAttempt(array $user) {
+        $db = Database::getConnection();
+        $this->ensureLoginAttemptColumns($db);
+
+        $intentos = ((int) ($user['intentos_fallidos'] ?? 0)) + 1;
+
+        if ($intentos >= self::MAX_LOGIN_ATTEMPTS) {
+            $lockUntil = date('Y-m-d H:i:s', time() + (self::LOGIN_LOCK_MINUTES * 60));
+            $stmt = $db->prepare("UPDATE usuarios
+                                  SET intentos_fallidos = 0, bloqueado_hasta = :bloqueado_hasta
+                                  WHERE id = :id");
+            $stmt->execute([
+                ':bloqueado_hasta' => $lockUntil,
+                ':id' => (int) $user['id']
+            ]);
+            return ['blocked' => true, 'lock_seconds' => self::LOGIN_LOCK_MINUTES * 60];
+        }
+
+        $stmt = $db->prepare("UPDATE usuarios SET intentos_fallidos = :intentos WHERE id = :id");
+        $stmt->execute([
+            ':intentos' => $intentos,
+            ':id' => (int) $user['id']
+        ]);
+
+        $restantes = self::MAX_LOGIN_ATTEMPTS - $intentos;
+        return [
+            'blocked' => false,
+            'restantes' => $restantes
+        ];
+    }
+
+    // Reinicia los intentos fallidos tras un login exitoso
+    private function resetFailedAttempts($userId) {
+        $db = Database::getConnection();
+        $this->ensureLoginAttemptColumns($db);
+        $stmt = $db->prepare("UPDATE usuarios
+                              SET intentos_fallidos = 0, bloqueado_hasta = NULL
+                              WHERE id = :id");
+        $stmt->execute([':id' => (int) $userId]);
+    }
+
     private function enforceLoginRateLimit($email) {
         $ip = $this->getClientIp();
         $emailHash = hash('sha256', strtolower(trim((string) $email)));
@@ -331,9 +400,13 @@ public function login() {
 
         $db = Database::getConnection();
 
+        // Asegurar columnas de control de intentos antes de consultarlas
+        $this->ensureLoginAttemptColumns($db);
+
         // 1. Buscar al usuario junto con su barrio y su lote asignado
         $stmt = $db->prepare("
             SELECT u.id, u.barrio_id, u.nombre, u.apellido, u.email, u.password_hash, u.rol, u.estado, 
+                   u.intentos_fallidos, u.bloqueado_hasta,
                    b.nombre AS barrio_nombre,
                    ul.lote_id
             FROM usuarios u
@@ -345,19 +418,56 @@ public function login() {
         $stmt->execute([':email' => $email]);
         $user = $stmt->fetch();
 
-        // 2. Validar existencia de usuario y clave
-        if (!$user || !password_verify($password, $user['password_hash'])) {
+        // 2. Validar si la cuenta esta activa (antes de validar clave)
+        if (!$user) {
             http_response_code(401);
-            echo json_encode(["error" => "Credenciales inválidas"]);
+            echo json_encode(["error" => "Credenciales inv\u00e1lidas"]);
             return;
         }
 
-        // 3. Validar si la cuenta está activa
-        if ($user['estado'] !== 'activo') {
+        if ($user['estado'] === 'bloqueado') {
             http_response_code(403);
-            echo json_encode(["error" => "Tu cuenta está pendiente de aprobación o inactiva"]);
+            echo json_encode(["error" => "Tu cuenta est\u00e1 bloqueada. Contacta al administrador del barrio."]);
             return;
         }
+
+        if ($user['estado'] !== 'activo') {
+            http_response_code(403);
+            echo json_encode(["error" => "Tu cuenta est\u00e1 pendiente de aprobaci\u00f3n o inactiva"]);
+            return;
+        }
+
+        // 2b. Verificar bloqueo temporal por intentos fallidos
+        $lockSeconds = $this->getLockRemainingSeconds($user);
+        if ($lockSeconds > 0) {
+            $minutos = (int) ceil($lockSeconds / 60);
+            http_response_code(423);
+            echo json_encode([
+                "error" => "Cuenta temporalmente bloqueada por intentos fallidos. Intenta nuevamente en {$minutos} minuto(s)."
+            ]);
+            return;
+        }
+
+        // 3. Validar clave
+        if (!password_verify($password, $user['password_hash'])) {
+            $resultado = $this->registerFailedAttempt($user);
+
+            if ($resultado['blocked']) {
+                http_response_code(423);
+                echo json_encode([
+                    "error" => "Superaste el limite de " . self::MAX_LOGIN_ATTEMPTS . " intentos. Tu cuenta queda bloqueada por " . self::LOGIN_LOCK_MINUTES . " minutos."
+                ]);
+            } else {
+                http_response_code(401);
+                echo json_encode([
+                    "error" => "Credenciales inv\u00e1lidas. Te quedan " . $resultado['restantes'] . " intento(s) antes del bloqueo."
+                ]);
+            }
+            return;
+        }
+
+        // 3b. Login exitoso: reiniciar intentos fallidos
+        $this->resetFailedAttempts($user['id']);
 
         // 4. GENERAR PAYLOAD Y TOKEN JWT (¡Esta parte es la que me consultabas y sí va!)
         $payload = [
