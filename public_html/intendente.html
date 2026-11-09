@@ -1051,8 +1051,9 @@
                         enlaceDescarga = document.createElement('a');
                         enlaceDescarga.href = doc.archivo_url;
                         enlaceDescarga.target = '_blank';
-                        enlaceDescarga.className = 'text-[10px] text-blue-600 hover:text-blue-800 hover:underline shrink-0 font-medium';
-                        enlaceDescarga.textContent = 'Ver';
+                        enlaceDescarga.download = doc.nombre;
+                        enlaceDescarga.className = 'bg-blue-600 hover:bg-blue-700 text-white font-semibold text-[10px] px-2.5 py-1.5 rounded-lg transition shadow-sm shrink-0';
+                        enlaceDescarga.textContent = '⬇ Descargar';
                     }
 
                     const badge = document.createElement('span');
