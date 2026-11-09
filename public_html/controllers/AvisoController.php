@@ -3,7 +3,7 @@ require_once __DIR__ . '/../config/database.php';
 
 class AvisoController {
 
-    // Listar avisos (tipo = 'aviso')
+    // Listar avisos (tipo_multa = 'aviso')
     public function index($user) {
         header('Content-Type: application/json');
 
@@ -27,7 +27,7 @@ class AvisoController {
                 FROM multas m
                 JOIN lotes l ON m.lote_id = l.id
                 LEFT JOIN usuarios u ON m.usuario_id = u.id
-                WHERE m.barrio_id = :barrio_id AND m.tipo = 'aviso'
+                WHERE m.barrio_id = :barrio_id AND m.tipo_multa = 'aviso'
                 ORDER BY m.created_at DESC");
             $stmt->execute([':barrio_id' => $barrio_id]);
             $avisos = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -72,14 +72,14 @@ class AvisoController {
             $db = Database::getConnection();
 
             // Verificar si ya existe un aviso pendiente del mismo tipo para el vecino
-            $stmtCheck = $db->prepare("SELECT COUNT(*) FROM multas WHERE usuario_id = :usuario_id AND tipo_multa = 'aviso' AND estado = 'pendiente' AND observaciones = :observaciones");
-            $stmtCheck->execute([':usuario_id' => $usuario_id, ':observaciones' => $observaciones]);
+            $stmtCheck = $db->prepare("SELECT COUNT(*) FROM multas WHERE usuario_id = :usuario_id AND tipo_multa = 'aviso' AND tipo = :tipo AND estado = 'pendiente' AND observaciones = :observaciones");
+            $stmtCheck->execute([':usuario_id' => $usuario_id, ':tipo' => $tipo, ':observaciones' => $observaciones]);
             $count = $stmtCheck->fetchColumn();
 
             if ($count > 0) {
                 // Generar multa relacionada
-                $stmtGetAviso = $db->prepare("SELECT * FROM multas WHERE usuario_id = :usuario_id AND tipo_multa = 'aviso' AND estado = 'pendiente' AND observaciones = :observaciones LIMIT 1");
-                $stmtGetAviso->execute([':usuario_id' => $usuario_id, ':observaciones' => $observaciones]);
+                $stmtGetAviso = $db->prepare("SELECT * FROM multas WHERE usuario_id = :usuario_id AND tipo_multa = 'aviso' AND tipo = :tipo AND estado = 'pendiente' AND observaciones = :observaciones LIMIT 1");
+                $stmtGetAviso->execute([':usuario_id' => $usuario_id, ':tipo' => $tipo, ':observaciones' => $observaciones]);
                 $aviso = $stmtGetAviso->fetch(PDO::FETCH_ASSOC);
 
                 if ($aviso) {
@@ -90,7 +90,7 @@ class AvisoController {
             }
 
             // Registrar nuevo aviso
-            $stmtInsert = $db->prepare("INSERT INTO multas (barrio_id, lote_id, usuario_id, usuario_intendente_id, tipo, monto, observaciones, estado) VALUES (:barrio_id, :lote_id, :usuario_id, :intendente_id, 'aviso', NULL, :observaciones, 'pendiente')");
+            $stmtInsert = $db->prepare("INSERT INTO multas (barrio_id, lote_id, usuario_id, usuario_intendente_id, tipo_multa, tipo, monto, observaciones, estado) VALUES (:barrio_id, :lote_id, :usuario_id, :intendente_id, 'aviso', :tipo, NULL, :observaciones, 'pendiente')");
 
             // Obtener lote_id del usuario
             $stmtLote = $db->prepare("SELECT lote_id FROM usuario_lote WHERE usuario_id = :usuario_id LIMIT 1");
@@ -103,6 +103,7 @@ class AvisoController {
                 ':lote_id' => $lote_id,
                 ':usuario_id' => $usuario_id,
                 ':intendente_id' => $user['user_id'],
+                ':tipo' => $tipo,
                 ':observaciones' => $observaciones
             ]);
 
@@ -118,13 +119,14 @@ class AvisoController {
     private function generarMultaRelacionada($user, $aviso) {
         $db = Database::getConnection();
 
-        $stmtInsert = $db->prepare("INSERT INTO multas (barrio_id, lote_id, usuario_id, usuario_intendente_id, tipo, monto, observaciones, estado, id_aviso_relacionado) VALUES (:barrio_id, :lote_id, :usuario_id, :intendente_id, 'multa', :monto, :observaciones, 'pendiente', :id_aviso_relacionado)");
+        $stmtInsert = $db->prepare("INSERT INTO multas (barrio_id, lote_id, usuario_id, usuario_intendente_id, tipo_multa, tipo, monto, observaciones, estado, id_aviso_relacionado) VALUES (:barrio_id, :lote_id, :usuario_id, :intendente_id, 'multa', :tipo, :monto, :observaciones, 'pendiente', :id_aviso_relacionado)");
 
         $stmtInsert->execute([
             ':barrio_id' => $user['barrio_id'],
             ':lote_id' => $aviso['lote_id'],
             ':usuario_id' => $aviso['usuario_id'],
             ':intendente_id' => $user['user_id'],
+            ':tipo' => $aviso['tipo'],
             ':monto' => 0, // o algún valor por defecto
             ':observaciones' => $aviso['observaciones'],
             ':id_aviso_relacionado' => $aviso['id']

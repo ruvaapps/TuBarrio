@@ -53,7 +53,7 @@ class MultaController {
             $db = Database::getConnection();
 
             $stmt = $db->prepare("
-                SELECT m.id, m.tipo, m.monto, m.estado, m.observaciones, m.created_at,
+                SELECT m.id, m.tipo, m.tipo_multa, m.monto, m.estado, m.observaciones, m.created_at,
                        l.identificador AS lote_identificador
                 FROM multas m
                 LEFT JOIN lotes l ON m.lote_id = l.id
@@ -149,8 +149,8 @@ class MultaController {
             $db = Database::getConnection();
 
             $stmt = $db->prepare("
-                INSERT INTO multas (barrio_id, lote_id, usuario_id, usuario_intendente_id, tipo, monto, observaciones, estado)
-                VALUES (:barrio_id, :lote_id, :usuario_id, :intendente_id, :tipo, :monto, :observaciones, 'pendiente')
+                INSERT INTO multas (barrio_id, lote_id, usuario_id, usuario_intendente_id, tipo_multa, tipo, monto, observaciones, estado)
+                VALUES (:barrio_id, :lote_id, :usuario_id, :intendente_id, 'multa', :tipo, :monto, :observaciones, 'pendiente')
             ");
 
             $stmt->execute([
