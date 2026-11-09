@@ -271,6 +271,48 @@
         </main>
     </div>
 
+    <!-- MODAL DE DETALLE DE MULTA (Intendencia) -->
+    <div id="modal-detalle-multa" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <div>
+                    <span id="modal-multa-id-badge" class="text-xs font-bold px-2 py-0.5 rounded uppercase"></span>
+                    <h3 class="font-bold text-gray-800 text-base mt-1" id="modal-multa-titulo">Detalle de la Multa</h3>
+                </div>
+                <button onclick="cerrarModalDetalleMulta()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div class="bg-gray-50 p-3 rounded-xl space-y-1 text-gray-600">
+                    <p><b>Vecino sancionado:</b> <span id="modal-multa-vecino"></span></p>
+                    <p><b>Correo:</b> <span id="modal-multa-email"></span></p>
+                    <p><b>Lote:</b> <span id="modal-multa-lote"></span></p>
+                    <p><b>Fecha de emisión:</b> <span id="modal-multa-fecha"></span></p>
+                    <p><b>Estado:</b> <span id="modal-multa-estado"></span></p>
+                </div>
+
+                <div class="bg-yellow-50 border border-yellow-100 p-4 rounded-xl text-center">
+                    <p class="text-[10px] uppercase font-semibold text-yellow-700 mb-1">Monto de la multa</p>
+                    <p class="text-2xl font-bold text-yellow-800" id="modal-multa-monto">$0.00</p>
+                </div>
+
+                <div>
+                    <p class="font-semibold text-gray-700 mb-1">Observaciones / Motivo:</p>
+                    <p id="modal-multa-observaciones" class="text-gray-600 bg-slate-50 p-3 rounded-xl border border-gray-100 leading-relaxed"></p>
+                </div>
+
+                <div class="pt-2 border-t flex justify-end gap-2">
+                    <button onclick="cerrarModalDetalleMulta(); enviarAvisoMulta(multaAbiertaId)" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition text-xs">
+                        ✉️ Enviar Aviso al Vecino
+                    </button>
+                    <button onclick="cerrarModalDetalleMulta()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-xl transition text-xs">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL DE DETALLE DE RECLAMO (Doble Clic) con Comentarios de Gestión -->
     <div id="modal-detalle-reclamo" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
@@ -349,6 +391,7 @@
         let listaMultasGlobal = [];
         let vecinosGlobal = [];
         let reclamoSeleccionadoId = null;
+        let multaAbiertaId = null;
 
         function escapeHtml(value) {
             return String(value ?? '')
@@ -766,6 +809,8 @@
                 listaMultasGlobal.forEach(m => {
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-gray-50/50 transition";
+                    tr.style.cursor = 'pointer';
+                    tr.onclick = () => abrirDetalleMulta(m);
 
                     const vecinoInfo = m.vecino_nombre ? `${m.vecino_nombre} ${m.vecino_apellido} (${m.vecino_email})` : 'Sin vecino vinculado';
                     const multaId = Number(m.id) || 0;
@@ -785,7 +830,7 @@
                             <span class="px-2.5 py-1 rounded-full font-semibold text-[10px] uppercase ${obtenerBadgeEstadoMulta(m.estado)}">${escapeHtml(m.estado)}</span>
                         </td>
                         <td class="p-3 text-right">
-                            <button onclick="enviarAvisoMulta(${multaId})" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded-lg text-[11px] transition shadow-sm">
+                            <button onclick="event.stopPropagation(); enviarAvisoMulta(${multaId})" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded-lg text-[11px] transition shadow-sm">
                                 ✉️ Enviar Aviso
                             </button>
                         </td>
@@ -1005,6 +1050,44 @@
                 case 'rechazado': return 'bg-red-100 text-red-800';
                 default: return 'bg-gray-100 text-gray-800';
             }
+        }
+
+        function abrirDetalleMulta(m) {
+            const multaId = Number(m.id) || 0;
+            multaAbiertaId = multaId;
+
+            document.getElementById('modal-multa-id-badge').innerText = `Multa #${multaId}`;
+            document.getElementById('modal-multa-id-badge').className = `text-xs font-bold px-2 py-0.5 rounded uppercase ${obtenerBadgeEstadoMulta(m.estado)}`;
+            document.getElementById('modal-multa-titulo').innerText = obtenerTextoTipoMulta(m.tipo);
+            document.getElementById('modal-multa-vecino').innerText = m.vecino_nombre ? `${m.vecino_nombre} ${m.vecino_apellido || ''}`.trim() : 'Sin vecino vinculado';
+            document.getElementById('modal-multa-email').innerText = m.vecino_email || 'N/D';
+            document.getElementById('modal-multa-lote').innerText = m.lote_identificador || m.lote_id || 'N/D';
+            document.getElementById('modal-multa-fecha').innerText = m.created_at ? new Date(m.created_at).toLocaleString() : 'N/D';
+            document.getElementById('modal-multa-monto').innerText = '$' + parseFloat(m.monto || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
+
+            const badge = document.getElementById('modal-multa-estado');
+            badge.innerText = m.estado || 'N/D';
+            badge.className = `px-2.5 py-1 rounded-full font-semibold text-[10px] uppercase ${obtenerBadgeEstadoMulta(m.estado)}`;
+
+            document.getElementById('modal-multa-observaciones').innerText = m.observaciones || 'Sin observaciones registradas.';
+
+            document.getElementById('modal-detalle-multa').classList.remove('hidden');
+        }
+
+        function cerrarModalDetalleMulta() {
+            document.getElementById('modal-detalle-multa').classList.add('hidden');
+        }
+
+        function obtenerTextoTipoMulta(tipo) {
+            const tipos = {
+                'velocidad': 'Exceso de velocidad',
+                'mal_estacionamiento': 'Mal estacionamiento',
+                'ruidos_molestos': 'Ruidos molestos',
+                'mascotas': 'Mascotas sueltas / Sin correa',
+                'obras': 'Incumplimiento reglamento de obra',
+                'otro': 'Otro motivo'
+            };
+            return tipos[tipo] || tipo || 'Infracción';
         }
 
         function obtenerBadgeEstadoMulta(estado) {
