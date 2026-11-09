@@ -180,6 +180,53 @@ switch (true) {
         require_once __DIR__ . '/controllers/PushController.php';
         (new PushController())->enviarPrueba($user);
         break;
+    // 11. DOCUMENTOS: Administración de documentación para vecinos
+    case ($route === '/documentos/vecino' && $method === 'GET'):
+        require_once __DIR__ . '/middlewares/AuthMiddleware.php';
+        $user = AuthMiddleware::verify();
+
+        require_once __DIR__ . '/controllers/DocumentoController.php';
+        (new DocumentoController())->listarParaVecino($user);
+        break;
+
+    case ($route === '/documentos' && ($method === 'GET' || $method === 'POST')):
+        require_once __DIR__ . '/middlewares/AuthMiddleware.php';
+        $user = AuthMiddleware::verify();
+
+        require_once __DIR__ . '/controllers/DocumentoController.php';
+        $controller = new DocumentoController();
+
+        if ($method === 'GET') {
+            $controller->index($user);
+        } elseif ($method === 'POST') {
+            $controller->store($user);
+        }
+        break;
+
+    case (preg_match('#^/documentos/(\d+)/disponibilidad$#', $route, $matches) && $method === 'PUT'):
+        require_once __DIR__ . '/middlewares/AuthMiddleware.php';
+        $user = AuthMiddleware::verify();
+
+        require_once __DIR__ . '/controllers/DocumentoController.php';
+        (new DocumentoController())->toggleDisponibilidad($user, $matches[1]);
+        break;
+
+    case (preg_match('#^/documentos/(\d+)/archivo$#', $route, $matches) && $method === 'POST'):
+        require_once __DIR__ . '/middlewares/AuthMiddleware.php';
+        $user = AuthMiddleware::verify();
+
+        require_once __DIR__ . '/controllers/DocumentoController.php';
+        (new DocumentoController())->actualizarArchivo($user, $matches[1]);
+        break;
+
+    case (preg_match('#^/documentos/(\d+)$#', $route, $matches) && $method === 'DELETE'):
+        require_once __DIR__ . '/middlewares/AuthMiddleware.php';
+        $user = AuthMiddleware::verify();
+
+        require_once __DIR__ . '/controllers/DocumentoController.php';
+        (new DocumentoController())->destroy($user, $matches[1]);
+        break;
+
     // AUTH - Password reset por código
     case ($route === '/auth/password/request-code' && $method === 'POST'):
         require_once __DIR__ . '/controllers/PasswordController.php';

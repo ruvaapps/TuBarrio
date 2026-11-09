@@ -44,6 +44,10 @@
                     <span>⚠️</span>
                     <span>Gestión de Multas</span>
                 </button>
+                <button onclick="cambiarSeccion('documentos')" id="nav-documentos" class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3">
+                    <span>📄</span>
+                    <span>Documentación</span>
+                </button>
             </div>
         </aside>
 
@@ -143,6 +147,36 @@
                             Registrar y Vincular Vecino
                         </button>
                     </form>
+                </div>
+            </section>
+
+            <!-- SECCIÓN 4: ADMINISTRAR DOCUMENTACIÓN -->
+            <section id="seccion-documentos" class="space-y-4 hidden">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-4">
+                        <div>
+                            <h2 class="font-bold text-gray-800 text-lg">Administrar Documentación</h2>
+                            <p class="text-xs text-gray-500">Agregá o quitá documentos. El tilde indica si el documento está disponible para los vecinos.</p>
+                        </div>
+                        <button onclick="cargarDocumentos()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">Actualizar lista</button>
+                    </div>
+
+                    <!-- Formulario para agregar documento (con archivo opcional) -->
+                    <form id="form-documento" onsubmit="agregarDocumento(event)" class="flex flex-col sm:flex-row gap-2">
+                        <input type="text" id="documento-nombre" placeholder="Nombre del documento (Ej: Reglamento Interno)" class="flex-1 border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
+                        <input type="file" id="documento-archivo" class="sm:w-64 text-xs text-gray-500 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.txt,.csv">
+                        <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-5 py-2.5 rounded-lg transition text-sm shadow">
+                            + Agregar Documento
+                        </button>
+                    </form>
+                    <p class="text-[10px] text-gray-400">El archivo es opcional (PDF, imagen, Word, Excel, TXT o CSV, max 10 MB). Si no adjuntás archivo, el documento se lista solo con su nombre.</p>
+
+                    <div id="documento-feedback" class="text-xs font-medium text-center hidden"></div>
+
+                    <!-- Listado de documentos -->
+                    <div id="lista-documentos" class="space-y-2">
+                        <p class="text-xs text-gray-400 text-center py-4">Cargando documentos...</p>
+                    </div>
                 </div>
             </section>
 
@@ -534,6 +568,7 @@
             cargarReclamos();
             cargarMultas();
             cargarTodosLosVecinos();
+            cargarDocumentos();
 
             // Verificar estado y activar notificaciones push de forma automática e inteligente
             chequearEstadoPush();
@@ -543,18 +578,22 @@
             const secReclamos = document.getElementById('seccion-reclamos');
             const secVecinos = document.getElementById('seccion-vecinos');
             const secMultas = document.getElementById('seccion-multas');
+            const secDocumentos = document.getElementById('seccion-documentos');
 
             const navReclamos = document.getElementById('nav-reclamos');
             const navVecinos = document.getElementById('nav-vecinos');
             const navMultas = document.getElementById('nav-multas');
+            const navDocumentos = document.getElementById('nav-documentos');
 
             secReclamos.classList.add('hidden');
             secVecinos.classList.add('hidden');
             secMultas.classList.add('hidden');
+            secDocumentos.classList.add('hidden');
 
             navReclamos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
             navVecinos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
             navMultas.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
+            navDocumentos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
 
             if (seccion === 'reclamos') {
                 secReclamos.classList.remove('hidden');
@@ -565,6 +604,10 @@
             } else if (seccion === 'multas') {
                 secMultas.classList.remove('hidden');
                 navMultas.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
+            } else if (seccion === 'documentos') {
+                secDocumentos.classList.remove('hidden');
+                navDocumentos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
+                cargarDocumentos();
             }
         }
 
@@ -970,6 +1013,212 @@
                 case 'pagada': return 'bg-emerald-100 text-emerald-800';
                 case 'anulada': return 'bg-red-100 text-red-800';
                 default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        // ============ DOCUMENTACIÓN ============
+
+        async function cargarDocumentos() {
+            try {
+                const response = await apiFetch('index.php?route=/documentos', { method: 'GET' });
+                const result = await response.json();
+                const documentos = result.data || [];
+
+                const contenedor = document.getElementById('lista-documentos');
+                contenedor.innerHTML = '';
+
+                if (!Array.isArray(documentos) || documentos.length === 0) {
+                    contenedor.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">No hay documentos cargados. Agregá el primero arriba.</p>';
+                    return;
+                }
+
+                documentos.forEach(doc => {
+                    const fila = document.createElement('div');
+                    fila.className = 'flex items-center justify-between gap-3 border border-gray-100 rounded-xl px-4 py-3 hover:bg-gray-50/50 transition';
+
+                    const izquierda = document.createElement('div');
+                    izquierda.className = 'flex items-center gap-3 min-w-0';
+
+                    const icono = document.createElement('span');
+                    icono.textContent = doc.archivo_url ? '📎' : '📄';
+
+                    const nombre = document.createElement('span');
+                    nombre.className = 'text-sm font-medium text-gray-800 truncate';
+                    nombre.textContent = doc.nombre;
+
+                    let enlaceDescarga = null;
+                    if (doc.archivo_url) {
+                        enlaceDescarga = document.createElement('a');
+                        enlaceDescarga.href = doc.archivo_url;
+                        enlaceDescarga.target = '_blank';
+                        enlaceDescarga.className = 'text-[10px] text-blue-600 hover:text-blue-800 hover:underline shrink-0 font-medium';
+                        enlaceDescarga.textContent = 'Ver';
+                    }
+
+                    const badge = document.createElement('span');
+                    badge.className = `text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full ${Number(doc.disponible) === 1 ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}`;
+                    badge.textContent = Number(doc.disponible) === 1 ? 'Disponible' : 'Oculto';
+
+                    izquierda.appendChild(icono);
+                    izquierda.appendChild(nombre);
+                    if (enlaceDescarga) {
+                        izquierda.appendChild(enlaceDescarga);
+                    }
+                    izquierda.appendChild(badge);
+
+                    const acciones = document.createElement('div');
+                    acciones.className = 'flex items-center gap-2 shrink-0';
+
+                    const idDoc = Number(doc.id) || 0;
+                    const disponible = Number(doc.disponible) === 1;
+
+                    const btnTilde = document.createElement('button');
+                    btnTilde.className = `w-9 h-9 rounded-lg text-lg font-bold transition shadow-sm ${disponible ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-gray-100 text-gray-300 hover:bg-gray-200 hover:text-gray-500'}`;
+                    btnTilde.textContent = disponible ? '✔' : '✖';
+                    btnTilde.title = disponible ? 'Disponible para vecinos (clic para ocultar)' : 'No disponible (clic para activar)';
+                    btnTilde.onclick = () => toggleDisponibilidadDocumento(idDoc, doc.nombre);
+
+                    const btnEliminar = document.createElement('button');
+                    btnEliminar.className = 'w-9 h-9 rounded-lg text-lg transition shadow-sm bg-red-50 text-red-500 hover:bg-red-100';
+                    btnEliminar.textContent = '🗑';
+                    btnEliminar.title = 'Quitar documento';
+                    btnEliminar.onclick = () => eliminarDocumento(idDoc, doc.nombre);
+
+                    const btnArchivo = document.createElement('button');
+                    btnArchivo.className = 'w-9 h-9 rounded-lg text-lg transition shadow-sm bg-blue-50 text-blue-600 hover:bg-blue-100';
+                    btnArchivo.textContent = '📤';
+                    btnArchivo.title = doc.archivo_url ? 'Reemplazar archivo adjunto' : 'Adjuntar archivo';
+                    btnArchivo.onclick = () => subirArchivoDocumento(idDoc);
+
+                    acciones.appendChild(btnTilde);
+                    acciones.appendChild(btnArchivo);
+                    acciones.appendChild(btnEliminar);
+                    fila.appendChild(acciones);
+                    contenedor.appendChild(fila);
+                });
+
+            } catch (error) {
+                console.error('Error al cargar documentos:', error);
+                document.getElementById('lista-documentos').innerHTML = '<p class="text-xs text-red-400 text-center py-4">Error al cargar los documentos.</p>';
+            }
+        }
+
+        function mostrarFeedbackDocumentos(mensaje, esError) {
+            const feedback = document.getElementById('documento-feedback');
+            feedback.classList.remove('hidden');
+            feedback.className = esError
+                ? 'text-xs font-medium text-center text-red-600'
+                : 'text-xs font-medium text-center text-emerald-600';
+            feedback.innerText = mensaje;
+            setTimeout(() => feedback.classList.add('hidden'), 3000);
+        }
+
+        async function agregarDocumento(e) {
+            e.preventDefault();
+            const input = document.getElementById('documento-nombre');
+            const inputArchivo = document.getElementById('documento-archivo');
+            const nombre = input.value.trim();
+
+            if (!nombre) return;
+
+            try {
+                const formData = new FormData();
+                formData.append('nombre', nombre);
+                formData.append('disponible', '1');
+
+                if (inputArchivo.files && inputArchivo.files[0]) {
+                    formData.append('archivo', inputArchivo.files[0]);
+                }
+
+                const response = await apiFetch('index.php?route=/documentos', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    input.value = '';
+                    inputArchivo.value = '';
+                    mostrarFeedbackDocumentos(result.message || 'Documento agregado correctamente.', false);
+                    cargarDocumentos();
+                } else {
+                    mostrarFeedbackDocumentos(result.error || 'No se pudo agregar el documento.', true);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarFeedbackDocumentos('Error de conexión con el servidor.', true);
+            }
+        }
+
+        async function subirArchivoDocumento(id) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.txt,.csv';
+
+            input.onchange = async () => {
+                if (!input.files || !input.files[0]) return;
+                const archivo = input.files[0];
+
+                if (archivo.size > 10 * 1024 * 1024) {
+                    mostrarFeedbackDocumentos('El archivo supera el tamano maximo de 10 MB.', true);
+                    return;
+                }
+
+                try {
+                    const formData = new FormData();
+                    formData.append('archivo', archivo);
+
+                    const response = await apiFetch(`index.php?route=/documentos/${id}/archivo`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+                    if (response.ok) {
+                        mostrarFeedbackDocumentos(result.message || 'Archivo actualizado correctamente.', false);
+                        cargarDocumentos();
+                    } else {
+                        mostrarFeedbackDocumentos(result.error || 'No se pudo subir el archivo.', true);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    mostrarFeedbackDocumentos('Error de conexión al subir el archivo.', true);
+                }
+            };
+
+            input.click();
+        }
+
+        async function toggleDisponibilidadDocumento(id, nombre) {
+            try {
+                const response = await apiFetch(`index.php?route=/documentos/${id}/disponibilidad`, { method: 'PUT' });
+                const result = await response.json();
+                if (response.ok) {
+                    cargarDocumentos();
+                } else {
+                    mostrarFeedbackDocumentos(result.error || 'No se pudo actualizar el documento.', true);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarFeedbackDocumentos('Error de conexión al actualizar la disponibilidad.', true);
+            }
+        }
+
+        async function eliminarDocumento(id, nombre) {
+            if (!confirm(`¿Seguro que querés quitar el documento "${nombre}"? También se borrará su archivo adjunto si tiene.`)) return;
+
+            try {
+                const response = await apiFetch(`index.php?route=/documentos/${id}`, { method: 'DELETE' });
+                const result = await response.json();
+                if (response.ok) {
+                    mostrarFeedbackDocumentos('Documento eliminado correctamente.', false);
+                    cargarDocumentos();
+                } else {
+                    mostrarFeedbackDocumentos(result.error || 'No se pudo eliminar el documento.', true);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarFeedbackDocumentos('Error de conexión al eliminar el documento.', true);
             }
         }
 

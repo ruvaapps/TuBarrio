@@ -35,6 +35,9 @@
             <button onclick="cambiarTab('nuevo')" id="tab-btn-nuevo" class="flex-1 py-3 text-sm font-semibold text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition">
                 ➕ Nuevo Reclamo
             </button>
+            <button onclick="cambiarTab('documentos')" id="tab-btn-documentos" class="flex-1 py-3 text-sm font-semibold text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition">
+                📄 Documentos
+            </button>
         </div>
     </div>
 
@@ -114,6 +117,21 @@
                         Enviar Reclamo
                     </button>
                 </form>
+            </div>
+        </div>
+
+        <!-- TAB 3: DOCUMENTOS DISPONIBLES PARA EL VECINO -->
+        <div id="seccion-tab-documentos" class="space-y-3 hidden">
+            <div class="flex justify-between items-center mb-2">
+                <div>
+                    <h2 class="text-gray-700 font-bold text-sm">Documentación del Barrio</h2>
+                    <p class="text-[11px] text-gray-400">Documentos publicados por la intendencia.</p>
+                </div>
+                <button onclick="cargarDocumentosVecino()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-2.5 py-1 rounded-lg transition">Actualizar</button>
+            </div>
+
+            <div id="lista-documentos-vecino" class="space-y-2">
+                <p class="text-xs text-gray-400 text-center py-4">Cargando documentos...</p>
             </div>
         </div>
 
@@ -201,6 +219,7 @@
 
             cargarDatosUsuario(usuario);
             cargarReclamos();
+            cargarDocumentosVecino();
             
             // Verificar estado y activar notificaciones push de forma automática e inteligente
             chequearEstadoPush();
@@ -400,19 +419,85 @@
         function cambiarTab(tab) {
             const tabReclamos = document.getElementById('seccion-tab-reclamos');
             const tabNuevo = document.getElementById('seccion-tab-nuevo');
+            const tabDocumentos = document.getElementById('seccion-tab-documentos');
             const btnReclamos = document.getElementById('tab-btn-reclamos');
             const btnNuevo = document.getElementById('tab-btn-nuevo');
+            const btnDocumentos = document.getElementById('tab-btn-documentos');
+
+            const claseInactiva = "flex-1 py-3 text-sm font-semibold text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition";
+            const claseActiva = "flex-1 py-3 text-sm font-semibold text-center border-b-2 border-blue-600 text-blue-600 transition";
+
+            tabReclamos.classList.add('hidden');
+            tabNuevo.classList.add('hidden');
+            tabDocumentos.classList.add('hidden');
+            btnReclamos.className = claseInactiva;
+            btnNuevo.className = claseInactiva;
+            btnDocumentos.className = claseInactiva;
 
             if (tab === 'reclamos') {
                 tabReclamos.classList.remove('hidden');
-                tabNuevo.classList.add('hidden');
-                btnReclamos.className = "flex-1 py-3 text-sm font-semibold text-center border-b-2 border-blue-600 text-blue-600 transition";
-                btnNuevo.className = "flex-1 py-3 text-sm font-semibold text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition";
+                btnReclamos.className = claseActiva;
+            } else if (tab === 'documentos') {
+                tabDocumentos.classList.remove('hidden');
+                btnDocumentos.className = claseActiva;
+                cargarDocumentosVecino();
             } else {
                 tabNuevo.classList.remove('hidden');
-                tabReclamos.classList.add('hidden');
-                btnNuevo.className = "flex-1 py-3 text-sm font-semibold text-center border-b-2 border-blue-600 text-blue-600 transition";
-                btnReclamos.className = "flex-1 py-3 text-sm font-semibold text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition";
+                btnNuevo.className = claseActiva;
+            }
+        }
+
+        // --- DOCUMENTACIÓN DEL BARRIO (Vecino) ---
+        async function cargarDocumentosVecino() {
+            try {
+                const response = await apiFetch(`${API_URL}/documentos/vecino`);
+
+                const responseText = await response.text();
+                if (!responseText.trim()) {
+                    throw new Error("El servidor devolvió una respuesta vacía.");
+                }
+
+                const result = JSON.parse(responseText);
+                const documentos = result.data || [];
+                const contenedor = document.getElementById('lista-documentos-vecino');
+                contenedor.innerHTML = '';
+
+                if (!Array.isArray(documentos) || documentos.length === 0) {
+                    contenedor.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Todavía no hay documentos publicados.</p>';
+                    return;
+                }
+
+                documentos.forEach(doc => {
+                    const fila = document.createElement('div');
+                    fila.className = 'bg-white rounded-2xl shadow-sm border border-gray-200 px-4 py-3 flex items-center gap-3';
+
+                    const icono = document.createElement('span');
+                    icono.className = 'text-lg shrink-0';
+                    icono.textContent = doc.archivo_url ? '📎' : '📄';
+
+                    const nombre = document.createElement('span');
+                    nombre.className = 'text-sm font-medium text-gray-800 flex-1 min-w-0 truncate';
+                    nombre.textContent = doc.nombre;
+
+                    fila.appendChild(icono);
+                    fila.appendChild(nombre);
+
+                    if (doc.archivo_url) {
+                        const enlace = document.createElement('a');
+                        enlace.href = doc.archivo_url;
+                        enlace.target = '_blank';
+                        enlace.download = doc.nombre;
+                        enlace.className = 'bg-blue-600 hover:bg-blue-700 text-white font-semibold text-[11px] px-3 py-1.5 rounded-lg transition shadow-sm shrink-0';
+                        enlace.textContent = '⬇ Descargar';
+                        fila.appendChild(enlace);
+                    }
+
+                    contenedor.appendChild(fila);
+                });
+
+            } catch (error) {
+                console.error('Error al cargar documentos:', error);
+                document.getElementById('lista-documentos-vecino').innerHTML = '<p class="text-xs text-red-400 text-center py-4">Error al cargar los documentos.</p>';
             }
         }
 
