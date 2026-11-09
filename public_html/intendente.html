@@ -6,7 +6,7 @@
     <title>Panel de Intendencia - Gestión de Barrio</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 font-sans antialiased min-h-screen flex flex-col">
+<body class="bg-gray-100 font-sans antialiased min-h-screen flex-col">
 
     <!-- Barra Superior -->
     <header class="bg-slate-800 text-white shadow-md p-4 flex justify-between items-center z-30">
@@ -31,7 +31,7 @@
 
         <!-- Menú Lateral -->
         <aside class="md:col-span-1 space-y-2">
-            <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-200 space-y-1">
+            <div class="bg-white p-3 rounded-2xl shadow-sm border-gray-200 space-y-1">
                 <button onclick="cambiarSeccion('reclamos')" id="nav-reclamos" class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3">
                     <span>📢</span>
                     <span>Gestión de Reclamos</span>
@@ -60,7 +60,7 @@
 
             <!-- SECCIÓN 1: RECLAMOS -->
             <section id="seccion-reclamos" class="space-y-4">
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 space-y-4">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border-gray-200 space-y-4">
                     <div class="flex justify-between items-center">
                         <div>
                             <h2 class="font-bold text-gray-800 text-lg">Reclamos del Barrio</h2>
@@ -70,7 +70,7 @@
                     </div>
 
                     <!-- Tabla de Reclamos -->
-                    <div class="overflow-x-auto border border-gray-100 rounded-xl">
+                    <div class="overflow-x-auto border-gray-100 rounded-xl">
                         <table class="w-full text-left border-collapse text-xs">
                             <thead>
                                 <tr class="bg-gray-50 text-gray-500 uppercase border-b border-gray-100 text-[11px]">
@@ -123,7 +123,7 @@
                     </div>
                 </div>
             </section>
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 space-y-4">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border-gray-200 space-y-4">
                     <h2 class="font-bold text-gray-800 text-lg">Dar de Alta a un Nuevo Vecino</h2>
                     <p class="text-xs text-gray-500">Completa los datos del residente y asígnale su lote correspondiente.</p>
 
@@ -151,7 +151,7 @@
                             </div>
                             <div>
                                 <label for="password" class="block text-xs font-semibold text-gray-600 mb-1">Contraseña temporal</label>
-                                <input type="password" id="password" placeholder="••••••••" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
+                                <input type="password" id="password" placeholder="••" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
                             </div>
                         </div>
 
@@ -162,7 +162,7 @@
                             </div>
                             <div>
                                 <label for="lote_identificador" class="block text-xs font-semibold text-gray-600 mb-1">Número de Lote</label>
-                                <input type="text" id="lote_identificador" placeholder="Ej: 12" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
+                                <input type="text" id="lote_identificador"="Ej: 12" class="w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
                             </div>
                         </div>
 
@@ -186,7 +186,7 @@
 
             <!-- SECCIÓN 4: ADMINISTRAR DOCUMENTACIÓN -->
             <section id="seccion-documentos" class="space-y-4 hidden">
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 space-y-4">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border-gray-200 space-y-4">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-4">
                         <div>
                             <h2 class="font-bold text-gray-800 text-lg">Administrar Documentación</h2>
@@ -266,8 +266,8 @@
                     </div>
                 </div>
             </section>
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 space-y-4">
-                    
+                <div class="bg-white rounded-2xl p-6 shadow-sm border-gray-200 space-y-4">
+
                     <!-- Cabecera de Multas y Sub-pestañas -->
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-4">
                         <div>
@@ -287,7 +287,7 @@
                             <button onclick="cargarMultas()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">Actualizar lista</button>
                         </div>
 
-                        <div class="overflow-x-auto border border-gray-100 rounded-xl">
+                        <div class="overflow-x-auto border-gray-100 rounded-xl">
                             <table class="w-full text-left border-collapse text-xs">
                                 <thead>
                                     <tr class="bg-gray-50 text-gray-500 uppercase border-b border-gray-100 text-[11px]">
@@ -375,14 +375,14 @@
                     <p><b>Estado:</b> <span id="modal-multa-estado"></span></p>
                 </div>
 
-                <div class="bg-yellow-50 border border-yellow-100 p-4 rounded-xl text-center">
+                <div class="bg-yellow-50 border-yellow-100 p-4 rounded-xl text-center">
                     <p class="text-[10px] uppercase font-semibold text-yellow-700 mb-1">Monto de la multa</p>
                     <p class="text-2xl font-bold text-yellow-800" id="modal-multa-monto">$0.00</p>
                 </div>
 
                 <div>
                     <p class="font-semibold text-gray-700 mb-1">Observaciones / Motivo:</p>
-                    <p id="modal-multa-observaciones" class="text-gray-600 bg-slate-50 p-3 rounded-xl border border-gray-100 leading-relaxed"></p>
+                    <p id="modal-multa-observaciones" class="text-gray-600 bg-slate-50 p-3 rounded-xl border-gray-100 leading-relaxed"></p>
                 </div>
 
                 <div class="pt-2 border-t flex justify-end gap-2">
@@ -418,7 +418,7 @@
 
                 <div>
                     <p class="font-semibold text-gray-700 mb-1">Descripción detallada:</p>
-                    <p id="modal-descripcion" class="text-gray-600 bg-slate-50 p-3 rounded-xl border border-gray-100 leading-relaxed"></p>
+                    <p id="modal-descripcion" class="text-gray-600 bg-slate-50 p-3 rounded-xl border-gray-100 leading-relaxed"></p>
                 </div>
 
                 <div id="modal-contenedor-imagen" class="hidden">
@@ -431,7 +431,7 @@
                 <!-- Historial de Comentarios de Gestión -->
                 <div>
                     <p class="font-semibold text-gray-700 mb-1">Historial de Gestión / Comentarios:</p>
-                    <div id="modal-historial-comentarios" class="bg-slate-50 p-3 rounded-xl border border-gray-100 max-h-36 overflow-y-auto space-y-2 text-[11px]">
+                    <div id="modal-historial-comentarios" class="bg-slate-50 p-3 rounded-xl border-gray-100 max-h-36 overflow-y-auto space-y-2 text-[11px]">
                         <span class="text-gray-400 italic">Cargando comentarios...</span>
                     </div>
                 </div>
@@ -469,7 +469,7 @@
     <script src="session-guard.js"></script>
     <!-- Script de lógica y Notificaciones Push -->
     <script>
-        const API_URL = 'index.php?route='; 
+        const API_URL = 'index.php?route=';
         let usuario = null;
         let listaReclamosGlobal = [];
         let listaMultasGlobal = [];
@@ -507,12 +507,12 @@
         // --- FUNCIONES DE NOTIFICACIONES PUSH Y CAMPANA ---
         async function chequearEstadoPush() {
             if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
-            
+
             try {
                 const registro = await navigator.serviceWorker.register('sw.js');
                 const suscripcion = await registro.pushManager.getSubscription();
                 const btn = document.getElementById('btn-push-toggle');
-                
+
                 if (suscripcion && Notification.permission === 'granted') {
                     btn.innerHTML = '🔔';
                     btn.title = 'Notificaciones activas (Clic para desactivar)';
@@ -688,7 +688,6 @@
             const sesion = await validarSesion();
             if (!sesion) return;
 
-
             document.getElementById('barrio-nombre').innerText = `Intendencia - ${sesion.barrio_nombre || 'Barrio'}`;
             document.getElementById('usuario-info').innerText = `${sesion.nombre} (${sesion.rol})`;
 
@@ -807,965 +806,6 @@
             } catch (error) {
                 console.error('Error al cambiar estado del vecino:', error);
                 alert('Error de conexión al actualizar el estado');
-            }
-        }
-
-            const navReclamos = document.getElementById('nav-reclamos');
-            const navVecinos = document.getElementById('nav-vecinos');
-            const navMultas = document.getElementById('nav-multas');
-            const navAvisos = document.getElementById('nav-avisos');
-
-            secReclamos.classList.add('hidden');
-            secVecinos.classList.add('hidden');
-            secMultas.classList.add('hidden');
-            secAvisos.classList.add('hidden');
-
-            navReclamos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
-            navVecinos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
-            navMultas.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
-            navAvisos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
-
-            if (seccion === 'reclamos') {
-                secReclamos.classList.remove('hidden');
-                navReclamos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
-            } else if (seccion === 'vecinos') {
-                secVecinos.classList.remove('hidden');
-                navVecinos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
-            } else if (seccion === 'multas') {
-                secMultas.classList.remove('hidden');
-                navMultas.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
-            } else if (seccion === 'avisos') {
-                secAvisos.classList.remove('hidden');
-                navAvisos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
-                cargarAvisos();
-            }
-        }
-
-        async function cargarAvisos() {
-            try {
-                const response = await apiFetch('index.php?route=/avisos', { method: 'GET' });
-                const result = await response.json();
-                const avisos = result.data || [];
-
-                const select = document.getElementById('aviso-select-vecino');
-                select.innerHTML = '';
-
-                if (!Array.isArray(avisos) || avisos.length === 0) {
-                    document.getElementById('lista-avisos').innerHTML = '<p class="text-xs text-gray-400 text-center py-4">No hay avisos registrados.</p>';
-                    return;
-                }
-
-                avisos.forEach(aviso => {
-                    const fila = document.createElement('div');
-                    fila.className = 'flex items-center justify-between gap-3 border-gray-100 rounded-xl px-4 py-3 hover:bg-gray-50/50 transition';
-
-                    const izquierda = document.createElement('div');
-                    izquierda.className = 'flex items-center gap-3 min-w-0';
-
-                    const icono = document.createElement('span');
-                    icono.textContent = '📣';
-
-                    const nombre = document.createElement('span');
-                    nombre.className = 'text-sm font-medium text-gray-800 truncate';
-                    nombre.textContent = aviso.nombre;
-
-                    const badge = document.createElement('span');
-                    badge.className = `text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full ${aviso.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-500'}`;
-                    badge.textContent = aviso.estado || '';
-
-                    izquierda.appendChild(icono);
-                    izquierda.appendChild(nombre);
-                    izquierda.appendChild(badge);
-
-                    fila.appendChild(izquierda);
-                    select.appendChild(fila);
-                });
-            } catch (error) {
-                console.error('Error al cargar avisos:', error);
-                document.getElementById('lista-avisos').innerHTML = '<p class="text-xs text-red-400 text-center py-4">Error al cargar los avisos.</p>';
-            }
-        }
-
-        async function cargarVecinosParaAvisos() {
-            try {
-                const response = await apiFetch('index.php?route=/vecinos/listar', { method: 'GET' });
-                const result = await response.json();
-                const vecinos = result.data || [];
-
-                const select = document.getElementById('aviso-select-vecino');
-                select.innerHTML = '<option value="">-- Seleccionar Vecino --</option>';
-
-                vecinos.forEach(v => {
-                    const option = document.createElement('option');
-                    option.value = v.usuario_id;
-                    option.textContent = `${v.nombre} ${v.apellido} (${v.email || 'Sin Email'})`;
-                    select.appendChild(option);
-                });
-            } catch (error) {
-                console.error('Error al cargar vecinos para avisos:', error);
-            }
-        }
-
-        async function registrarAviso(e) {
-            e.preventDefault();
-
-            const selectVecino = document.getElementById('aviso-select-vecino');
-            const tipo = document.getElementById('aviso-tipo').value;
-            const observaciones = document.getElementById('aviso-observaciones').value.trim();
-            const feedback = document.getElementById('aviso-feedback');
-
-            if (!selectVecino.value) {
-                alert('Seleccioná un vecino');
-                return;
-            }
-
-            if (!observaciones) {
-                alert('Completá las observaciones');
-                return;
-            }
-
-            feedback.classList.add('hidden');
-
-            try {
-                const data = {
-                    usuario_id: selectVecino.value,
-                    tipo: tipo,
-                    observaciones: observaciones
-                };
-
-                const response = await apiFetch('index.php?route=/avisos', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await response.json();
-                if (response.ok) {
-                    feedback.classList.remove('hidden');
-                    feedback.className = 'text-xs font-medium text-center text-emerald-600';
-                    feedback.innerText = result.message || 'Aviso registrado correctamente';
-                    document.getElementById('form-aviso').reset();
-                    cargarAvisos();
-                } else {
-                    feedback.classList.remove('hidden');
-                    feedback.className = 'text-xs font-medium text-center text-red-600';
-                    feedback.innerText = result.error || 'Error al registrar el aviso';
-                }
-            } catch (error) {
-                console.error('Error al registrar aviso:', error);
-                feedback.classList.remove('hidden');
-                feedback.className = 'text-xs font-medium text-center text-red-600';
-                feedback.innerText = 'Error de conexión al registrar el aviso';
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            await cargarVecinosParaAvisos();
-        });
-            const secDocumentos = document.getElementById('seccion-documentos');
-
-            const navReclamos = document.getElementById('nav-reclamos');
-            const navVecinos = document.getElementById('nav-vecinos');
-            const navMultas = document.getElementById('nav-multas');
-            const navDocumentos = document.getElementById('nav-documentos');
-
-            secReclamos.classList.add('hidden');
-            secVecinos.classList.add('hidden');
-            secMultas.classList.add('hidden');
-            secDocumentos.classList.add('hidden');
-
-            navReclamos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
-            navVecinos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
-            navMultas.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
-            navDocumentos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center space-x-3";
-
-            if (seccion === 'reclamos') {
-                secReclamos.classList.remove('hidden');
-                navReclamos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
-            } else if (seccion === 'vecinos') {
-                secVecinos.classList.remove('hidden');
-                navVecinos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
-            } else if (seccion === 'multas') {
-                secMultas.classList.remove('hidden');
-                navMultas.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
-            } else if (seccion === 'documentos') {
-                secDocumentos.classList.remove('hidden');
-                navDocumentos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
-                cargarDocumentos();
-            }
-        }
-
-        function cambiarSubSeccionMultas(sub) {
-            const subVer = document.getElementById('subseccion-ver-multas');
-            const subReg = document.getElementById('subseccion-registrar-multa');
-            const btnVer = document.getElementById('subnav-ver');
-            const btnReg = document.getElementById('subnav-registrar');
-
-            if (sub === 'ver') {
-                subVer.classList.remove('hidden');
-                subReg.classList.add('hidden');
-                btnVer.className = "px-4 py-2 rounded-lg transition bg-white text-slate-800 shadow-sm";
-                btnReg.className = "px-4 py-2 rounded-lg transition text-gray-600 hover:text-slate-900";
-                cargarMultas();
-            } else {
-                subReg.classList.remove('hidden');
-                subVer.classList.add('hidden');
-                btnReg.className = "px-4 py-2 rounded-lg transition bg-white text-slate-800 shadow-sm";
-                btnVer.className = "px-4 py-2 rounded-lg transition text-gray-600 hover:text-slate-900";
-            }
-        }
-
-        async function cargarTodosLosVecinos() {
-            try {
-                const response = await apiFetch('index.php?route=/vecinos/listar', { method: 'GET' });
-                const result = await response.json();
-                vecinosGlobal = result.data || [];
-
-                const selectMulta = document.getElementById('multa-select-vecino');
-                selectMulta.innerHTML = '<option value="">-- Seleccionar Vecino (Mza / Lote / Nombre) --</option>';
-
-                const selectAviso = document.getElementById('aviso-select-vecino');
-                selectAviso.innerHTML = '<option value="">-- Seleccionar Vecino --</option>';
-
-                vecinosGlobal.forEach(v => {
-                    const mzaTexto = v.manzana ? `Mza: ${v.manzana} - ` : '';
-                    const loteTexto = v.lote_identificador ? `Lote: ${v.lote_identificador}` : 'Sin lote';
-
-                    const optionMulta = document.createElement('option');
-                    optionMulta.value = v.usuario_id;
-                    optionMulta.dataset.lote = v.lote_id || '';
-                    optionMulta.textContent = `${mzaTexto}${loteTexto} - ${v.nombre || ''} ${v.apellido || ''} (${v.tipo_relacion || 'Residente'})`;
-                    selectMulta.appendChild(optionMulta);
-
-                    const optionAviso = document.createElement('option');
-                    optionAviso.value = v.usuario_id;
-                    optionAviso.textContent = `${v.nombre || ''} ${v.apellido || ''} (${v.email || 'Sin Email'})`;
-                    selectAviso.appendChild(optionAviso);
-                });
-            } catch (error) {
-                console.error('Error al cargar vecinos:', error);
-            }
-        }
-
-        async function cargarAvisos() {
-            try {
-                const response = await apiFetch('index.php?route=/avisos', { method: 'GET' });
-                const result = await response.json();
-                const avisos = result.data || [];
-
-                const contenedor = document.getElementById('lista-avisos');
-                contenedor.innerHTML = '';
-
-                if (!Array.isArray(avisos) || avisos.length === 0) {
-                    contenedor.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">No hay avisos registrados.</p>';
-                    return;
-                }
-
-                avisos.forEach(aviso => {
-                    const fila = document.createElement('div');
-                    fila.className = 'flex items-center justify-between gap-3 border-gray-100 rounded-xl px-4 py-3 hover:bg-gray-50/50 transition';
-
-                    const izquierda = document.createElement('div');
-                    izquierda.className = 'flex items-center gap-3 min-w-0';
-
-                    const icono = document.createElement('span');
-                    icono.textContent = '📣';
-
-                    const nombre = document.createElement('span');
-                    nombre.className = 'text-sm font-medium text-gray-800 truncate';
-                    nombre.textContent = aviso.nombre;
-
-                    const badge = document.createElement('span');
-                    badge.className = `text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full ${aviso.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-500'}`;
-                    badge.textContent = aviso.estado || '';
-
-                    izquierda.appendChild(icono);
-                    izquierda.appendChild(nombre);
-                    izquierda.appendChild(badge);
-
-                    fila.appendChild(izquierda);
-                    contenedor.appendChild(fila);
-                });
-            } catch (error) {
-                console.error('Error al cargar avisos:', error);
-                document.getElementById('lista-avisos').innerHTML = '<p class="text-xs text-red-400 text-center py-4">Error al cargar los avisos.</p>';
-            }
-        }
-
-        async function registrarAviso(e) {
-            e.preventDefault();
-
-            const selectVecino = document.getElementById('aviso-select-vecino');
-            const tipo = document.getElementById('aviso-tipo').value;
-            const observaciones = document.getElementById('aviso-observaciones').value.trim();
-            const feedback = document.getElementById('aviso-feedback');
-
-            if (!selectVecino.value) {
-                alert('Seleccioná un vecino');
-                return;
-            }
-
-            if (!observaciones) {
-                alert('Completá las observaciones');
-                return;
-            }
-
-            feedback.classList.add('hidden');
-
-            try {
-                const data = {
-                    usuario_id: selectVecino.value,
-                    tipo: tipo,
-                    observaciones: observaciones
-                };
-
-                const response = await apiFetch('index.php?route=/avisos', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await response.json();
-                if (response.ok) {
-                    feedback.classList.remove('hidden');
-                    feedback.className = 'text-xs font-medium text-center text-emerald-600';
-                    feedback.innerText = result.message || 'Aviso registrado correctamente';
-                    document.getElementById('form-aviso').reset();
-                    cargarAvisos();
-                } else {
-                    feedback.classList.remove('hidden');
-                    feedback.className = 'text-xs font-medium text-center text-red-600';
-                    feedback.innerText = result.error || 'Error al registrar el aviso';
-                }
-            } catch (error) {
-                console.error('Error al registrar aviso:', error);
-                feedback.classList.remove('hidden');
-                feedback.className = 'text-xs font-medium text-center text-red-600';
-                feedback.innerText = 'Error de conexión al registrar el aviso';
-            }
-        }
-
-        function seleccionarVecino() {
-            const select = document.getElementById('multa-select-vecino');
-            const selectedOption = select.options[select.selectedIndex];
-            const loteId = selectedOption.getAttribute('data-lote');
-            
-            document.getElementById('multa-lote-id').value = loteId || '';
-        }
-
-        async function registrarVecino(e) {
-            e.preventDefault();
-            const feedback = document.getElementById('mensaje-feedback');
-            feedback.classList.add('hidden');
-
-            const data = {
-                nombre: document.getElementById('nombre').value,
-                apellido: document.getElementById('apellido').value,
-                email: document.getElementById('email').value,
-                telefono: document.getElementById('telefono').value,
-                password: document.getElementById('password').value,
-                manzana: document.getElementById('manzana').value,
-                lote_identificador: document.getElementById('lote_identificador').value,
-                tipo_relacion: document.getElementById('tipo_relacion').value
-            };
-
-            try {
-                const response = await apiFetch('index.php?route=/vecinos', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await response.json();
-
-                feedback.classList.remove('hidden');
-                if (response.ok) {
-                    feedback.className = "text-xs font-medium text-center text-emerald-600";
-                    feedback.innerText = "¡Vecino registrado y vinculado al lote con éxito!";
-                    document.getElementById('form-alta-vecino').reset();
-                    cargarTodosLosVecinos(); 
-                } else {
-                    feedback.className = "text-xs font-medium text-center text-red-600";
-                    feedback.innerText = result.error || 'Ocurrió un error al registrar el vecino.';
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                feedback.classList.add('hidden');
-            }
-        }
-
-        async function registrarMulta(e) {
-            e.preventDefault();
-            const feedback = document.getElementById('multa-feedback');
-            feedback.classList.add('hidden');
-
-            const data = {
-                lote_id: document.getElementById('multa-lote-id').value,
-                usuario_id: document.getElementById('multa-select-vecino').value,
-                tipo: document.getElementById('multa-tipo').value,
-                monto: document.getElementById('multa-monto').value,
-                observaciones: document.getElementById('multa-observaciones').value,
-                barrio_id: usuario.barrio_id
-            };
-
-            try {
-                const response = await apiFetch('index.php?route=/multas', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await response.json();
-
-                feedback.classList.remove('hidden');
-                if (response.ok) {
-                    feedback.className = "text-xs font-medium text-center text-emerald-600";
-                    feedback.innerText = "¡Multa registrada con éxito!";
-                    document.getElementById('form-multa').reset();
-                    setTimeout(() => cambiarSubSeccionMultas('ver'), 1200);
-                } else {
-                    feedback.className = "text-xs font-medium text-center text-red-600";
-                    feedback.innerText = result.error || 'Ocurrió un error al registrar la multa.';
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                feedback.classList.add('hidden');
-                feedback.className = "text-xs font-medium text-center text-red-600";
-                feedback.innerText = 'Error de conexión con el servidor.';
-            }
-        }
-
-        async function cargarMultas() {
-            try {
-                const response = await apiFetch('index.php?route=/multas', { method: 'GET' });
-
-                const result = await response.json();
-                listaMultasGlobal = result.data || [];
-                
-                const tbody = document.getElementById('tabla-multas-body');
-                tbody.innerHTML = '';
-
-                if (!Array.isArray(listaMultasGlobal) || listaMultasGlobal.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">No hay multas registradas.</td></tr>`;
-                    return;
-                }
-
-                listaMultasGlobal.forEach(m => {
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-gray-50/50 transition";
-                    tr.style.cursor = 'pointer';
-                    tr.onclick = () => abrirDetalleMulta(m);
-
-                    const vecinoInfo = m.vecino_nombre ? `${m.vecino_nombre} ${m.vecino_apellido} (${m.vecino_email})` : 'Sin vecino vinculado';
-                    const multaId = Number(m.id) || 0;
-
-                    tr.innerHTML = `
-                        <td class="p-3 font-bold text-gray-800">#${multaId}</td>
-                        <td class="p-3 text-gray-700">
-                            <span class="font-semibold block text-gray-900">Lote: ${escapeHtml(m.lote_identificador || m.lote_id)}</span>
-                            <span class="text-[10px] text-gray-500">${escapeHtml(vecinoInfo)}</span>
-                        </td>
-                        <td class="p-3 text-gray-800">
-                            <span class="font-semibold text-blue-600 uppercase text-[10px] block">${escapeHtml(m.tipo)}</span>
-                            <span>$${parseFloat(m.monto).toLocaleString()}</span><br>
-                            <span class="text-[10px] text-gray-400 italic">${escapeHtml(m.observaciones || '')}</span>
-                        </td>
-                        <td class="p-3">
-                            <span class="px-2.5 py-1 rounded-full font-semibold text-[10px] uppercase ${obtenerBadgeEstadoMulta(m.estado)}">${escapeHtml(m.estado)}</span>
-                        </td>
-                        <td class="p-3 text-right">
-                            <button onclick="event.stopPropagation(); enviarAvisoMulta(${multaId})" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded-lg text-[11px] transition shadow-sm">
-                                ✉️ Enviar Aviso
-                            </button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-
-            } catch (error) {
-                console.error('Error al cargar multas:', error);
-                document.getElementById('tabla-multas-body').innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-400">Error al cargar las multas.</td></tr>`;
-            }
-        }
-
-        async function enviarAvisoMulta(multaId) {
-            if (!confirm(`¿Deseas enviar el aviso de la multa #${multaId} por correo electrónico y notificación push al vecino?`)) return;
-
-            try {
-                const response = await apiFetch(`index.php?route=/multas/${multaId}/enviar-aviso`, { method: 'POST' });
-
-                const result = await response.json();
-                if (response.ok) {
-                    alert('¡Aviso de multa enviado por correo y notificación push con éxito!');
-                } else {
-                    alert(result.error || 'No se pudo enviar el aviso.');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error de conexión al intentar enviar el aviso.');
-            }
-        }
-
-        async function cargarReclamos() {
-            try {
-                const response = await apiFetch('index.php?route=/reclamos', { method: 'GET' });
-
-                const result = await response.json();
-                listaReclamosGlobal = result.data || [];
-                
-                const tbody = document.getElementById('tabla-reclamos-body');
-                tbody.innerHTML = '';
-
-                if (!Array.isArray(listaReclamosGlobal) || listaReclamosGlobal.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-gray-400">No hay reclamos registrados en este barrio.</td></tr>`;
-                    return;
-                }
-
-                listaReclamosGlobal.forEach(r => {
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-blue-50/50 cursor-pointer transition select-none";
-                    tr.ondblclick = () => abrirDetalleReclamo(r.id);
-
-                    const fechaFormateada = r.created_at ? new Date(r.created_at).toLocaleDateString() : '';
-                    const nombreVecino = `${r.vecino_nombre || 'N/D'} ${r.vecino_apellido || ''}`;
-                    const loteInfo = `Lote: ${r.lote_identificador || r.lote_id || 'N/D'}`;
-
-                    tr.innerHTML = `
-                        <td class="p-3 font-bold text-gray-800">#${r.id}</td>
-                        <td class="p-3 text-gray-700 font-medium">${escapeHtml(nombreVecino)}<br><span class="text-[10px] text-gray-400">${escapeHtml(loteInfo)}</span></td>
-                        <td class="p-3 text-gray-800">
-                            <span class="font-semibold text-blue-600 uppercase text-[10px] block">${escapeHtml(r.categoria_nombre || 'General')}</span>
-                            <span class="font-bold">${escapeHtml(r.titulo || 'Sin título')}</span>
-                        </td>
-                        <td class="p-3">
-                            <span class="px-2.5 py-1 rounded-full font-semibold text-[10px] uppercase ${obtenerBadgeEstado(r.estado)}">${escapeHtml(r.estado)}</span>
-                        </td>
-                        <td class="p-3 text-right text-gray-400">${fechaFormateada}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-
-            } catch (error) {
-                console.error('Error al cargar reclamos:', error);
-            }
-        }
-
-        async function abrirDetalleReclamo(id) {
-            const r = listaReclamosGlobal.find(item => item.id == id);
-            if (!r) return;
-
-            reclamoSeleccionadoId = r.id;
-
-            document.getElementById('modal-id-badge').innerText = `Reclamo #${r.id}`;
-            document.getElementById('modal-id-badge').className = `text-xs font-bold px-2 py-0.5 rounded uppercase ${obtenerBadgeEstado(r.estado)}`;
-            document.getElementById('modal-titulo').innerText = r.titulo || 'Sin título';
-            document.getElementById('modal-vecino').innerText = `${r.vecino_nombre || 'N/D'} ${r.vecino_apellido || ''}`;
-            document.getElementById('modal-lote').innerText = r.lote_identificador || r.lote_id || 'N/D';
-            document.getElementById('modal-categoria').innerText = r.categoria_nombre || 'General';
-            document.getElementById('modal-fecha').innerText = r.created_at ? new Date(r.created_at).toLocaleString() : 'N/D';
-            document.getElementById('modal-descripcion').innerText = r.descripcion || 'Sin descripción';
-
-            const contenedorImg = document.getElementById('modal-contenedor-imagen');
-            if (r.imagen_url) {
-                document.getElementById('modal-imagen-src').src = r.imagen_url;
-                document.getElementById('modal-imagen-link').href = r.imagen_url;
-                contenedorImg.classList.remove('hidden');
-            } else {
-                contenedorImg.classList.add('hidden');
-            }
-
-            document.getElementById('modal-select-estado').value = r.estado;
-            document.getElementById('modal-detalle-reclamo').classList.remove('hidden');
-            
-            cargarHistorialComentarios(id);
-        }
-
-        function cerrarModalDetalle() {
-            document.getElementById('modal-detalle-reclamo').classList.add('hidden');
-            reclamoSeleccionadoId = null;
-        }
-
-        async function cargarHistorialComentarios(reclamoId) {
-            const contenedor = document.getElementById('modal-historial-comentarios');
-            contenedor.innerHTML = '<span class="text-gray-400 italic">Cargando comentarios...</span>';
-
-            try {
-                const response = await apiFetch(`index.php?route=/reclamos/${reclamoId}/historial`, { method: 'GET' });
-                const result = await response.json();
-                const historial = result.data || [];
-
-                if (historial.length === 0) {
-                    contenedor.innerHTML = '<span class="text-gray-400 italic">No hay comentarios registrados aún.</span>';
-                    return;
-                }
-
-                contenedor.innerHTML = '';
-                historial.forEach(h => {
-                    const div = document.createElement('div');
-                    div.className = "border-b pb-1 mb-1";
-                    const fecha = h.created_at ? new Date(h.created_at).toLocaleString() : '';
-
-                    const strong = document.createElement('b');
-                    strong.textContent = `${h.nombre || 'Sistema'} ${h.apellido || ''}`.trim();
-
-                    const fechaSpan = document.createElement('span');
-                    fechaSpan.className = 'text-[10px] text-gray-400';
-                    fechaSpan.textContent = ` (${fecha}):`;
-
-                    const br = document.createElement('br');
-                    const textoComentario = document.createTextNode(h.comentario || '');
-
-                    div.appendChild(strong);
-                    div.appendChild(fechaSpan);
-                    div.appendChild(br);
-                    div.appendChild(textoComentario);
-                    contenedor.appendChild(div);
-                });
-            } catch (error) {
-                console.error('Error al cargar historial:', error);
-                contenedor.innerHTML = '<span class="text-red-400">Error al cargar comentarios.</span>';
-            }
-        }
-
-        async function agregarComentarioReclamo() {
-            if (!reclamoSeleccionadoId) return;
-            const inputComentario = document.getElementById('modal-nuevo-comentario');
-            const comentario = inputComentario.value.trim();
-
-            if (!comentario) {
-                alert('Escribí un comentario antes de enviar.');
-                return;
-            }
-
-            try {
-                const response = await apiFetch(`index.php?route=/reclamos/${reclamoSeleccionadoId}/comentarios`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ comentario: comentario })
-                });
-
-                const result = await response.json();
-                if (response.ok) {
-                    inputComentario.value = '';
-                    cargarHistorialComentarios(reclamoSeleccionadoId);
-                } else {
-                    alert(result.error || 'No se pudo guardar el comentario.');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error de conexión al enviar el comentario.');
-            }
-        }
-
-        async function actualizarEstadoDesdeModal() {
-            if (!reclamoSeleccionadoId) return;
-            const nuevoEstado = document.getElementById('modal-select-estado').value;
-
-            try {
-                const response = await apiFetch(`index.php?route=/reclamos/${reclamoSeleccionadoId}/estado`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ estado: nuevoEstado })
-                });
-
-                const result = await response.json();
-                if (response.ok) {
-                    alert('¡Estado actualizado con éxito!');
-                    cerrarModalDetalle();
-                    cargarReclamos();
-                } else {
-                    alert(result.error || 'No se pudo actualizar el estado');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error de conexión al actualizar el estado.');
-            }
-        }
-
-        function obtenerBadgeEstado(estado) {
-            switch(estado) {
-                case 'pendiente': return 'bg-yellow-100 text-yellow-800';
-                case 'en_proceso': return 'bg-blue-100 text-blue-800';
-                case 'resuelto': return 'bg-emerald-100 text-emerald-800';
-                case 'rechazado': return 'bg-red-100 text-red-800';
-                default: return 'bg-gray-100 text-gray-800';
-            }
-        }
-
-        function abrirDetalleMulta(m) {
-            const multaId = Number(m.id) || 0;
-            multaAbiertaId = multaId;
-
-            document.getElementById('modal-multa-id-badge').innerText = `Multa #${multaId}`;
-            document.getElementById('modal-multa-id-badge').className = `text-xs font-bold px-2 py-0.5 rounded uppercase ${obtenerBadgeEstadoMulta(m.estado)}`;
-            document.getElementById('modal-multa-titulo').innerText = obtenerTextoTipoMulta(m.tipo);
-            document.getElementById('modal-multa-vecino').innerText = m.vecino_nombre ? `${m.vecino_nombre} ${m.vecino_apellido || ''}`.trim() : 'Sin vecino vinculado';
-            document.getElementById('modal-multa-email').innerText = m.vecino_email || 'N/D';
-            document.getElementById('modal-multa-lote').innerText = m.lote_identificador || m.lote_id || 'N/D';
-            document.getElementById('modal-multa-fecha').innerText = m.created_at ? new Date(m.created_at).toLocaleString() : 'N/D';
-            document.getElementById('modal-multa-monto').innerText = '$' + parseFloat(m.monto || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
-
-            const badge = document.getElementById('modal-multa-estado');
-            badge.innerText = m.estado || 'N/D';
-            badge.className = `px-2.5 py-1 rounded-full font-semibold text-[10px] uppercase ${obtenerBadgeEstadoMulta(m.estado)}`;
-
-            document.getElementById('modal-multa-observaciones').innerText = m.observaciones || 'Sin observaciones registradas.';
-
-            document.getElementById('modal-detalle-multa').classList.remove('hidden');
-        }
-
-        function cerrarModalDetalleMulta() {
-            document.getElementById('modal-detalle-multa').classList.add('hidden');
-        }
-
-        function obtenerTextoTipoMulta(tipo) {
-            const tipos = {
-                'velocidad': 'Exceso de velocidad',
-                'mal_estacionamiento': 'Mal estacionamiento',
-                'ruidos_molestos': 'Ruidos molestos',
-                'mascotas': 'Mascotas sueltas / Sin correa',
-                'obras': 'Incumplimiento reglamento de obra',
-                'otro': 'Otro motivo'
-            };
-            return tipos[tipo] || tipo || 'Infracción';
-        }
-
-        function obtenerBadgeEstadoMulta(estado) {
-            switch(estado) {
-                case 'pendiente': return 'bg-yellow-100 text-yellow-800';
-                case 'pagada': return 'bg-emerald-100 text-emerald-800';
-                case 'anulada': return 'bg-red-100 text-red-800';
-                default: return 'bg-gray-100 text-gray-800';
-            }
-        }
-
-        // ============ DOCUMENTACIÓN ============
-
-        async function cargarDocumentos() {
-            try {
-                const response = await apiFetch('index.php?route=/documentos', { method: 'GET' });
-                const result = await response.json();
-                const documentos = result.data || [];
-
-                const contenedor = document.getElementById('lista-documentos');
-                contenedor.innerHTML = '';
-
-                if (!Array.isArray(documentos) || documentos.length === 0) {
-                    contenedor.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">No hay documentos cargados. Agregá el primero arriba.</p>';
-                    return;
-                }
-
-                documentos.forEach(doc => {
-                    const fila = document.createElement('div');
-                    fila.className = 'flex items-center justify-between gap-3 border border-gray-100 rounded-xl px-4 py-3 hover:bg-gray-50/50 transition';
-
-                    const izquierda = document.createElement('div');
-                    izquierda.className = 'flex items-center gap-3 min-w-0';
-
-                    const icono = document.createElement('span');
-                    icono.textContent = doc.archivo_url ? '📎' : '📄';
-
-                    const nombre = document.createElement('span');
-                    nombre.className = 'text-sm font-medium text-gray-800 truncate';
-                    nombre.textContent = doc.nombre;
-
-                    let enlaceDescarga = null;
-                    if (doc.archivo_url) {
-                        enlaceDescarga = document.createElement('a');
-                        enlaceDescarga.href = doc.archivo_url;
-                        enlaceDescarga.target = '_blank';
-                        enlaceDescarga.download = doc.nombre;
-                        enlaceDescarga.className = 'bg-blue-600 hover:bg-blue-700 text-white font-semibold text-[10px] px-2.5 py-1.5 rounded-lg transition shadow-sm shrink-0';
-                        enlaceDescarga.textContent = '⬇ Descargar';
-                    }
-
-                    const badge = document.createElement('span');
-                    badge.className = `text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full ${Number(doc.disponible) === 1 ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}`;
-                    badge.textContent = Number(doc.disponible) === 1 ? 'Disponible' : 'Oculto';
-
-                    izquierda.appendChild(icono);
-                    izquierda.appendChild(nombre);
-                    if (enlaceDescarga) {
-                        izquierda.appendChild(enlaceDescarga);
-                    }
-                    izquierda.appendChild(badge);
-
-                    const acciones = document.createElement('div');
-                    acciones.className = 'flex items-center gap-2 shrink-0';
-
-                    const idDoc = Number(doc.id) || 0;
-                    const disponible = Number(doc.disponible) === 1;
-
-                    const btnTilde = document.createElement('button');
-                    btnTilde.className = `w-9 h-9 rounded-lg text-lg font-bold transition shadow-sm ${disponible ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-gray-100 text-gray-300 hover:bg-gray-200 hover:text-gray-500'}`;
-                    btnTilde.textContent = disponible ? '✔' : '✖';
-                    btnTilde.title = disponible ? 'Disponible para vecinos (clic para ocultar)' : 'No disponible (clic para activar)';
-                    btnTilde.onclick = () => toggleDisponibilidadDocumento(idDoc, doc.nombre);
-
-                    const btnEliminar = document.createElement('button');
-                    btnEliminar.className = 'w-9 h-9 rounded-lg text-lg transition shadow-sm bg-red-50 text-red-500 hover:bg-red-100';
-                    btnEliminar.textContent = '🗑';
-                    btnEliminar.title = 'Quitar documento';
-                    btnEliminar.onclick = () => eliminarDocumento(idDoc, doc.nombre);
-
-                    const btnArchivo = document.createElement('button');
-                    btnArchivo.className = 'w-9 h-9 rounded-lg text-lg transition shadow-sm bg-blue-50 text-blue-600 hover:bg-blue-100';
-                    btnArchivo.textContent = '📤';
-                    btnArchivo.title = doc.archivo_url ? 'Reemplazar archivo adjunto' : 'Adjuntar archivo';
-                    btnArchivo.onclick = () => subirArchivoDocumento(idDoc);
-
-                    acciones.appendChild(btnTilde);
-                    acciones.appendChild(btnArchivo);
-                    acciones.appendChild(btnEliminar);
-                    fila.appendChild(izquierda);
-                    fila.appendChild(acciones);
-                    contenedor.appendChild(fila);
-                });
-
-            } catch (error) {
-                console.error('Error al cargar documentos:', error);
-                document.getElementById('lista-documentos').innerHTML = '<p class="text-xs text-red-400 text-center py-4">Error al cargar los documentos.</p>';
-            }
-        }
-
-        function mostrarFeedbackDocumentos(mensaje, esError) {
-            const feedback = document.getElementById('documento-feedback');
-            feedback.classList.remove('hidden');
-            feedback.className = esError
-                ? 'text-xs font-medium text-center text-red-600'
-                : 'text-xs font-medium text-center text-emerald-600';
-            feedback.innerText = mensaje;
-            setTimeout(() => feedback.classList.add('hidden'), 3000);
-        }
-
-        async function agregarDocumento(e) {
-            e.preventDefault();
-            const input = document.getElementById('documento-nombre');
-            const inputArchivo = document.getElementById('documento-archivo');
-            const nombre = input.value.trim();
-
-            if (!nombre) return;
-
-            try {
-                const formData = new FormData();
-                formData.append('nombre', nombre);
-                formData.append('disponible', '1');
-
-                if (inputArchivo.files && inputArchivo.files[0]) {
-                    formData.append('archivo', inputArchivo.files[0]);
-                }
-
-                const response = await apiFetch('index.php?route=/documentos', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const result = await response.json();
-                if (response.ok) {
-                    input.value = '';
-                    inputArchivo.value = '';
-                    mostrarFeedbackDocumentos(result.message || 'Documento agregado correctamente.', false);
-                    cargarDocumentos();
-                } else {
-                    mostrarFeedbackDocumentos(result.error || 'No se pudo agregar el documento.', true);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                mostrarFeedbackDocumentos('Error de conexión con el servidor.', true);
-            }
-        }
-
-        async function subirArchivoDocumento(id) {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.txt,.csv';
-
-            input.onchange = async () => {
-                if (!input.files || !input.files[0]) return;
-                const archivo = input.files[0];
-
-                if (archivo.size > 10 * 1024 * 1024) {
-                    mostrarFeedbackDocumentos('El archivo supera el tamano maximo de 10 MB.', true);
-                    return;
-                }
-
-                try {
-                    const formData = new FormData();
-                    formData.append('archivo', archivo);
-
-                    const response = await apiFetch(`index.php?route=/documentos/${id}/archivo`, {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    const result = await response.json();
-                    if (response.ok) {
-                        mostrarFeedbackDocumentos(result.message || 'Archivo actualizado correctamente.', false);
-                        cargarDocumentos();
-                    } else {
-                        mostrarFeedbackDocumentos(result.error || 'No se pudo subir el archivo.', true);
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    mostrarFeedbackDocumentos('Error de conexión al subir el archivo.', true);
-                }
-            };
-
-            input.click();
-        }
-
-        async function toggleDisponibilidadDocumento(id, nombre) {
-            try {
-                const response = await apiFetch(`index.php?route=/documentos/${id}/disponibilidad`, { method: 'PUT' });
-                const result = await response.json();
-                if (response.ok) {
-                    cargarDocumentos();
-                } else {
-                    mostrarFeedbackDocumentos(result.error || 'No se pudo actualizar el documento.', true);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                mostrarFeedbackDocumentos('Error de conexión al actualizar la disponibilidad.', true);
-            }
-        }
-
-        async function eliminarDocumento(id, nombre) {
-            if (!confirm(`¿Seguro que querés quitar el documento "${nombre}"? También se borrará su archivo adjunto si tiene.`)) return;
-
-            try {
-                const response = await apiFetch(`index.php?route=/documentos/${id}`, { method: 'DELETE' });
-                const result = await response.json();
-                if (response.ok) {
-                    mostrarFeedbackDocumentos('Documento eliminado correctamente.', false);
-                    cargarDocumentos();
-                } else {
-                    mostrarFeedbackDocumentos(result.error || 'No se pudo eliminar el documento.', true);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                mostrarFeedbackDocumentos('Error de conexión al eliminar el documento.', true);
-            }
-        }
-
-        async function cerrarSesion() {
-            try {
-                await fetch('index.php?route=/auth/logout', {
-                    method: 'POST',
-                    credentials: 'same-origin'
-                });
-            } catch (error) {
-                console.error('No se pudo limpiar cookie de sesion en servidor:', error);
-            } finally {
-                localStorage.clear();
-                window.location.href = 'login';
             }
         }
     </script>
