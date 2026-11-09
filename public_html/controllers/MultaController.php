@@ -101,7 +101,7 @@ class MultaController {
                 FROM multas m
                 JOIN lotes l ON m.lote_id = l.id
                 LEFT JOIN usuarios u ON m.usuario_id = u.id
-                WHERE m.barrio_id = :barrio_id
+                WHERE m.barrio_id = :barrio_id AND m.tipo_multa = 'multa'
                 ORDER BY m.created_at DESC
             ");
             
@@ -290,7 +290,7 @@ class MultaController {
 
     // Método privado para disparar las notificaciones Push reales con la librería
 // Método privado para disparar las notificaciones Push reales con la librería
-    private function enviarPushVecino($db, $usuarioId, $titulo, $cuerpo) {
+    public function enviarPushVecino($db, $usuarioId, $titulo, $cuerpo) {
         try {
             $stmtPush = $db->prepare("SELECT * FROM push_subscriptions WHERE usuario_id = :usuario_id");
             $stmtPush->execute([':usuario_id' => $usuarioId]);

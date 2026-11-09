@@ -153,6 +153,14 @@ switch (true) {
         require_once __DIR__ . '/controllers/MultaController.php';
         (new MultaController())->enviarAviso($user, $matches[1]);
         break; 
+    case (preg_match('#^/avisos/(\d+)/enviar-aviso$#', $route, $matches) && $method === 'POST'):
+        require_once __DIR__ . '/middlewares/AuthMiddleware.php';
+        $user = AuthMiddleware::verify();
+
+        require_once __DIR__ . '/controllers/AvisoController.php';
+        (new AvisoController())->enviarAviso($user, $matches[1]);
+        break;
+
     case (preg_match('#^/avisos/(\d+)/generar-multa$#', $route, $matches) && $method === 'POST'):
         require_once __DIR__ . '/middlewares/AuthMiddleware.php';
         $user = AuthMiddleware::verify();

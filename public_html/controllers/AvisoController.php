@@ -23,7 +23,8 @@ class AvisoController {
 
             $db = Database::getConnection();
 
-            $stmt = $db->prepare("SELECT m.*, l.identificador AS lote_identificador, u.nombre, u.apellido, u.email
+            $stmt = $db->prepare("SELECT m.*, l.identificador AS lote_identificador, u.nombre, u.apellido, u.email,
+                       (SELECT COUNT(*) FROM multas mm WHERE mm.id_aviso_relacionado = m.id AND mm.tipo_multa = 'multa') AS multa_generada
                 FROM multas m
                 JOIN lotes l ON m.lote_id = l.id
                 LEFT JOIN usuarios u ON m.usuario_id = u.id
@@ -117,6 +118,79 @@ class AvisoController {
 
         } catch (Exception $e) {
             error_log('AvisoController::store error: ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['error' => 'Error interno del servidor']);
+        }
+    }
+
+    // Enviar aviso (mail + notificación push) al vecino sobre un aviso registrado
+    public function enviarAviso($user, $avisoId) {
+        header('Content-Type: application/json');
+
+        if (!in_array($user['rol'] ?? '', ['intendente', 'admin_general'], true)) {
+            http_response_code(403);
+            echo json_encode(['error' => 'No tenés permisos para enviar avisos']);
+            return;
+        }
+
+        try {
+            $db = Database::getConnection();
+
+            $stmt = $db->prepare("SELECT m.*, l.identificador AS lote_identificador, u.nombre, u.apellido, u.email,
+                        u.id AS vecino_id
+                    FROM multas m
+                    JOIN lotes l ON m.lote_id = l.id
+                    LEFT JOIN usuarios u ON m.usuario_id = u.id
+                    WHERE m.id = :id AND m.barrio_id = :barrio_id AND m.tipo_multa = 'aviso'");
+            $stmt->execute([':id' => $avisoId, ':barrio_id' => $user['barrio_id'] ?? null]);
+            $aviso = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$aviso) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Aviso no encontrado']);
+                return;
+            }
+
+            if (empty($aviso['email'])) {
+                http_response_code(400);
+                echo json_encode(['error' => 'El vecino seleccionado no tiene correo electrónico registrado.']);
+                return;
+            }
+
+            // 1. Envío de correo electrónico
+            $destinatario = $aviso['email'];
+            $asunto = "Aviso de Infracción - Lote " . $aviso['lote_identificador'];
+            $mensaje = "Hola {$aviso['nombre']} {$aviso['apellido']},\n\n"
+                     . "Se le ha registrado un aviso de infracción en el barrio.\n"
+                     . "Tipo: {$aviso['tipo']}\n"
+                     . "Observaciones: {$aviso['observaciones']}\n\n"
+                     . "Por favor, tome las medidas necesarias para regularizar su situación.\n\n"
+                     . "Atentamente,\nAdministración del Barrio.";
+
+            $headers = "From: no-reply@tubarrio.lovar.com.ar\r\n" .
+                       "X-Mailer: PHP/" . phpversion();
+
+            @mail($destinatario, $asunto, $mensaje, $headers);
+
+            // 2. Envío de notificación push
+            if (!empty($aviso['vecino_id'])) {
+                require_once __DIR__ . '/MultaController.php';
+                $multaController = new MultaController();
+                $multaController->enviarPushVecino(
+                    $db,
+                    $aviso['vecino_id'],
+                    "⚠️ Aviso de Infracción - Lote {$aviso['lote_identificador']}",
+                    "Tipo: {$aviso['tipo']} | {$aviso['observaciones']}"
+                );
+            }
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Aviso enviado por correo y notificación push a ' . $destinatario
+            ]);
+
+        } catch (Exception $e) {
+            error_log('AvisoController::enviarAviso error: ' . $e->getMessage());
             http_response_code(500);
             echo json_encode(['error' => 'Error interno del servidor']);
         }

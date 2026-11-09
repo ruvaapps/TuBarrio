@@ -441,12 +441,15 @@
                     <input type="number" id="aviso-multa-monto" min="0" step="0.01" placeholder="Ej: 5000.00" class="w-full border rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-yellow-400 bg-white">
                 </div>
                 <div id="aviso-multa-feedback" class="text-[11px] font-medium text-center hidden"></div>
-                <button onclick="generarMultaDesdeAviso()" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2.5 rounded-xl transition text-xs">
+                <button id="btn-generar-multa" onclick="generarMultaDesdeAviso()" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2.5 rounded-xl transition text-xs">
                     Generar Multa
                 </button>
             </div>
 
             <div class="pt-2 border-t flex justify-end gap-2">
+                <button onclick="cerrarModalDetalleAviso(); enviarAvisoVecino(avisoAbiertoId)" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl transition text-xs">
+                    ✉️ Enviar Aviso al Vecino
+                </button>
                 <button onclick="cerrarModalDetalleAviso()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-xl transition text-xs">
                     Cerrar
                 </button>
@@ -1264,7 +1267,9 @@
             cont.innerHTML = avisos.map(a => `
                 <div onclick="abrirModalDetalleAviso(${a.id})" class="border border-gray-100 rounded-xl p-3 flex justify-between items-start bg-gray-50/50 cursor-pointer hover:bg-gray-100 hover:border-gray-300 transition">
                     <div>
-                        <p class="text-xs font-bold text-gray-800">${escapeHtml(a.tipo || '')} — ${escapeHtml(`${a.vecino_nombre || ''} ${a.vecino_apellido || ''}`.trim())}</p>
+                        <p class="text-xs font-bold text-gray-800">${escapeHtml(a.tipo || '')} — ${escapeHtml(`${a.vecino_nombre || ''} ${a.vecino_apellido || ''}`.trim())}
+                            ${a.multa_generada > 0 ? '<span class="ml-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-green-100 text-green-800 align-middle">MULTA GENERADA</span>' : ''}
+                        </p>
                         <p class="text-[11px] text-gray-600 mt-1">${escapeHtml(a.observaciones || a.detalle || '')}</p>
                         <p class="text-[10px] text-gray-400 mt-1">${escapeHtml((a.created_at || '').slice(0, 16).replace('T', ' '))}</p>
                     </div>
@@ -1333,6 +1338,19 @@
         feedback.textContent = '';
         document.getElementById('aviso-multa-monto').value = '';
 
+        // Bloquear generación si ya existe una multa para este aviso
+        const yaTieneMulta = (a.multa_generada || 0) > 0;
+        const bloque = document.getElementById('aviso-bloque-generar-multa');
+        const btnGenerar = document.getElementById('btn-generar-multa');
+        if (yaTieneMulta) {
+            bloque.classList.add('opacity-50', 'pointer-events-none');
+            feedback.classList.remove('hidden');
+            feedback.textContent = 'Ya se generó una multa a partir de este aviso.';
+            feedback.className = 'text-[11px] font-medium text-center text-green-700';
+        } else {
+            bloque.classList.remove('opacity-50', 'pointer-events-none');
+        }
+
         const modal = document.getElementById('modal-detalle-aviso');
         modal.classList.remove('hidden');
         modal.classList.add('flex');
@@ -1342,6 +1360,22 @@
         const modal = document.getElementById('modal-detalle-aviso');
         modal.classList.add('hidden');
         modal.classList.remove('flex');
+    }
+
+    async function enviarAvisoVecino(avisoId) {
+        if (!avisoId) return;
+        try {
+            const response = await apiFetch(`index.php?route=/avisos/${avisoId}/enviar-aviso`, { method: 'POST' });
+            const result = await response.json();
+            if (response.ok && result.success) {
+                alert('Aviso enviado al vecino correctamente.');
+            } else {
+                alert(result.error || 'No se pudo enviar el aviso.');
+            }
+        } catch (error) {
+            console.error('Error al enviar aviso:', error);
+            alert('Error de conexión al enviar el aviso.');
+        }
     }
 
     async function generarMultaDesdeAviso() {
