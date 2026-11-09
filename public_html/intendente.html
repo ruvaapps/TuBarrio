@@ -807,6 +807,556 @@
             alert('Error de conexión al actualizar el estado');
         }
     }
+
+    // ===================== VECINOS PARA SELECTS =====================
+    async function cargarTodosLosVecinos() {
+        try {
+            const response = await apiFetch('index.php?route=/vecinos/listar', { method: 'GET' });
+            const result = await response.json();
+            vecinosGlobal = Array.isArray(result.data) ? result.data : [];
+
+            poblarSelectVecinos('multa-select-vecino');
+            poblarSelectVecinos('aviso-select-vecino');
+
+            // Además, llenar la tabla de vecinos con estos datos
+            const tbody = document.getElementById('tabla-vecinos-body');
+            tbody.innerHTML = '';
+
+            if (vecinosGlobal.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="p-6 text-center text-gray-400">No hay vecinos registrados.</td></tr>';
+                return;
+            }
+
+            vecinosGlobal.forEach(v => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50/50 transition';
+                tr.innerHTML = `
+                    <td class="p-3 text-gray-800">${escapeHtml(v.nombre)}</td>
+                    <td class="p-3 text-gray-800">${escapeHtml(v.apellido)}</td>
+                    <td class="p-3 text-gray-800">${escapeHtml(v.email)}</td>
+                    <td class="p-3 text-gray-800"></td>
+                    <td class="p-3 text-gray-800">${escapeHtml(v.manzana || '')}</td>
+                    <td class="p-3 text-gray-800">${escapeHtml(v.lote_identificador || '')}</td>
+                    <td class="p-3 text-gray-800">${escapeHtml(v.tipo_relacion || '')}</td>
+                    <td class="p-3 text-gray-800">activo</td>
+                    <td class="p-3 text-center text-gray-400 text-[10px]">—</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (error) {
+            console.error('Error al cargar vecinos:', error);
+            document.getElementById('tabla-vecinos-body').innerHTML = '<tr><td colspan="9" class="p-6 text-center text-red-400">Error al cargar los vecinos.</td></tr>';
+        }
+    }
+
+    function poblarSelectVecinos(selectId) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        select.innerHTML = '<option value="">Seleccioná un vecino...</option>';
+        vecinosGlobal.forEach(v => {
+            const option = document.createElement('option');
+            option.value = v.usuario_id;
+            option.dataset.loteId = v.lote_id || '';
+            option.textContent = `${v.manzana ? 'Mza. ' + v.manzana + ' - ' : ''}${v.lote_identificador ? 'Lote ' + v.lote_identificador + ' - ' : ''}${v.nombre} ${v.apellido}`;
+            select.appendChild(option);
+        });
+    }
+
+    function seleccionarVecino() {
+        const select = document.getElementById('multa-select-vecino');
+        const opcion = select.options[select.selectedIndex];
+        document.getElementById('multa-lote-id').value = opcion ? (opcion.dataset.loteId || '') : '';
+    }
+
+    // ===================== RECLAMOS =====================
+    async function cargarReclamos() {
+        try {
+            const response = await apiFetch('index.php?route=/reclamos', { method: 'GET' });
+            const result = await response.json();
+            const reclamos = result.data || [];
+            listaReclamosGlobal = reclamos;
+
+            const tbody = document.getElementById('tabla-reclamos-body');
+            tbody.innerHTML = '';
+
+            if (!Array.isArray(reclamos) || reclamos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-400">No hay reclamos cargados.</td></tr>';
+                return;
+            }
+
+            reclamos.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-blue-50/40 cursor-pointer transition';
+                tr.ondblclick = () => abrirModalReclamo(r.id);
+
+                const estadosClase = {
+                    pendiente: 'bg-yellow-100 text-yellow-800',
+                    en_proceso: 'bg-blue-100 text-blue-800',
+                    resuelto: 'bg-green-100 text-green-800',
+                    rechazado: 'bg-red-100 text-red-800'
+                };
+                const clase = estadosClase[r.estado] || 'bg-gray-100 text-gray-800';
+
+                tr.innerHTML = `
+                    <td class="p-3 font-mono text-gray-500">#${r.id}</td>
+                    <td class="p-3 text-gray-800">${escapeHtml((r.vecino_nombre || '') + ' ' + (r.vecino_apellido || ''))}</td>
+                    <td class="p-3 text-gray-800">${escapeHtml(r.titulo || '')} <span class="text-gray-400">(${escapeHtml(r.categoria_nombre || '-')})</span></td>
+                    <td class="p-3"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${clase}">${escapeHtml(r.estado || 'pendiente')}</span></td>
+                    <td class="p-3 text-right text-gray-500">${escapeHtml((r.created_at || '').slice(0, 10))}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (error) {
+            console.error('Error al cargar reclamos:', error);
+            document.getElementById('tabla-reclamos-body').innerHTML = '<tr><td colspan="5" class="p-6 text-center text-red-400">Error al cargar los reclamos.</td></tr>';
+        }
+    }
+
+    function abrirModalReclamo(id) {
+        const r = listaReclamosGlobal.find(x => x.id == id);
+        if (!r) return;
+        reclamoSeleccionadoId = r.id;
+
+        document.getElementById('modal-id-badge').textContent = 'RECLAMO #' + r.id;
+        document.getElementById('modal-titulo').textContent = r.titulo || 'Detalle del Reclamo';
+        document.getElementById('modal-vecino').textContent = `${r.vecino_nombre || ''} ${r.vecino_apellido || ''}`.trim() || '-';
+        document.getElementById('modal-lote').textContent = r.lote_identificador || '-';
+        document.getElementById('modal-categoria').textContent = r.categoria_nombre || '-';
+        document.getElementById('modal-fecha').textContent = (r.created_at || '').slice(0, 10);
+        document.getElementById('modal-descripcion').textContent = r.descripcion || '-';
+        document.getElementById('modal-select-estado').value = r.estado || 'pendiente';
+
+        const contImagen = document.getElementById('modal-contenedor-imagen');
+        if (r.imagen_url) {
+            contImagen.classList.remove('hidden');
+            document.getElementById('modal-imagen-src').src = r.imagen_url;
+            document.getElementById('modal-imagen-link').href = r.imagen_url;
+        } else {
+            contImagen.classList.add('hidden');
+        }
+
+        document.getElementById('modal-historial-comentarios').innerHTML = '<span class="text-gray-400 italic">Cargando comentarios...</span>';
+        document.getElementById('modal-detalle-reclamo').classList.remove('hidden');
+        document.getElementById('modal-detalle-reclamo').classList.add('flex');
+
+        cargarHistorialReclamo(r.id);
+    }
+
+    function cerrarModalDetalle() {
+        const modal = document.getElementById('modal-detalle-reclamo');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    async function cargarHistorialReclamo(id) {
+        try {
+            const response = await apiFetch(`index.php?route=/reclamos/${id}/historial`, { method: 'GET' });
+            const result = await response.json();
+            const historial = result.data || [];
+
+            const cont = document.getElementById('modal-historial-comentarios');
+            if (!Array.isArray(historial) || historial.length === 0) {
+                cont.innerHTML = '<span class="text-gray-400 italic">Sin comentarios todavía.</span>';
+                return;
+            }
+
+            cont.innerHTML = historial.map(h => `
+                <div class="border-b border-gray-100 pb-1">
+                    <span class="font-semibold text-gray-700">${escapeHtml(h.autor || 'Gestión')}</span>
+                    <span class="text-gray-400">· ${(h.created_at || '').slice(0, 16).replace('T', ' ')}</span>
+                    <p class="text-gray-600">${escapeHtml(h.comentario || h.contenido || '')}</p>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error al cargar historial:', error);
+            document.getElementById('modal-historial-comentarios').innerHTML = '<span class="text-red-400 italic">Error al cargar comentarios.</span>';
+        }
+    }
+
+    async function agregarComentarioReclamo() {
+        const input = document.getElementById('modal-nuevo-comentario');
+        const texto = input.value.trim();
+        if (!texto || !reclamoSeleccionadoId) return;
+
+        try {
+            const response = await apiFetch(`index.php?route=/reclamos/${reclamoSeleccionadoId}/comentarios`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ comentario: texto })
+            });
+
+            const result = await response.json();
+            if (response.ok && result.success) {
+                input.value = '';
+                cargarHistorialReclamo(reclamoSeleccionadoId);
+            } else {
+                alert(result.error || 'No se pudo registrar el comentario');
+            }
+        } catch (error) {
+            console.error('Error al comentar:', error);
+            alert('Error de conexión al comentar');
+        }
+    }
+
+    async function actualizarEstadoDesdeModal() {
+        if (!reclamoSeleccionadoId) return;
+        const estado = document.getElementById('modal-select-estado').value;
+
+        try {
+            const response = await apiFetch(`index.php?route=/reclamos/${reclamoSeleccionadoId}/estado`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ estado: estado })
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert(result.message || 'Estado actualizado correctamente');
+                cerrarModalDetalle();
+                cargarReclamos();
+            } else {
+                alert(result.error || 'No se pudo actualizar el estado');
+            }
+        } catch (error) {
+            console.error('Error al actualizar estado:', error);
+            alert('Error de conexión al actualizar el estado');
+        }
+    }
+
+    // ===================== MULTAS =====================
+    async function cargarMultas() {
+        try {
+            const response = await apiFetch('index.php?route=/multas', { method: 'GET' });
+            const result = await response.json();
+            const multas = result.data || [];
+            listaMultasGlobal = multas;
+
+            const tbody = document.getElementById('tabla-multas-body');
+            tbody.innerHTML = '';
+
+            if (!Array.isArray(multas) || multas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-400">No hay multas registradas.</td></tr>';
+                return;
+            }
+
+            multas.forEach(m => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50/50 cursor-pointer transition';
+                tr.ondblclick = () => abrirModalMulta(m.id);
+
+                const estadosClase = {
+                    pendiente: 'bg-yellow-100 text-yellow-800',
+                    pagada: 'bg-green-100 text-green-800',
+                    anulada: 'bg-gray-100 text-gray-600'
+                };
+                const clase = estadosClase[m.estado] || 'bg-gray-100 text-gray-800';
+
+                tr.innerHTML = `
+                    <td class="p-3 font-mono text-gray-500">#${m.id}</td>
+                    <td class="p-3 text-gray-800">${escapeHtml(`Mza. ${m.manzana || '-'} / Lote ${m.lote_identificador || '-'} — ${(m.vecino_nombre || '')} ${(m.vecino_apellido || '')}`)}</td>
+                    <td class="p-3 text-gray-800">${escapeHtml(m.tipo || '')} <br><b>$${Number(m.monto || 0).toFixed(2)}</b></td>
+                    <td class="p-3"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${clase}">${escapeHtml(m.estado || 'pendiente')}</span></td>
+                    <td class="p-3 text-right">
+                        <button onclick="event.stopPropagation(); abrirModalMulta(${m.id})" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-1 rounded-lg text-[10px] transition">Ver</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (error) {
+            console.error('Error al cargar multas:', error);
+            document.getElementById('tabla-multas-body').innerHTML = '<tr><td colspan="5" class="p-6 text-center text-red-400">Error al cargar las multas.</td></tr>';
+        }
+    }
+
+    function cambiarSubSeccionMultas(sub) {
+        const ver = document.getElementById('subseccion-ver-multas');
+        const registrar = document.getElementById('subseccion-registrar-multa');
+        const navVer = document.getElementById('subnav-ver');
+        const navRegistrar = document.getElementById('subnav-registrar');
+
+        ver.classList.toggle('hidden', sub !== 'ver');
+        registrar.classList.toggle('hidden', sub !== 'registrar');
+        navVer.className = sub === 'ver' ? 'px-4 py-2 rounded-lg transition bg-white text-slate-800 shadow-sm' : 'px-4 py-2 rounded-lg transition text-gray-600 hover:text-slate-900';
+        navRegistrar.className = sub === 'registrar' ? 'px-4 py-2 rounded-lg transition bg-white text-slate-800 shadow-sm' : 'px-4 py-2 rounded-lg transition text-gray-600 hover:text-slate-900';
+    }
+
+    async function registrarMulta(event) {
+        event.preventDefault();
+        const feedback = document.getElementById('multa-feedback');
+
+        const select = document.getElementById('multa-select-vecino');
+        const opcion = select.options[select.selectedIndex];
+        const loteId = opcion ? (opcion.dataset.loteId || '') : '';
+
+        const payload = {
+            usuario_id: select.value,
+            lote_id: loteId,
+            tipo: document.getElementById('multa-tipo').value,
+            monto: parseFloat(document.getElementById('multa-monto').value),
+            observaciones: document.getElementById('multa-observaciones').value.trim()
+        };
+
+        try {
+            const response = await apiFetch('index.php?route=/multas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            feedback.classList.remove('hidden');
+            if (response.ok && result.success) {
+                feedback.textContent = 'Multa registrada con éxito.';
+                feedback.className = 'text-xs font-medium text-center text-green-600';
+                document.getElementById('form-multa').reset();
+                cargarMultas();
+            } else {
+                feedback.textContent = result.error || 'No se pudo registrar la multa.';
+                feedback.className = 'text-xs font-medium text-center text-red-600';
+            }
+        } catch (error) {
+            console.error('Error al registrar multa:', error);
+            feedback.classList.remove('hidden');
+            feedback.textContent = 'Error de conexión al registrar la multa.';
+            feedback.className = 'text-xs font-medium text-center text-red-600';
+        }
+    }
+
+    function abrirModalMulta(id) {
+        const m = listaMultasGlobal.find(x => x.id == id);
+        if (!m) return;
+        multaAbiertaId = m.id;
+
+        const estadosClase = {
+            pendiente: 'bg-yellow-100 text-yellow-800',
+            pagada: 'bg-green-100 text-green-800',
+            anulada: 'bg-gray-100 text-gray-600'
+        };
+        const clase = estadosClase[m.estado] || 'bg-gray-100 text-gray-800';
+
+        const badge = document.getElementById('modal-multa-id-badge');
+        badge.textContent = 'MULTA #' + m.id;
+        badge.className = `text-xs font-bold px-2 py-0.5 rounded uppercase ${clase}`;
+
+        document.getElementById('modal-multa-titulo').textContent = m.tipo || 'Detalle de la Multa';
+        document.getElementById('modal-multa-vecino').textContent = `${(m.vecino_nombre || '')} ${(m.vecino_apellido || '')}`.trim() || '-';
+        document.getElementById('modal-multa-email').textContent = m.vecino_email || '-';
+        document.getElementById('modal-multa-lote').textContent = `Mza. ${m.manzana || '-'} / Lote ${m.lote_identificador || '-'}`;
+        document.getElementById('modal-multa-fecha').textContent = (m.created_at || '').slice(0, 10);
+        document.getElementById('modal-multa-estado').textContent = m.estado || '-';
+        document.getElementById('modal-multa-monto').textContent = '$' + Number(m.monto || 0).toFixed(2);
+        document.getElementById('modal-multa-observaciones').textContent = m.observaciones || '-';
+
+        const modal = document.getElementById('modal-detalle-multa');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function cerrarModalDetalleMulta() {
+        const modal = document.getElementById('modal-detalle-multa');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    async function enviarAvisoMulta(multaId) {
+        if (!multaId) return;
+        try {
+            const response = await apiFetch(`index.php?route=/multas/${multaId}/enviar-aviso`, { method: 'POST' });
+            const result = await response.json();
+            if (response.ok && result.success) {
+                alert('Aviso enviado al vecino correctamente.');
+            } else {
+                alert(result.error || 'No se pudo enviar el aviso.');
+            }
+        } catch (error) {
+            console.error('Error al enviar aviso:', error);
+            alert('Error de conexión al enviar el aviso.');
+        }
+    }
+
+    // ===================== AVISOS =====================
+    async function cargarAvisos() {
+        try {
+            const response = await apiFetch('index.php?route=/avisos', { method: 'GET' });
+            const result = await response.json();
+            const avisos = result.data || [];
+
+            const cont = document.getElementById('lista-avisos');
+            if (!Array.isArray(avisos) || avisos.length === 0) {
+                cont.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">No hay avisos registrados.</p>';
+                return;
+            }
+
+            cont.innerHTML = avisos.map(a => `
+                <div class="border border-gray-100 rounded-xl p-3 flex justify-between items-start bg-gray-50/50">
+                    <div>
+                        <p class="text-xs font-bold text-gray-800">${escapeHtml(a.tipo || '')} — ${escapeHtml(`${a.vecino_nombre || ''} ${a.vecino_apellido || ''}`.trim())}</p>
+                        <p class="text-[11px] text-gray-600 mt-1">${escapeHtml(a.observaciones || a.detalle || '')}</p>
+                        <p class="text-[10px] text-gray-400 mt-1">${escapeHtml((a.created_at || '').slice(0, 16).replace('T', ' '))}</p>
+                    </div>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error al cargar avisos:', error);
+            document.getElementById('lista-avisos').innerHTML = '<p class="text-xs text-red-400 text-center py-4">Error al cargar los avisos.</p>';
+        }
+    }
+
+    async function registrarAviso(event) {
+        event.preventDefault();
+        const feedback = document.getElementById('aviso-feedback');
+
+        const payload = {
+            usuario_id: document.getElementById('aviso-select-vecino').value,
+            tipo: document.getElementById('aviso-tipo').value,
+            observaciones: document.getElementById('aviso-observaciones').value.trim()
+        };
+
+        try {
+            const response = await apiFetch('index.php?route=/avisos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            feedback.classList.remove('hidden');
+            if (response.ok && result.success) {
+                feedback.textContent = result.message || 'Aviso registrado correctamente.';
+                feedback.className = 'text-xs font-medium text-center text-green-600';
+                document.getElementById('form-aviso').reset();
+                cargarAvisos();
+            } else {
+                feedback.textContent = result.error || 'No se pudo registrar el aviso.';
+                feedback.className = 'text-xs font-medium text-center text-red-600';
+            }
+        } catch (error) {
+            console.error('Error al registrar aviso:', error);
+            feedback.classList.remove('hidden');
+            feedback.textContent = 'Error de conexión al registrar el aviso.';
+            feedback.className = 'text-xs font-medium text-center text-red-600';
+        }
+    }
+
+    // ===================== DOCUMENTOS =====================
+    async function cargarDocumentos() {
+        try {
+            const response = await apiFetch('index.php?route=/documentos', { method: 'GET' });
+            const result = await response.json();
+            const documentos = result.data || [];
+
+            const cont = document.getElementById('lista-documentos');
+            if (!Array.isArray(documentos) || documentos.length === 0) {
+                cont.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">No hay documentos cargados.</p>';
+                return;
+            }
+
+            cont.innerHTML = documentos.map(d => `
+                <div class="border border-gray-100 rounded-xl p-3 flex justify-between items-center bg-gray-50/50">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-lg">📄</span>
+                        <div>
+                            <p class="text-xs font-bold text-gray-800">${escapeHtml(d.nombre)}</p>
+                            ${d.archivo_url ? `<a href="${escapeHtml(d.archivo_url)}" target="_blank" class="text-[10px] text-blue-600 hover:underline">Ver archivo adjunto</a>` : '<span class="text-[10px] text-gray-400">Sin archivo adjunto</span>'}
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label class="flex items-center space-x-1 text-[10px] text-gray-600 cursor-pointer">
+                            <input type="checkbox" ${d.disponible == 1 ? 'checked' : ''} onchange="toggleDisponibilidadDocumento(${d.id}, this.checked)">
+                            <span>Visible</span>
+                        </label>
+                        <button onclick="eliminarDocumento(${d.id})" class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded-lg text-[10px] font-semibold transition">Eliminar</button>
+                    </div>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error al cargar documentos:', error);
+            document.getElementById('lista-documentos').innerHTML = '<p class="text-xs text-red-400 text-center py-4">Error al cargar los documentos.</p>';
+        }
+    }
+
+    async function agregarDocumento(event) {
+        event.preventDefault();
+        const feedback = document.getElementById('documento-feedback');
+        const nombre = document.getElementById('documento-nombre').value.trim();
+        const archivoInput = document.getElementById('documento-archivo');
+
+        try {
+            let response;
+            if (archivoInput.files.length > 0) {
+                const formData = new FormData();
+                formData.append('nombre', nombre);
+                formData.append('archivo', archivoInput.files[0]);
+                response = await apiFetch('index.php?route=/documentos', { method: 'POST', body: formData });
+            } else {
+                response = await apiFetch('index.php?route=/documentos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre: nombre })
+                });
+            }
+
+            const result = await response.json();
+            feedback.classList.remove('hidden');
+            if (response.ok && result.success) {
+                feedback.textContent = 'Documento agregado correctamente.';
+                feedback.className = 'text-xs font-medium text-center text-green-600';
+                document.getElementById('form-documento').reset();
+                cargarDocumentos();
+            } else {
+                feedback.textContent = result.error || 'No se pudo agregar el documento.';
+                feedback.className = 'text-xs font-medium text-center text-red-600';
+            }
+        } catch (error) {
+            console.error('Error al agregar documento:', error);
+            feedback.classList.remove('hidden');
+            feedback.textContent = 'Error de conexión al agregar el documento.';
+            feedback.className = 'text-xs font-medium text-center text-red-600';
+        }
+    }
+
+    async function toggleDisponibilidadDocumento(id, visible) {
+        try {
+            const response = await apiFetch(`index.php?route=/documentos/${id}/disponibilidad`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ disponible: visible ? 1 : 0 })
+            });
+            const result = await response.json();
+            if (!response.ok || !result.success) {
+                alert(result.error || 'No se pudo cambiar la disponibilidad');
+                cargarDocumentos();
+            }
+        } catch (error) {
+            console.error('Error al cambiar disponibilidad:', error);
+            alert('Error de conexión');
+            cargarDocumentos();
+        }
+    }
+
+    async function eliminarDocumento(id) {
+        if (!confirm('¿Seguro que querés eliminar este documento?')) return;
+        try {
+            const response = await apiFetch(`index.php?route=/documentos/${id}`, { method: 'DELETE' });
+            const result = await response.json();
+            if (response.ok && result.success) {
+                cargarDocumentos();
+            } else {
+                alert(result.error || 'No se pudo eliminar el documento');
+            }
+        } catch (error) {
+            console.error('Error al eliminar documento:', error);
+            alert('Error de conexión al eliminar');
+        }
+    }
+
+    // Recargar reclamos/multas al cambiar a esas secciones también
+    const _cambiarSeccionOriginal = cambiarSeccion;
+    cambiarSeccion = function (seccion) {
+        _cambiarSeccionOriginal(seccion);
+        if (seccion === 'reclamos') cargarReclamos();
+        if (seccion === 'multas') cargarMultas();
+    };
 </script>
 </body>
 </html>
