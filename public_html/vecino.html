@@ -28,10 +28,6 @@
             <button onclick="toggleNotificacionesPush()" id="btn-push-toggle" class="bg-blue-700 hover:bg-blue-800 p-2 rounded-lg transition text-lg leading-none flex items-center justify-center shadow" title="Activar/Desactivar Notificaciones">
                 🔕
             </button>
-            <button onclick="probarPushManual(this)" id="btn-push-test" class="bg-blue-700 hover:bg-blue-800 p-2 sm:px-3 sm:py-1.5 rounded-lg transition shadow flex items-center justify-center" title="Enviar una notificacion de prueba">
-                <svg class="w-4 h-4 sm:hidden" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
-                <span class="btn-label hidden sm:inline text-xs">Probar Push</span>
-            </button>
             <button onclick="cerrarSesion()" class="bg-blue-700 hover:bg-blue-800 p-2 sm:px-3 sm:py-1.5 rounded-lg transition shadow flex items-center justify-center" title="Cerrar sesión">
                 <svg class="w-4 h-4 sm:hidden" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
                 <span class="hidden sm:inline text-sm font-medium">Salir</span>
@@ -77,7 +73,7 @@
                     <h2 class="text-gray-700 font-bold text-sm">Historial de Incidencias</h2>
                     <p class="text-[11px] text-gray-400">Tocá cualquier fila para ver el detalle y seguimiento.</p>
                 </div>
-                <button onclick="cargarReclamos()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-2.5 py-1 rounded-lg transition">Actualizar</button>
+                <button onclick="cargarReclamos()" class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold px-3 py-1.5 rounded-lg transition">Actualizar</button>
             </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
@@ -85,7 +81,7 @@
                     <table class="w-full text-left border-collapse text-xs">
                         <thead>
                             <tr class="bg-gray-50 text-gray-500 uppercase border-b border-gray-100 text-[10px]">
-                                <th class="p-2.5">ID</th>
+                                <th class="p-2.5">Nro</th>
                                 <th class="p-2.5">Título / Cat.</th>
                                 <th class="p-2.5">Estado</th>
                                 <th class="p-2.5 text-right">Fecha</th>
@@ -153,7 +149,7 @@
                     <h2 class="text-gray-700 font-bold text-sm">Mis Avisos y Multas</h2>
                     <p class="text-[11px] text-gray-400">Avisos de infracción y multas emitidas para vos o tu lote.</p>
                 </div>
-                <button onclick="cargarMisMultas()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-2.5 py-1 rounded-lg transition">Actualizar</button>
+                <button onclick="cargarMisMultas()" class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold px-3 py-1.5 rounded-lg transition">Actualizar</button>
             </div>
 
             <!-- LISTA DE AVISOS -->
@@ -180,7 +176,7 @@
                     <h2 class="text-gray-700 font-bold text-sm">Documentación del Barrio</h2>
                     <p class="text-[11px] text-gray-400">Documentos publicados por la intendencia.</p>
                 </div>
-                <button onclick="cargarDocumentosVecino()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-2.5 py-1 rounded-lg transition">Actualizar</button>
+                <button onclick="cargarDocumentosVecino()" class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold px-3 py-1.5 rounded-lg transition">Actualizar</button>
             </div>
             <div id="lista-documentos-vecino" class="space-y-2">
                 <p class="text-xs text-gray-400 text-center py-4">Cargando documentos...</p>
@@ -390,11 +386,11 @@
                 
                 if (suscripcion && Notification.permission === 'granted') {
                     btn.innerHTML = '🔔';
-                    btn.title = 'Notificaciones activas (Clic para desactivar)';
+                    btn.title = 'Estás recibiendo notificaciones. Tocá para silenciarlas';
                     btn.classList.add('ring-2', 'ring-white');
                 } else {
                     btn.innerHTML = '🔕';
-                    btn.title = 'Notificaciones desactivadas (Clic para activar)';
+                    btn.title = 'Notificaciones silenciadas. Tocá para recibirlas';
                     btn.classList.remove('ring-2', 'ring-white');
                 }
             } catch (err) {
@@ -404,7 +400,7 @@
 
         async function toggleNotificacionesPush() {
             if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-                alert('Tu navegador no soporta notificaciones push.');
+                alert('Tu navegador no permite recibir notificaciones. Probá con Chrome o actualizá tu navegador.');
                 return;
             }
 
@@ -417,13 +413,13 @@
                     // Si ya está suscrito, se desuscribe
                     await suscripcion.unsubscribe();
                     await eliminarSuscripcionEnServidor(endpointActual);
-                    alert('Notificaciones desactivadas correctamente.');
+                    alert('🔕 Listo, ya no vas a recibir notificaciones.\n\nCuando quieras volver a activarlas, tocá la campanita nuevamente.');
                     chequearEstadoPush();
                 } else {
                     // Si no está suscrito, solicita permisos y suscribe
                     const permiso = await Notification.requestPermission();
                     if (permiso !== 'granted') {
-                        alert('No se concedieron los permisos para las notificaciones.');
+                        alert('No pudimos activar las notificaciones porque el navegador no dio permiso.\n\nPodés habilitarlo desde el candadito 🔒 junto a la dirección web o desde los ajustes del navegador.');
                         chequearEstadoPush();
                         return;
                     }
@@ -434,14 +430,14 @@
                         applicationServerKey: claveConvertida
                     });
 
-                    const guardado = await guardarSuscripcionEnServidor(suscripcion);
+                    await guardarSuscripcionEnServidor(suscripcion);
                     await enviarPushDePrueba();
-                    alert(`Notificaciones activadas para usuario ID ${guardado.usuario_id} y validadas con una prueba.`);
+                    alert('🔔 ¡Listo! Ya vas a recibir avisos del barrio.\n\nTe enviamos una notificación de prueba para que la veas funcionando.');
                     chequearEstadoPush();
                 }
             } catch (error) {
                 console.error('Error al alternar notificaciones:', error);
-                alert('No se pudo activar push. Revisá sesion/token y permisos del navegador.');
+                alert('Ups, hubo un problema al conectar con el servidor.\n\nRevisá tu conexión a internet e intentá de nuevo en unos momentos.');
             }
         }
 
@@ -537,29 +533,6 @@
             }
         }
 
-        async function probarPushManual(btn) {
-            const boton = btn || document.getElementById('btn-push-test');
-            const etiqueta = boton ? boton.querySelector('.btn-label') : null;
-            const textoOriginal = etiqueta ? etiqueta.innerText : '';
-
-            try {
-                if (boton) {
-                    boton.disabled = true;
-                    if (etiqueta) etiqueta.innerText = 'Enviando...';
-                }
-
-                await enviarPushDePrueba();
-                alert('Push de prueba enviado correctamente.');
-            } catch (error) {
-                console.error('Error al enviar push de prueba:', error);
-                alert(error.message || 'No se pudo enviar el push de prueba.');
-            } finally {
-                if (boton) {
-                    boton.disabled = false;
-                    if (etiqueta) etiqueta.innerText = textoOriginal || 'Probar Push';
-                }
-            }
-        }
         // --------------------------------------------------
 
         function cargarDatosUsuario(usuario) {
