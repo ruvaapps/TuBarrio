@@ -16,21 +16,51 @@
     </div>
     <div class="flex items-center space-x-2">
         <!-- Botón de Notificaciones Push (Campanita) -->
-        <button onclick="toggleNotificacionesPush()" id="btn-push-toggle" class="bg-slate-700 hover:bg-slate-600 p-2 rounded-lg transition text-sm flex items-center justify-center shadow" title="Activar/Desactivar Notificaciones">
+        <button onclick="toggleNotificacionesPush()" id="btn-push-toggle" class="bg-slate-700 hover:bg-slate-600 p-2 rounded-lg transition text-lg leading-none flex items-center justify-center shadow" title="Activar/Desactivar Notificaciones">
             🔕
         </button>
-        <button onclick="probarPushManual(this)" id="btn-push-test" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg transition shadow" title="Enviar una notificacion de prueba">
-            Probar Push
+        <button onclick="probarPushManual(this)" id="btn-push-test" class="bg-slate-700 hover:bg-slate-600 p-2 sm:px-3 sm:py-1.5 rounded-lg transition shadow flex items-center justify-center" title="Enviar una notificacion de prueba">
+            <svg class="w-4 h-4 sm:hidden" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
+            <span class="btn-label hidden sm:inline text-xs">Probar Push</span>
         </button>
-        <button onclick="cerrarSesion()" class="text-sm bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg transition shadow">Salir</button>
+        <button onclick="cerrarSesion()" class="bg-slate-700 hover:bg-slate-600 p-2 sm:px-3 sm:py-1.5 rounded-lg transition shadow flex items-center justify-center" title="Cerrar sesión">
+            <svg class="w-4 h-4 sm:hidden" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
+            <span class="hidden sm:inline text-sm font-medium">Salir</span>
+        </button>
     </div>
 </header>
 
-<!-- Contenedor Principal con Menú Lateral y Secciones -->
-<div class="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6 grid md:grid-cols-4 gap-6">
+<!-- Barra inferior en móvil -->
+<nav id="bottom-nav" class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-200 shadow-[0_-2px_10px_rgba(0,0,0,0.06)]">
+    <div class="flex pb-[env(safe-area-inset-bottom)]">
+        <button onclick="cambiarSeccion('reclamos')" id="mnav-reclamos" class="nav-item flex-1 py-2 flex flex-col items-center justify-center gap-0.5 transition text-blue-600" aria-label="Reclamos">
+            <svg class="nav-icon w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20.25l-4.5-4.056a9.75 9.75 0 1113.14-11.916l-8.64 15.972zM12 20.25V12" /></svg>
+            <span class="nav-label text-[10px] font-semibold">Reclamos</span>
+        </button>
+        <button onclick="cambiarSeccion('vecinos')" id="mnav-vecinos" class="nav-item flex-1 py-2 flex flex-col items-center justify-center gap-0.5 transition text-gray-400" aria-label="Vecinos">
+            <svg class="nav-icon w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.068A15.588 15.588 0 0112 19.5c-1.096 0-2.17-.128-3.2-.37m0 0a9.313 9.313 0 01-1.625-3.295c-.18-.955-.198-1.93-.06-2.874m2.906-4.294a4.125 4.125 0 105.852 0M3.182 13.5a3.75 3.75 0 01-.06-1.875 3.75 3.75 0 016.192-2.826" /></svg>
+            <span class="nav-label text-[10px] font-semibold">Vecinos</span>
+        </button>
+        <button onclick="cambiarSeccion('multas')" id="mnav-multas" class="nav-item flex-1 py-2 flex flex-col items-center justify-center gap-0.5 transition text-gray-400" aria-label="Multas">
+            <svg class="nav-icon w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+            <span class="nav-label text-[10px] font-semibold">Multas</span>
+        </button>
+        <button onclick="cambiarSeccion('avisos')" id="mnav-avisos" class="nav-item flex-1 py-2 flex flex-col items-center justify-center gap-0.5 transition text-gray-400" aria-label="Avisos">
+            <svg class="nav-icon w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.522-.461a19.064 19.064 0 01-1.444-4.212m8.436-2.132c.534-.24 1.1-.406 1.686-.49.147-.023.3-.04.456-.053m0 4.075c-.156-.012-.309-.03-.456-.053a6.585 6.585 0 01-1.686-.49m3.142-3.532a8.973 8.973 0 00-2.62-1.925 8.988 8.988 0 00-3.806-1.03m1.03.98c-1.03.634-2.06 1.267-3.09 1.9M3.75 15a.75.75 0 01.75-.75H6a.75.75 0 01.75.75v3a.75.75 0 01-.75.75H4.5a.75.75 0 01-.75-.75v-3z" /></svg>
+            <span class="nav-label text-[10px] font-semibold">Avisos</span>
+        </button>
+        <button onclick="cambiarSeccion('documentos')" id="mnav-documentos" class="nav-item flex-1 py-2 flex flex-col items-center justify-center gap-0.5 transition text-gray-400" aria-label="Documentos">
+            <svg class="nav-icon w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12h9m-9 3h9m-9-6h9m-9-3H8.25m-.75 3H6.375c-.621 0-1.125.504-1.125 1.125v7.5c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V15M19.5 14.25V18a2.25 2.25 0 01-2.25 2.25h-.375m0 0h.375a2.25 2.25 0 002.25-2.25V14.25h-1.5" /></svg>
+            <span class="nav-label text-[10px] font-semibold">Docs</span>
+        </button>
+    </div>
+</nav>
 
-    <!-- Menú Lateral -->
-    <aside class="md:col-span-1 space-y-2">
+<!-- Contenedor Principal con Menú Lateral y Secciones -->
+<div class="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6 pb-24 md:pb-6 grid md:grid-cols-4 gap-6">
+
+    <!-- Menú Lateral (solo desktop) -->
+    <aside class="hidden md:block md:col-span-1 space-y-2">
         <div class="bg-white p-3 rounded-2xl shadow-sm border-gray-200 space-y-1">
             <button onclick="cambiarSeccion('reclamos')" id="nav-reclamos" class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3">
                 <span>📢</span>
@@ -736,12 +766,13 @@
 
     async function probarPushManual(btn) {
         const boton = btn || document.getElementById('btn-push-test');
-        const textoOriginal = boton ? boton.innerText : '';
+        const etiqueta = boton ? boton.querySelector('.btn-label') : null;
+        const textoOriginal = etiqueta ? etiqueta.innerText : '';
 
         try {
             if (boton) {
                 boton.disabled = true;
-                boton.innerText = 'Enviando...';
+                if (etiqueta) etiqueta.innerText = 'Enviando...';
             }
 
             await enviarPushDePrueba();
@@ -752,7 +783,7 @@
         } finally {
             if (boton) {
                 boton.disabled = false;
-                boton.innerText = textoOriginal || 'Probar Push';
+                if (etiqueta) etiqueta.innerText = textoOriginal || 'Probar Push';
             }
         }
     }
@@ -818,6 +849,14 @@
             navDocumentos.className = "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition bg-blue-50 text-blue-700 flex items-center space-x-3";
             cargarDocumentos();
         }
+
+        // Sincronizar barra inferior (móvil)
+        const itemInactivo = "nav-item flex-1 py-2 flex flex-col items-center justify-center gap-0.5 transition text-gray-400";
+        const itemActivo = "nav-item flex-1 py-2 flex flex-col items-center justify-center gap-0.5 transition text-blue-600";
+        ['reclamos', 'vecinos', 'multas', 'avisos', 'documentos'].forEach(s => {
+            const mBtn = document.getElementById('mnav-' + s);
+            if (mBtn) mBtn.className = (s === seccion) ? itemActivo : itemInactivo;
+        });
     }
 
     async function cargarVecinos() {

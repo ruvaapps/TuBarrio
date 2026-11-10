@@ -16,36 +16,50 @@
         </div>
         <div class="flex items-center space-x-2">
             <!-- Botón de Notificaciones Push (Campanita) -->
-            <button onclick="toggleNotificacionesPush()" id="btn-push-toggle" class="bg-blue-700 hover:bg-blue-800 p-2 rounded-lg transition text-sm flex items-center justify-center shadow" title="Activar/Desactivar Notificaciones">
+            <button onclick="toggleNotificacionesPush()" id="btn-push-toggle" class="bg-blue-700 hover:bg-blue-800 p-2 rounded-lg transition text-lg leading-none flex items-center justify-center shadow" title="Activar/Desactivar Notificaciones">
                 🔕
             </button>
-            <button onclick="probarPushManual(this)" id="btn-push-test" class="text-xs bg-blue-700 hover:bg-blue-800 px-3 py-1.5 rounded-lg transition shadow" title="Enviar una notificacion de prueba">
-                Probar Push
+            <button onclick="probarPushManual(this)" id="btn-push-test" class="bg-blue-700 hover:bg-blue-800 p-2 sm:px-3 sm:py-1.5 rounded-lg transition shadow flex items-center justify-center" title="Enviar una notificacion de prueba">
+                <svg class="w-4 h-4 sm:hidden" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
+                <span class="btn-label hidden sm:inline text-xs">Probar Push</span>
             </button>
-            <button onclick="cerrarSesion()" class="text-sm bg-blue-700 hover:bg-blue-800 px-3 py-1.5 rounded-lg transition shadow">Salir</button>
+            <button onclick="cerrarSesion()" class="bg-blue-700 hover:bg-blue-800 p-2 sm:px-3 sm:py-1.5 rounded-lg transition shadow flex items-center justify-center" title="Cerrar sesión">
+                <svg class="w-4 h-4 sm:hidden" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
+                <span class="hidden sm:inline text-sm font-medium">Salir</span>
+            </button>
         </div>
     </header>
 
-    <!-- Navegación por pestañas (Tabs) -->
-    <div class="bg-white border-b shadow-sm">
-        <div class="max-w-md mx-auto flex">
-            <button onclick="cambiarTab('nuevo')" id="tab-btn-nuevo" class="flex-1 py-3 text-sm font-semibold text-center border-b-2 border-blue-600 text-blue-600 transition">
-                ➕ Nuevo Reclamo
+    <!-- Navegación inferior (bottom tab bar estilo app) -->
+    <nav id="bottom-nav" class="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-200 shadow-[0_-2px_10px_rgba(0,0,0,0.06)]">
+        <div class="max-w-md mx-auto flex pb-[env(safe-area-inset-bottom)]">
+            <button onclick="cambiarTab('nuevo')" id="tab-btn-nuevo" class="nav-item flex-1 py-2 flex flex-col items-center justify-center gap-0.5 transition text-blue-600" aria-label="Nuevo Reclamo">
+                <span class="relative">
+                    <svg class="nav-icon w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                    <span id="badge-nuevo" class="hidden absolute -top-1 -right-1.5 w-2 h-2 rounded-full bg-red-500"></span>
+                </span>
+                <span class="nav-label text-[10px] font-semibold">Nuevo</span>
             </button>
-            <button onclick="cambiarTab('reclamos')" id="tab-btn-reclamos" class="flex-1 py-3 text-sm font-semibold text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition">
-                📋 Mis Reclamos
+            <button onclick="cambiarTab('reclamos')" id="tab-btn-reclamos" class="nav-item flex-1 py-2 flex flex-col items-center justify-center gap-0.5 transition text-gray-400" aria-label="Mis Reclamos">
+                <svg class="nav-icon w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 3h6m-9 5.25h12a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v12a2.25 2.25 0 002.25 2.25z" /></svg>
+                <span class="nav-label text-[10px] font-semibold">Reclamos</span>
             </button>
-            <button onclick="cambiarTab('multas')" id="tab-btn-multas" class="flex-1 py-3 text-sm font-semibold text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition">
-                ⚠️ Avisos/Multas
+            <button onclick="cambiarTab('multas')" id="tab-btn-multas" class="nav-item flex-1 py-2 flex flex-col items-center justify-center gap-0.5 transition text-gray-400" aria-label="Avisos y Multas">
+                <span class="relative">
+                    <svg class="nav-icon w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+                    <span id="badge-multas" class="hidden absolute -top-1 -right-1.5 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-white animate-pulse"></span>
+                </span>
+                <span class="nav-label text-[10px] font-semibold">Multas</span>
             </button>
-            <button onclick="cambiarTab('documentos')" id="tab-btn-documentos" class="flex-1 py-3 text-sm font-semibold text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition">
-                ℹ️ Información
+            <button onclick="cambiarTab('documentos')" id="tab-btn-documentos" class="nav-item flex-1 py-2 flex flex-col items-center justify-center gap-0.5 transition text-gray-400" aria-label="Información">
+                <svg class="nav-icon w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
+                <span class="nav-label text-[10px] font-semibold">Info</span>
             </button>
         </div>
-    </div>
+    </nav>
 
     <!-- Contenedor Principal -->
-    <main class="max-w-md w-full mx-auto p-4 flex-1 space-y-4">
+    <main class="max-w-md w-full mx-auto p-4 flex-1 space-y-4 pb-24">
 
         <!-- TAB 2: MIS RECLAMOS (LISTADO EN FORMATO TABLA) -->
         <div id="seccion-tab-reclamos" class="space-y-3 hidden">
@@ -489,12 +503,13 @@
 
         async function probarPushManual(btn) {
             const boton = btn || document.getElementById('btn-push-test');
-            const textoOriginal = boton ? boton.innerText : '';
+            const etiqueta = boton ? boton.querySelector('.btn-label') : null;
+            const textoOriginal = etiqueta ? etiqueta.innerText : '';
 
             try {
                 if (boton) {
                     boton.disabled = true;
-                    boton.innerText = 'Enviando...';
+                    if (etiqueta) etiqueta.innerText = 'Enviando...';
                 }
 
                 await enviarPushDePrueba();
@@ -505,7 +520,7 @@
             } finally {
                 if (boton) {
                     boton.disabled = false;
-                    boton.innerText = textoOriginal || 'Probar Push';
+                    if (etiqueta) etiqueta.innerText = textoOriginal || 'Probar Push';
                 }
             }
         }
@@ -528,9 +543,9 @@
                 { id: 'documentos', seccion: 'seccion-tab-documentos', btn: 'tab-btn-documentos' }
             ];
 
-            const claseInactiva = "flex-1 py-3 text-sm font-semibold text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition";
-            const claseActiva = "flex-1 py-3 text-sm font-semibold text-center border-b-2 border-blue-600 text-blue-600 transition";
-            const claseAlerta = "flex-1 py-3 text-sm font-semibold text-center border-b-2 border-transparent text-red-600 animate-pulse transition";
+            const claseInactiva = "nav-item flex-1 py-2 flex flex-col items-center justify-center gap-0.5 transition text-gray-400";
+            const claseActiva = "nav-item flex-1 py-2 flex flex-col items-center justify-center gap-0.5 transition text-blue-600";
+            const claseAlerta = "nav-item flex-1 py-2 flex flex-col items-center justify-center gap-0.5 transition text-red-500";
 
             tabs.forEach(t => document.getElementById(t.seccion).classList.add('hidden'));
 
@@ -562,8 +577,9 @@
             if (tabActivo) return;
 
             btnMultas.className = hayPendientes
-                ? "flex-1 py-3 text-sm font-semibold text-center border-b-2 border-transparent text-red-600 animate-pulse transition"
-                : "flex-1 py-3 text-sm font-semibold text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition";
+                ? "nav-item flex-1 py-2 flex flex-col items-center justify-center gap-0.5 transition text-red-500"
+                : "nav-item flex-1 py-2 flex flex-col items-center justify-center gap-0.5 transition text-gray-400";
+            document.getElementById('badge-multas').classList.toggle('hidden', !hayPendientes);
         }
 
         // --- MULTAS DEL VECINO ---
