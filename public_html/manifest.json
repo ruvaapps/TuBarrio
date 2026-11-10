@@ -1,16 +1,24 @@
 {
-  "short_name": "BarrioApp",
-  "name": "BarrioConectado - Gestión de Barrio",
+  "short_name": "TuBarrio",
+  "name": "TuBarrio - Gestión de Barrio",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/1043/1043444.png",
+      "src": "icons/icon-192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/1043/1043444.png",
+      "src": "icons/icon-512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
     }
   ],
   "start_url": "index.html",
