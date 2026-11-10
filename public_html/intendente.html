@@ -227,6 +227,7 @@
                         Registrar y Vincular Vecino
                     </button>
                 </form>
+                </div>
             </div>
         </section>
 
@@ -390,7 +391,8 @@
 
                 <!-- Formulario para agregar documento (con archivo opcional) -->
                 <form id="form-documento" onsubmit="agregarDocumento(event)" class="flex flex-col sm:flex-row gap-2">
-                    <input type="text" id="documento-nombre" placeholder="Nombre del documento (Ej: Reglamento Interno)" class="flex-1 border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
+                    <label for="documento-nombre" class="sr-only">Nombre del documento</label>
+                    <input type="text" id="documento-nombre" placeholder="Nombre del documento (Ej: Reglamento Interno)" aria-label="Nombre del documento" class="flex-1 border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-slate-500" required>
                     <input type="file" id="documento-archivo" class="sm:w-64 text-xs text-gray-500 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.txt,.csv">
                     <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-5 py-2.5 rounded-lg transition text-sm shadow">
                         + Agregar Documento
